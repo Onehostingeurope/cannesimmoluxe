@@ -1,20 +1,114 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { AdminLayout } from '../../components/layout/AdminLayout';
 import { Button } from '../../components/ui/Button';
+import { supabase } from '../../lib/supabase';
 import { clsx } from 'clsx';
+
+interface CMSModule {
+  id: string;
+  type: string;
+  title?: string;
+  content?: string;
+  media_type?: 'image' | 'video' | 'youtube';
+  media_url?: string;
+  youtube_id?: string;
+}
 
 const CMS = () => {
   const [activePage, setActivePage] = useState('Homepage');
+  const [modules, setModules] = useState<CMSModule[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState<string | null>(null);
   
   const pages = ['Homepage', 'Buy', 'Rent', 'About Us', 'Contact', 'Services'];
   
-  const modules = [
+  const availableModules = [
     { type: 'hero', label: 'Cinematic Hero', icon: 'movie' },
     { type: 'grid', label: 'Asymmetric Grid', icon: 'grid_view' },
     { type: 'text', label: 'Editorial Narrative', icon: 'subject' },
     { type: 'media', label: 'Full Span Asset', icon: 'image' },
     { type: 'contact', label: 'Concierge Form', icon: 'hub' },
   ];
+
+  useEffect(() => {
+    fetchPageContent();
+  }, [activePage]);
+
+  const fetchPageContent = async () => {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from('cms_content')
+      .select('*')
+      .eq('page_name', activePage)
+      .maybeSingle();
+
+    if (error) {
+      console.error('Error fetching CMS content:', error);
+    } else if (data) {
+      setModules(data.modules || []);
+    } else {
+      setModules([
+        { 
+          id: '1', 
+          type: 'hero', 
+          title: 'The Art of Living', 
+          content: 'Curated residences for the global collector.',
+          media_type: 'image',
+          media_url: 'https://images.unsplash.com/photo-1512918728675-ed5a9ecdebfd?auto=format&fit=crop&q=80&w=2000'
+        }
+      ]);
+    }
+    setLoading(false);
+  };
+
+  const handleDeploy = async () => {
+    setSaving(true);
+    const { error } = await supabase
+      .from('cms_content')
+      .upsert({ 
+        page_name: activePage, 
+        modules: modules,
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'page_name' });
+
+    if (error) {
+      alert('Error deploying changes: ' + error.message);
+    } else {
+      alert('Content successfully deployed to global cluster.');
+    }
+    setSaving(false);
+  };
+
+  const updateModuleContent = (id: string, field: string, value: any) => {
+    setModules(modules.map(m => m.id === id ? { ...m, [field]: value } : m));
+  };
+
+  const handleFileUpload = async (moduleId: string, file: File) => {
+    try {
+      setUploading(moduleId);
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Math.random()}.${fileExt}`;
+      const filePath = `cms/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('assets')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('assets')
+        .getPublicUrl(filePath);
+
+      updateModuleContent(moduleId, 'media_url', publicUrl);
+      updateModuleContent(moduleId, 'media_type', file.type.startsWith('video/') ? 'video' : 'image');
+    } catch (error: any) {
+      alert('Error uploading file: ' + error.message);
+    } finally {
+      setUploading(null);
+    }
+  };
 
   return (
     <AdminLayout>
@@ -33,15 +127,20 @@ const CMS = () => {
           </div>
           <div className="flex gap-4 w-full md:w-auto">
             <Button variant="outline" className="flex-1 md:flex-none">Preview Live</Button>
-            <Button variant="primary" className="flex-1 md:flex-none flex items-center justify-center gap-2">
-              <span className="material-symbols-outlined text-sm">cloud_done</span>
-              Deploy Changes
+            <Button 
+              variant="primary" 
+              className="flex-1 md:flex-none flex items-center justify-center gap-2"
+              onClick={handleDeploy}
+              disabled={saving}
+            >
+              <span className="material-symbols-outlined text-sm">{saving ? 'sync' : 'cloud_done'}</span>
+              {saving ? 'Synchronizing...' : 'Deploy Changes'}
             </Button>
           </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-          {/* Module Selector Sidebar */}
+          {/* Sitemap Sidebar */}
           <div className="lg:col-span-3 space-y-8">
             <div className="space-y-6">
                <h3 className="font-headline text-xl text-primary pb-2 border-b border-outline-variant/20">Sitemap</h3>
@@ -62,100 +161,124 @@ const CMS = () => {
                   ))}
                </div>
             </div>
-
-            <div className="space-y-6">
-               <h3 className="font-headline text-xl text-primary pb-2 border-b border-outline-variant/20">Component Library</h3>
-               <div className="grid grid-cols-1 gap-3">
-                  {modules.map((module) => (
-                    <div 
-                      key={module.type}
-                      className="p-4 bg-[#f6f3ee] dark:bg-[#1c1b1b] border border-outline-variant/10 flex items-center gap-4 group cursor-grab active:cursor-grabbing hover:border-secondary transition-all"
-                    >
-                      <span className="material-symbols-outlined text-xl text-secondary group-hover:scale-110 transition-transform">
-                        {module.icon}
-                      </span>
-                      <span className="font-label text-[9px] tracking-[0.1em] uppercase text-primary font-bold">
-                        {module.label}
-                      </span>
-                      <span className="material-symbols-outlined ml-auto text-sm text-outline group-hover:text-primary">drag_handle</span>
-                    </div>
-                  ))}
-               </div>
-            </div>
           </div>
 
           {/* Builder Canvas */}
           <div className="lg:col-span-9 space-y-8">
              <div className="bg-[#f6f3ee] dark:bg-[#1c1b1b] p-1 border border-outline-variant/10 min-h-[600px] relative">
-                {/* Canvas Header */}
-                <div className="bg-white dark:bg-black p-4 border-b border-outline-variant/10 flex justify-between items-center mb-1">
-                   <div className="flex items-center gap-3">
-                      <span className="w-2 h-2 rounded-full bg-green-500"></span>
-                      <span className="font-label text-[9px] tracking-widest uppercase text-primary font-bold animate-pulse">Editing: {activePage}</span>
-                   </div>
-                   <div className="flex gap-4">
-                      <button className="material-symbols-outlined text-lg text-outline hover:text-primary transition-colors">history</button>
-                      <button className="material-symbols-outlined text-lg text-outline hover:text-primary transition-colors">desktop_windows</button>
-                      <button className="material-symbols-outlined text-lg text-outline hover:text-primary transition-colors">smartphone</button>
-                   </div>
-                </div>
-
-                {/* Simulated Module Stack */}
                 <div className="p-8 space-y-6">
-                   {/* 1. Hero Module */}
-                   <div className="bg-white dark:bg-black p-10 border border-outline-variant/20 shadow-sm relative group">
-                      <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                         <button className="material-symbols-outlined text-sm text-outline hover:text-primary">settings</button>
-                         <button className="material-symbols-outlined text-sm text-outline hover:text-red-500">delete</button>
+                   {loading ? (
+                      <div className="py-20 text-center">
+                         <div className="w-12 h-12 border-t-2 border-secondary animate-spin rounded-full mx-auto"></div>
                       </div>
-                      <div className="flex items-center gap-4 mb-8 text-secondary">
-                         <span className="material-symbols-outlined">movie</span>
-                         <span className="font-label text-[10px] tracking-[0.2em] uppercase font-bold">Cinematic Hero</span>
-                      </div>
-                      <div className="space-y-6 max-w-2xl">
-                         <div className="space-y-2">
-                            <label className="font-label text-[9px] tracking-widest uppercase text-outline opacity-50">Narrative Title</label>
-                            <input 
-                              type="text" 
-                              className="w-full bg-transparent border-0 border-b border-outline-variant/30 focus:border-primary focus:ring-0 px-0 pb-2 font-headline text-3xl text-primary transition-all" 
-                              defaultValue="The Art of Living"
-                            />
-                         </div>
-                         <div className="space-y-2">
-                            <label className="font-label text-[9px] tracking-widest uppercase text-outline opacity-50">Content Body</label>
-                            <textarea 
-                              className="w-full bg-transparent border-0 border-b border-outline-variant/30 focus:border-primary focus:ring-0 px-0 pb-2 font-body text-sm text-on-surface-variant leading-relaxed resize-none h-20" 
-                              defaultValue="Curated residences for the global collector on the French Riviera."
-                            />
-                         </div>
-                      </div>
-                   </div>
+                   ) : (
+                     modules.map((module) => (
+                       <div key={module.id} className="bg-white dark:bg-black p-10 border border-outline-variant/20 shadow-sm relative group space-y-8">
+                          <div className="flex items-center gap-4 mb-2 text-secondary">
+                             <span className="material-symbols-outlined">
+                                {availableModules.find(am => am.type === module.type)?.icon || 'article'}
+                             </span>
+                             <span className="font-label text-[10px] tracking-[0.2em] uppercase font-bold">
+                                {availableModules.find(am => am.type === module.type)?.label || 'Module'}
+                             </span>
+                          </div>
 
-                   {/* 2. Media List Module */}
-                   <div className="bg-white dark:bg-black p-10 border border-outline-variant/20 shadow-sm group">
-                      <div className="flex items-center gap-4 mb-8 text-secondary">
-                         <span className="material-symbols-outlined">collections</span>
-                         <span className="font-label text-[10px] tracking-[0.2em] uppercase font-bold">Asset Gallery</span>
-                      </div>
-                      <div className="grid grid-cols-4 gap-4">
-                         {[1, 2, 3].map(id => (
-                            <div key={id} className="aspect-square bg-[#f6f3ee] dark:bg-[#1c1b1b] border border-dashed border-outline-variant/30 flex flex-col items-center justify-center group/item hover:border-secondary transition-all cursor-pointer">
-                               <span className="material-symbols-outlined text-2xl text-outline group-hover/item:text-secondary group-hover/item:scale-110 transition-transform">add_photo_alternate</span>
-                               <span className="font-label text-[8px] tracking-widest uppercase text-outline mt-3 opacity-50">Upload Asset</span>
-                            </div>
-                         ))}
-                         <div className="aspect-square bg-[#f6f3ee] dark:bg-[#1c1b1b] p-1">
-                            <img alt="Preview" className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD9E8XzWI5jMLoUgmUMfXDCCGLCXElyRB55A0xrusX9F3Tjxh8dcZ30A9LpOKw1NQ2a8AdjpMD9Ht72XayBK7LSfgi6Lyy8EPuYp1bdxkufJSHftsQNLbrTTyXMZKtKbhxXQ_nwXVx9DBkSL3VcnfmBBOEPISwARX0j4-aOq_1-rnsneheH2GPbvXzjbCdtc4WZ2Nq7fUIrkzsTXIlxvjhZxi_S6LQf-_u0DE6UyK-ZE0E25_8Xfh6dNYRjrGc56ArvR7b70iO048" />
-                         </div>
-                      </div>
-                   </div>
-                </div>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                             <div className="space-y-6">
+                                <div className="space-y-2">
+                                   <label className="font-label text-[9px] tracking-widest uppercase text-outline opacity-50">Narrative Title</label>
+                                   <input 
+                                     type="text" 
+                                     className="w-full bg-transparent border-0 border-b border-outline-variant/30 focus:border-primary focus:ring-0 px-0 pb-2 font-headline text-3xl text-primary" 
+                                     value={module.title || ''}
+                                     onChange={(e) => updateModuleContent(module.id, 'title', e.target.value)}
+                                   />
+                                </div>
+                                <div className="space-y-2">
+                                   <label className="font-label text-[9px] tracking-widest uppercase text-outline opacity-50">Narrative Content</label>
+                                   <textarea 
+                                     className="w-full bg-transparent border-0 border-b border-outline-variant/30 focus:border-primary focus:ring-0 px-0 pb-2 font-body text-sm text-on-surface-variant h-24 resize-none" 
+                                     value={module.content || ''}
+                                     onChange={(e) => updateModuleContent(module.id, 'content', e.target.value)}
+                                   />
+                                </div>
+                             </div>
 
-                {/* Global Plus Button */}
-                <div className="absolute left-1/2 -bottom-6 -translate-x-1/2">
-                   <button className="w-12 h-12 bg-black dark:bg-white text-white dark:text-black rounded-full shadow-2xl flex items-center justify-center group hover:scale-110 transition-all active:scale-95 border-4 border-background">
-                      <span className="material-symbols-outlined text-2xl group-hover:rotate-90 transition-transform">add</span>
-                   </button>
+                             <div className="space-y-6">
+                                <label className="font-label text-[9px] tracking-widest uppercase text-outline opacity-50 block">Media Orchestration</label>
+                                
+                                <div className="flex gap-4 mb-4">
+                                   {['image', 'video', 'youtube'].map((m) => (
+                                     <button
+                                       key={m}
+                                       onClick={() => updateModuleContent(module.id, 'media_type', m)}
+                                       className={clsx(
+                                         "px-4 py-2 font-label text-[9px] tracking-widest uppercase border",
+                                         module.media_type === m ? "bg-secondary text-white border-secondary" : "border-outline-variant/30 text-outline"
+                                       )}
+                                     >
+                                       {m}
+                                     </button>
+                                   ))}
+                                </div>
+
+                                {module.media_type === 'youtube' ? (
+                                   <div className="space-y-2">
+                                      <label className="font-label text-[8px] tracking-widest uppercase text-outline">YouTube ID</label>
+                                      <input 
+                                        type="text" 
+                                        placeholder="e.g. dQw4w9WgXcQ"
+                                        className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/20 p-4 font-label text-[10px]"
+                                        value={module.youtube_id || ''}
+                                        onChange={(e) => updateModuleContent(module.id, 'youtube_id', e.target.value)}
+                                      />
+                                   </div>
+                                ) : (
+                                   <div className="space-y-4">
+                                      <div className="aspect-video bg-[#f6f3ee] dark:bg-[#1c1b1b] border border-dashed border-outline-variant/30 relative flex items-center justify-center group/media overflow-hidden">
+                                         {module.media_url ? (
+                                            module.media_type === 'video' ? (
+                                               <video src={module.media_url} className="w-full h-full object-cover" muted loop autoPlay />
+                                            ) : (
+                                               <img src={module.media_url} className="w-full h-full object-cover" alt="Media Preview" />
+                                            )
+                                         ) : (
+                                            <span className="material-symbols-outlined text-4xl text-outline opacity-30">add_photo_alternate</span>
+                                         )}
+                                         <input 
+                                           type="file" 
+                                           accept={module.media_type === 'video' ? 'video/*' : 'image/*'}
+                                           className="absolute inset-0 opacity-0 cursor-pointer"
+                                           onChange={(e) => e.target.files && handleFileUpload(module.id, e.target.files[0])}
+                                           disabled={uploading === module.id}
+                                         />
+                                         {uploading === module.id && (
+                                            <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                                               <div className="w-8 h-8 border-t-2 border-white animate-spin rounded-full"></div>
+                                            </div>
+                                         )}
+                                      </div>
+                                      <div className="space-y-2">
+                                         <label className="font-label text-[8px] tracking-widest uppercase text-outline">Direct URL Fallback</label>
+                                         <input 
+                                           type="text" 
+                                           className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/20 p-3 font-label text-[9px]" 
+                                           value={module.media_url || ''}
+                                           onChange={(e) => updateModuleContent(module.id, 'media_url', e.target.value)}
+                                         />
+                                      </div>
+                                   </div>
+                                )}
+                             </div>
+                          </div>
+                          
+                          <div className="absolute top-6 right-6 flex gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                             <button className="material-symbols-outlined text-outline hover:text-secondary">drag_indicator</button>
+                             <button className="material-symbols-outlined text-outline hover:text-red-500">delete</button>
+                          </div>
+                       </div>
+                     ))
+                   )}
                 </div>
              </div>
           </div>

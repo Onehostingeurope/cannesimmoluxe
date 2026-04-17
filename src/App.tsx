@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Home from './pages/Home';
 import PropertiesPage from './pages/Properties';
 import PropertyDetail from './pages/PropertyDetail';
@@ -14,6 +14,8 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import CRM from './pages/admin/CRM';
 import PropertyManagement from './pages/admin/PropertyManagement';
 import CMS from './pages/admin/CMS';
+import PropertyEditor from './pages/admin/PropertyEditor';
+import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import { useAuthStore } from './store/useAuthStore';
 
 function App() {
@@ -35,20 +37,24 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
         
-        {/* Dashboard Routes */}
-        <Route path="/dashboard" element={<DashboardHome />} />
-        <Route path="/dashboard/saved" element={<SavedProperties />} />
-        <Route path="/dashboard/inquiries" element={<Inquiries />} />
+        {/* Dashboard Routes (Protected) */}
+        <Route path="/dashboard" element={<ProtectedRoute><DashboardHome /></ProtectedRoute>} />
+        <Route path="/dashboard/saved" element={<ProtectedRoute><SavedProperties /></ProtectedRoute>} />
+        <Route path="/dashboard/inquiries" element={<ProtectedRoute><Inquiries /></ProtectedRoute>} />
         
-        {/* Admin Console Routes */}
-        <Route path="/admin" element={<AdminDashboard />} />
-        <Route path="/admin/crm" element={<CRM />} />
-        <Route path="/admin/properties" element={<PropertyManagement />} />
-        <Route path="/admin/cms" element={<CMS />} />
+        {/* Admin Console Routes (Restricted) */}
+        <Route path="/admin" element={<ProtectedRoute requireAdmin><AdminDashboard /></ProtectedRoute>} />
+        <Route path="/admin/crm" element={<ProtectedRoute requireAdmin><CRM /></ProtectedRoute>} />
+        <Route path="/admin/properties" element={<ProtectedRoute requireAdmin><PropertyManagement /></ProtectedRoute>} />
+        <Route path="/admin/properties/new" element={<ProtectedRoute requireAdmin><PropertyEditor /></ProtectedRoute>} />
+        <Route path="/admin/properties/edit/:id" element={<ProtectedRoute requireAdmin><PropertyEditor /></ProtectedRoute>} />
+        <Route path="/admin/cms" element={<ProtectedRoute requireAdmin><CMS /></ProtectedRoute>} />
         
-        {/* Placeholder routes for Phase 3 static pages */}
         <Route path="/management" element={<Home />} />
         <Route path="/areas" element={<Home />} />
+        
+        {/* Fallback */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>
   );

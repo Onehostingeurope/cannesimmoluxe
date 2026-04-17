@@ -1,0 +1,328 @@
+import { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+import { AdminLayout } from '../../components/layout/AdminLayout';
+import { Button } from '../../components/ui/Button';
+import { supabase } from '../../lib/supabase';
+import { clsx } from 'clsx';
+
+const propertySchema = z.object({
+  title: z.string().min(3, 'Title is required'),
+  ref_id: z.string().min(2, 'Reference ID is required'),
+  type: z.string().min(2, 'Asset type is required'),
+  mode: z.enum(['sale', 'rent']),
+  status: z.enum(['available', 'reserved', 'sold', 'highlight']),
+  city: z.string().min(2, 'City is required'),
+  district: z.string().optional(),
+  price: z.number().nullable().optional(),
+  price_on_request: z.boolean().default(false),
+  surface: z.number().nullable().optional(),
+  land_surface: z.number().nullable().optional(),
+  rooms: z.number().nullable().optional(),
+  bedrooms: z.number().nullable().optional(),
+  bathrooms: z.number().nullable().optional(),
+  description_short: z.string().nullable().optional(),
+  description_long: z.string().nullable().optional(),
+});
+
+type PropertyFormData = z.infer<typeof propertySchema>;
+
+const PropertyEditor = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const isEdit = !!id;
+  const [loading, setLoading] = useState(isEdit);
+  const [imageUrls, setImageUrls] = useState<string[]>([]);
+  const [newImageUrl, setNewImageUrl] = useState('');
+
+  const { register, handleSubmit, reset, watch, setValue, formState: { errors, isSubmitting } } = useForm<any>({
+    resolver: zodResolver(propertySchema),
+    defaultValues: {
+      mode: 'sale',
+      status: 'available',
+      price_on_request: false,
+    }
+  });
+
+  const priceOnRequest = watch('price_on_request');
+
+  useEffect(() => {
+    if (isEdit) {
+      fetchProperty();
+    }
+  }, [id]);
+
+  const fetchProperty = async () => {
+    const { data, error } = await supabase
+      .from('properties')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error) {
+      console.error('Error fetching property:', error);
+      navigate('/admin/properties');
+    } else {
+      reset({
+        title: data.title,
+        ref_id: data.ref_id,
+        type: data.type,
+        mode: data.mode,
+        status: data.status,
+        city: data.city,
+        district: data.district || '',
+        price: data.price,
+        price_on_request: data.price_on_request,
+        surface: data.surface,
+        land_surface: data.land_surface,
+        rooms: data.rooms,
+        bedrooms: data.bedrooms,
+        bathrooms: data.bathrooms,
+        description_short: data.description_short,
+        description_long: data.description_long,
+      });
+      setImageUrls(data.images || []);
+      setLoading(false);
+    }
+  };
+
+  const onSubmit = async (values: PropertyFormData) => {
+    const slug = values.title.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
+    const propertyData = {
+      ...values,
+      slug,
+      images: imageUrls,
+      updated_at: new Date().toISOString(),
+    };
+
+    let error;
+    if (isEdit) {
+      const { error: updateError } = await supabase
+        .from('properties')
+        .update(propertyData)
+        .eq('id', id);
+      error = updateError;
+    } else {
+      const { error: insertError } = await supabase
+        .from('properties')
+        .insert([propertyData]);
+      error = insertError;
+    }
+
+    if (error) {
+      alert('Error saving property: ' + error.message);
+    } else {
+      navigate('/admin/properties');
+    }
+  };
+
+  const addImage = () => {
+    if (newImageUrl && !imageUrls.includes(newImageUrl)) {
+      setImageUrls([...imageUrls, newImageUrl]);
+      setNewImageUrl('');
+    }
+  };
+
+  const removeImage = (url: string) => {
+    setImageUrls(imageUrls.filter(u => u !== url));
+  };
+
+  if (loading) {
+    return (
+      <AdminLayout>
+         <div className="min-h-[400px] flex items-center justify-center">
+            <div className="w-12 h-12 border-t-2 border-secondary animate-spin rounded-full"></div>
+         </div>
+      </AdminLayout>
+    );
+  }
+
+  return (
+    <AdminLayout>
+      <div className="max-w-5xl mx-auto space-y-12 animate-luxury-fade font-body pb-24">
+        <div className="flex justify-between items-end border-b border-outline-variant/20 pb-8">
+           <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                 <span className="material-symbols-outlined text-secondary text-base">edit_square</span>
+                 <p className="font-label text-[10px] tracking-[0.2em] uppercase text-outline">Technical Dossier Editor</p>
+              </div>
+              <h2 className="font-headline text-4xl text-primary">{isEdit ? 'Refine Asset' : 'Deploy New Estate'}</h2>
+           </div>
+           <div className="flex gap-4">
+              <Button variant="ghost" onClick={() => navigate('/admin/properties')}>Cancel</Button>
+              <Button 
+                variant="primary" 
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleSubmit(onSubmit as any)();
+                }}
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? 'Processing...' : isEdit ? 'Update Entry' : 'Publish Asset'}
+              </Button>
+           </div>
+        </div>
+
+        <form className="grid grid-cols-1 md:grid-cols-2 gap-12">
+           {/* Section 1: Identification */}
+           <div className="space-y-8">
+              <h3 className="font-label text-[10px] tracking-[0.3em] uppercase text-secondary font-bold border-l-2 border-secondary pl-4">Identification Matrix</h3>
+              
+              <div className="space-y-6">
+                 <div className="space-y-2">
+                    <label className="font-label text-[9px] tracking-widest uppercase text-outline opacity-60">Property Title</label>
+                    <input {...register('title')} className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/20 focus:border-secondary focus:ring-0 p-4 font-headline text-xl text-primary" />
+                    {errors.title && <p className="text-red-500 text-[9px] uppercase tracking-widest">{(errors.title as any).message}</p>}
+                 </div>
+
+                 <div className="grid grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                       <label className="font-label text-[9px] tracking-widest uppercase text-outline opacity-60">Reference ID</label>
+                       <input {...register('ref_id')} placeholder="REF-XXXX" className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/20 p-4 font-label text-[10px] tracking-widest uppercase" />
+                    </div>
+                    <div className="space-y-2">
+                       <label className="font-label text-[9px] tracking-widest uppercase text-outline opacity-60">Asset Type</label>
+                       <input {...register('type')} placeholder="Villa, Penthouse, etc." className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/20 p-4 font-label text-[10px] tracking-widest uppercase" />
+                    </div>
+                 </div>
+
+                 <div className="grid grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                       <label className="font-label text-[9px] tracking-widest uppercase text-outline opacity-60">Listing Mode</label>
+                       <select {...register('mode')} className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/20 p-4 font-label text-[10px] tracking-widest uppercase">
+                          <option value="sale">For Sale</option>
+                          <option value="rent">Seasonal Rental</option>
+                       </select>
+                    </div>
+                    <div className="space-y-2">
+                       <label className="font-label text-[9px] tracking-widest uppercase text-outline opacity-60">Market Status</label>
+                       <select {...register('status')} className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/20 p-4 font-label text-[10px] tracking-widest uppercase">
+                          <option value="available">Available</option>
+                          <option value="highlight">Exclusive Highlight</option>
+                          <option value="reserved">Reserved</option>
+                          <option value="sold">Decommissioned (Sold)</option>
+                       </select>
+                    </div>
+                 </div>
+              </div>
+           </div>
+
+           {/* Section 2: Financials & Location */}
+           <div className="space-y-8">
+              <h3 className="font-label text-[10px] tracking-[0.3em] uppercase text-secondary font-bold border-l-2 border-secondary pl-4">Financials & Geometry</h3>
+              
+              <div className="space-y-6">
+                 <div className="flex items-center gap-4 py-2 border-b border-outline-variant/10">
+                    <input type="checkbox" {...register('price_on_request')} className="w-4 h-4 text-secondary focus:ring-0" />
+                    <label className="font-label text-[10px] tracking-widest uppercase text-primary">Conceal Price (On Request)</label>
+                 </div>
+
+                 {!priceOnRequest && (
+                    <div className="space-y-2">
+                       <label className="font-label text-[9px] tracking-widest uppercase text-outline opacity-60">Valuation (€)</label>
+                       <input 
+                         type="number" 
+                         {...register('price', { valueAsNumber: true })} 
+                         className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/20 p-4 font-headline text-2xl text-primary" 
+                       />
+                    </div>
+                 )}
+
+                 <div className="grid grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                       <label className="font-label text-[9px] tracking-widest uppercase text-outline opacity-60">City / Commune</label>
+                       <input {...register('city')} className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/20 p-4 font-label text-[10px] tracking-widest uppercase" />
+                    </div>
+                    <div className="space-y-2">
+                       <label className="font-label text-[9px] tracking-widest uppercase text-outline opacity-60">District / Quarter</label>
+                       <input {...register('district')} className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/20 p-4 font-label text-[10px] tracking-widest uppercase" />
+                    </div>
+                 </div>
+              </div>
+           </div>
+
+           {/* Section 3: Technical Specifications */}
+           <div className="space-y-8">
+              <h3 className="font-label text-[10px] tracking-[0.3em] uppercase text-secondary font-bold border-l-2 border-secondary pl-4">Technical Specifications</h3>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+                 {[
+                   { id: 'surface', label: 'Living Space (m²)', icon: 'straighten' },
+                   { id: 'land_surface', label: 'Plot Size (m²)', icon: 'landscape' },
+                   { id: 'rooms', label: 'Total Rooms', icon: 'apps' },
+                   { id: 'bedrooms', label: 'Bedrooms', icon: 'bed' },
+                   { id: 'bathrooms', label: 'Bathrooms', icon: 'bathtub' },
+                 ].map((spec) => (
+                   <div key={spec.id} className="space-y-2">
+                      <label className="font-label text-[9px] tracking-widest uppercase text-outline opacity-60 flex items-center gap-2">
+                         <span className="material-symbols-outlined text-xs">{spec.icon}</span>
+                         {spec.label}
+                      </label>
+                      <input 
+                        type="number" 
+                        {...register(spec.id as any, { valueAsNumber: true })} 
+                        className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/20 p-4 font-label text-[11px]" 
+                      />
+                   </div>
+                 ))}
+              </div>
+           </div>
+
+           {/* Section 4: Media Orchestration */}
+           <div className="space-y-8">
+              <h3 className="font-label text-[10px] tracking-[0.3em] uppercase text-secondary font-bold border-l-2 border-secondary pl-4">Media Orchestration</h3>
+              <div className="space-y-4">
+                 <div className="flex gap-2">
+                    <input 
+                      value={newImageUrl}
+                      onChange={(e) => setNewImageUrl(e.target.value)}
+                      placeholder="ENTER ASSET URL..." 
+                      className="flex-grow bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/20 p-4 font-label text-[9px] tracking-widest uppercase" 
+                    />
+                    <Button variant="secondary" onClick={addImage} type="button">Add</Button>
+                 </div>
+                 <div className="grid grid-cols-4 gap-4 max-h-40 overflow-y-auto pr-2 custom-scrollbar">
+                    {imageUrls.map((url, index) => (
+                       <div key={index} className="relative group aspect-square border border-outline-variant/20">
+                          <img src={url} className="w-full h-full object-cover" alt="Property asset" />
+                          <button 
+                            type="button"
+                            onClick={() => removeImage(url)}
+                            className="absolute inset-0 bg-red-500/80 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                             <span className="material-symbols-outlined text-sm">delete</span>
+                          </button>
+                       </div>
+                    ))}
+                 </div>
+              </div>
+           </div>
+
+           {/* Section 5: Editorial Content */}
+           <div className="md:col-span-2 space-y-8">
+              <h3 className="font-label text-[10px] tracking-[0.3em] uppercase text-secondary font-bold border-l-2 border-secondary pl-4">Editorial Narrative</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                 <div className="space-y-4">
+                    <label className="font-label text-[9px] tracking-widest uppercase text-outline opacity-60">Short Abstract (Curated Teaser)</label>
+                    <textarea 
+                      {...register('description_short')}
+                      className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/20 p-6 font-body text-sm leading-relaxed resize-none h-32" 
+                    />
+                 </div>
+                 <div className="space-y-4">
+                    <label className="font-label text-[9px] tracking-widest uppercase text-outline opacity-60">The Full Narrative (Detailed Dossier)</label>
+                    <textarea 
+                      {...register('description_long')}
+                      className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/20 p-6 font-body text-sm leading-relaxed resize-none h-32" 
+                    />
+                 </div>
+              </div>
+           </div>
+        </form>
+      </div>
+    </AdminLayout>
+  );
+};
+
+export default PropertyEditor;

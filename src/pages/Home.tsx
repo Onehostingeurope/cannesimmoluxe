@@ -1,9 +1,28 @@
+import { useState, useEffect } from 'react';
 import { Layout } from '../components/layout/Layout';
 import { Button } from '../components/ui/Button';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '../lib/supabase';
 
 const Home = () => {
   const navigate = useNavigate();
+  const [heroData, setHeroData] = useState<any>(null);
+
+  useEffect(() => {
+    const fetchHero = async () => {
+      const { data } = await supabase
+        .from('cms_content')
+        .select('*')
+        .eq('page_name', 'Homepage')
+        .maybeSingle();
+      
+      if (data && data.modules) {
+        const hero = data.modules.find((m: any) => m.type === 'hero');
+        if (hero) setHeroData(hero);
+      }
+    };
+    fetchHero();
+  }, []);
 
   return (
     <Layout>
@@ -11,11 +30,30 @@ const Home = () => {
       <section className="relative h-screen flex flex-col items-center justify-center overflow-hidden font-body bg-black">
         {/* Living Background */}
         <div className="absolute inset-0 z-0">
-          <img 
-            src="https://images.unsplash.com/photo-1512918728675-ed5a9ecdebfd?auto=format&fit=crop&q=80&w=2000" 
-            alt="Riviera Horizon" 
-            className="w-full h-full object-cover scale-105 animate-[ken-burns_20s_ease-in-out_infinite_alternate] opacity-60"
-          />
+          {!heroData || heroData.media_type === 'image' ? (
+            <img 
+              src={heroData?.media_url || "https://images.unsplash.com/photo-1512918728675-ed5a9ecdebfd?auto=format&fit=crop&q=80&w=2000"} 
+              alt="Riviera Horizon" 
+              className="w-full h-full object-cover scale-105 animate-[ken-burns_20s_ease-in-out_infinite_alternate] opacity-60"
+            />
+          ) : heroData.media_type === 'video' ? (
+            <video 
+              src={heroData.media_url} 
+              autoPlay 
+              muted 
+              loop 
+              playsInline
+              className="w-full h-full object-cover opacity-60 scale-105"
+            />
+          ) : heroData.media_type === 'youtube' ? (
+            <div className="absolute inset-0 w-full h-full pointer-events-none scale-[1.3] opacity-60">
+              <iframe 
+                src={`https://www.youtube.com/embed/${heroData.youtube_id}?autoplay=1&mute=1&loop=1&playlist=${heroData.youtube_id}&controls=0&showinfo=0&rel=0&iv_load_policy=3`}
+                className="w-full h-full border-0"
+                allow="autoplay; encrypted-media"
+              />
+            </div>
+          ) : null}
           <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
         </div>
 
@@ -26,10 +64,11 @@ const Home = () => {
              <p className="font-label text-[10px] tracking-[0.5em] uppercase text-secondary">CannesImmo Luxe</p>
           </div>
           <h1 className="font-headline text-white text-6xl md:text-8xl lg:text-9xl tracking-tighter leading-none italic">
-            L'Art de <br /> <span className="not-italic text-secondary">Vivre.</span>
+            {heroData?.title?.split(' ').slice(0, -1).join(' ') || "L'Art de"} <br /> 
+            <span className="not-italic text-secondary">{heroData?.title?.split(' ').slice(-1) || "Vivre."}</span>
           </h1>
           <p className="text-white/60 text-lg md:text-xl font-body max-w-2xl mx-auto leading-relaxed">
-            Curating the French Riviera's most distinguished estates with an unwavering focus on architectural precision and discreet representation.
+            {heroData?.content || "Curating the French Riviera's most distinguished estates with an unwavering focus on architectural precision and discreet representation."}
           </p>
           <div className="pt-8 flex flex-col md:flex-row items-center justify-center gap-6">
              <Button 
