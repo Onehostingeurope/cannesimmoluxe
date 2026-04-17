@@ -1,0 +1,102 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Serif:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+
+@import "tailwindcss";
+@config "../tailwind.config.ts";
+
+@theme {
+  --color-luxury-ivory: #fcf9f4;
+  --color-luxury-ivory-low: #f6f3ee;
+  --color-luxury-charcoal: #1c1c19;
+  --color-luxury-gold: #705b3b;
+  --color-luxury-gold-light: #fbdeb5;
+  --color-luxury-charcoal-deep: #1A1A1A;
+  
+  --color-surface: #fcf9f4;
+  --color-surface-low: #f6f3ee;
+  --color-surface-lowest: #ffffff;
+  --color-surface-container: #f0ede8;
+  --color-surface-high: #ebe8e3;
+  --color-surface-highest: #e5e2dd;
+  --color-surface-dim: #dcdad5;
+  --color-surface-variant: #e5e2dd;
+  
+  --color-on-surface: #1c1c19;
+  --color-on-background: #1c1c19;
+  --color-on-primary: #ffffff;
+  
+  --color-primary: #000000;
+  --color-primary-container: #1c1b1b;
+
+  --font-serif: "Noto Serif", serif;
+  --font-sans: "Inter", sans-serif;
+  
+  --blur-luxury: 20px;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  body {
+    @apply bg-surface text-on-surface font-sans antialiased;
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-serif;
+  }
+
+  /* The "No-Line" Rule: Borders are forbidden, use background shifts */
+  * {
+    @apply border-transparent;
+    border-radius: 0 !important;
+  }
+
+  /* Luxury Link Styling */
+  a {
+    @apply transition-colors duration-300;
+  }
+}
+
+@layer components {
+  .luxury-glass {
+    @apply bg-surface/80 backdrop-blur-luxury;
+  }
+
+  .minimal-input {
+    @apply bg-transparent border-b border-luxury-charcoal/30 py-2 outline-none transition-all duration-300 focus:border-luxury-charcoal;
+  }
+
+  .luxury-button-primary {
+    @apply bg-primary text-on-primary px-8 py-4 font-sans text-sm tracking-widest uppercase transition-all duration-300 hover:bg-primary-container active:scale-[0.98];
+  }
+
+  .luxury-button-secondary {
+    @apply border border-luxury-gold text-luxury-gold px-8 py-4 font-sans text-sm tracking-widest uppercase transition-all duration-300 hover:bg-luxury-gold hover:text-white active:scale-[0.98];
+  }
+
+  /* Editorial Layout Helpers */
+  .editorial-grid {
+    @apply grid grid-cols-1 md:grid-cols-12 gap-6;
+  }
+
+  .section-padding {
+    @apply py-20 px-6 md:px-12 lg:px-24;
+  }
+}
+
+/* Custom Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes ken-burns {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.1); }
+}
+
+.animate-luxury-fade {
+  animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
