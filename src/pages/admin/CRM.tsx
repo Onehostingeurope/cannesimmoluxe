@@ -10,6 +10,11 @@ const CRM = () => {
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
   const [creating, setCreating] = useState(false);
+  const [activeDossier, setActiveDossier] = useState<any | null>(null);
+  const [logType, setLogType] = useState('Call');
+  const [logNote, setLogNote] = useState('');
+  const [logging, setLogging] = useState(false);
+
   const [availableProperties, setAvailableProperties] = useState<any[]>([]);
   const [newLead, setNewLead] = useState({ 
     email: '', 
@@ -90,6 +95,44 @@ const CRM = () => {
       fetchLeads();
     }
     setCreating(false);
+  };
+
+  const handleLogInteraction = async () => {
+    if (!activeDossier || !logNote.trim()) return;
+    setLogging(true);
+
+    const newLog = {
+       id: Math.random().toString(36).substring(2),
+       date: new Date().toISOString(),
+       type: logType,
+       note: logNote.trim(),
+       admin_id: 'admin' // In a full scalable backend, you'd pull this from useAuthStore if needed
+    };
+
+    const currentTracking = activeDossier.tracking_data || {};
+    const currentHistory = currentTracking.history || [];
+    const updatedHistory = [newLog, ...currentHistory];
+
+    const updatedTracking = {
+       ...currentTracking,
+       history: updatedHistory
+    };
+
+    const { error } = await supabase
+       .from('inquiries')
+       .update({ tracking_data: updatedTracking })
+       .eq('id', activeDossier.id);
+
+    if (error) {
+       alert("Telemetry Sync Failed: " + error.message);
+    } else {
+       // Update localized state instantly
+       const updatedLead = { ...activeDossier, tracking_data: updatedTracking };
+       setActiveDossier(updatedLead);
+       setLeads(prev => prev.map(l => l.id === updatedLead.id ? updatedLead : l));
+       setLogNote('');
+    }
+    setLogging(false);
   };
 
   return (
@@ -256,24 +299,14 @@ const CRM = () => {
                    <p className="font-label text-[8px] text-outline uppercase tracking-[0.3em] font-medium">{lead.intensity || 'LOW'} ENGAGEMENT</p>
                 </div>
 
-                {/* Orchestration Actions */}
+                {/* Dossier Gateway */}
                 <div className="flex items-center gap-3 w-full lg:w-auto lg:justify-end">
-                   {[
-                     { icon: 'forum', title: 'Open Conversation' },
-                     { icon: 'call', title: 'Initiate Call' },
-                     { icon: 'event', title: 'Schedule Visit' },
-                   ].map((action, aIdx) => (
-                     <button 
-                       key={aIdx}
-                       title={action.title}
-                       className="w-12 h-12 flex items-center justify-center bg-[#f6f3ee] dark:bg-[#1c1b1b] border border-outline-variant/10 text-outline hover:text-secondary hover:border-secondary transition-all"
-                     >
-                       <span className="material-symbols-outlined text-xl">{action.icon}</span>
-                     </button>
-                   ))}
-                   <div className="w-px h-10 bg-outline-variant/20 mx-2 hidden lg:block" />
-                   <button className="w-12 h-12 flex items-center justify-center bg-black dark:bg-white text-white dark:text-black hover:bg-secondary hover:text-white transition-all">
-                      <span className="material-symbols-outlined text-xl">arrow_forward_ios</span>
+                   <button 
+                     onClick={() => setActiveDossier(lead)}
+                     className="px-6 py-3 flex items-center justify-center gap-3 bg-black dark:bg-white text-white dark:text-black font-label text-[10px] uppercase tracking-widest hover:bg-secondary hover:text-white transition-all shadow-[0_0_15px_rgba(212,175,55,0.1)]"
+                   >
+                     <span>Open Dossier</span>
+                     <span className="material-symbols-outlined text-sm">arrow_forward_ios</span>
                    </button>
                 </div>
               </div>
@@ -299,10 +332,147 @@ const CRM = () => {
               </div>
            </div>
         </div>
+
+         {/* Interactive Fullscreen Dossier Overlay */}
+         {activeDossier && (
+            <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 sm:p-8 animate-luxury-fade">
+               <div className="bg-white dark:bg-[#0a0a0a] border border-outline-variant/20 shadow-2xl w-full max-w-6xl max-h-[90vh] flex flex-col font-body">
+                  
+                  {/* Dossier Header */}
+                  <div className="flex justify-between items-center p-6 border-b border-outline-variant/20 bg-[#f6f3ee] dark:bg-[#1c1b1b]">
+                     <div className="flex items-center gap-6">
+                        <div className="w-16 h-16 bg-white dark:bg-black flex items-center justify-center font-headline text-3xl italic text-secondary border border-outline-variant/10">
+                           {activeDossier.profiles?.first_name?.[0] || activeDossier.tracking_data?.first_name?.[0] || 'L'}
+                        </div>
+                        <div>
+                           <h2 className="font-headline text-3xl text-primary mb-1">
+                              {activeDossier.profiles ? `${activeDossier.profiles.first_name || ''} ${activeDossier.profiles.last_name || ''}` : activeDossier.tracking_data?.first_name ? `${activeDossier.tracking_data.first_name} ${activeDossier.tracking_data.last_name || ''}` : 'Anonymous Prospect'}
+                           </h2>
+                           <div className="flex items-center gap-4 text-xs font-label uppercase tracking-widest text-outline">
+                              <span className="flex items-center gap-1">
+                                 <span className="material-symbols-outlined text-[14px]">alternate_email</span>
+                                 <a 
+                                    href={`mailto:${activeDossier.profiles?.email || activeDossier.tracking_data?.email}`} 
+                                    className="hover:text-secondary underline decoration-outline-variant/40 underline-offset-4"
+                                 >
+                                    {activeDossier.profiles?.email || activeDossier.tracking_data?.email || 'N/A'}
+                                 </a>
+                              </span>
+                              |
+                              <span className="flex items-center gap-1">
+                                 <span className="material-symbols-outlined text-[14px]">phone</span>
+                                 {activeDossier.profiles?.phone || activeDossier.tracking_data?.phone || 'No Phone Data'}
+                              </span>
+                           </div>
+                        </div>
+                     </div>
+                     <button onClick={() => setActiveDossier(null)} className="w-12 h-12 border border-outline-variant/20 flex items-center justify-center hover:bg-red-500 hover:text-white transition-colors hover:border-red-500 text-outline">
+                        <span className="material-symbols-outlined text-xl">close</span>
+                     </button>
+                  </div>
+
+                  {/* Dossier Content Structure */}
+                  <div className="flex flex-col lg:flex-row flex-1 overflow-hidden h-full">
+                     
+                     {/* Left Panel: Log Interaction Engine */}
+                     <div className="lg:w-1/3 border-r border-outline-variant/20 p-8 flex flex-col bg-[#f6f3ee]/30 dark:bg-[#1c1b1b]/50 overflow-y-auto">
+                        <h3 className="font-label text-[10px] uppercase tracking-widest text-primary font-bold mb-8">Deploy Engagement Log</h3>
+                        <div className="space-y-6">
+                           <div className="space-y-3">
+                              <label className="font-label text-[9px] uppercase tracking-widest text-outline">Interaction Medium</label>
+                              <div className="grid grid-cols-2 gap-3">
+                                 {['Email', 'Call', 'Meeting', 'On-site Viewing'].map(type => (
+                                    <button 
+                                      key={type}
+                                      onClick={() => setLogType(type)}
+                                      className={clsx(
+                                         "px-4 py-3 border text-[10px] font-label uppercase tracking-widest transition-all",
+                                         logType === type ? "border-secondary text-secondary bg-secondary/10" : "border-outline-variant/20 text-outline hover:border-primary"
+                                      )}
+                                    >
+                                       {type}
+                                    </button>
+                                 ))}
+                              </div>
+                           </div>
+                           <div className="space-y-3">
+                              <label className="font-label text-[9px] uppercase tracking-widest text-outline">Executive Intelligence Notes</label>
+                              <textarea 
+                                 rows={6}
+                                 placeholder="Log critical discussion points, budget adjustments, or requests..."
+                                 value={logNote}
+                                 onChange={e => setLogNote(e.target.value)}
+                                 className="w-full bg-white dark:bg-black border border-outline-variant/20 p-4 font-body text-sm placeholder:text-outline-variant resize-none focus:border-secondary outline-none transition-colors"
+                              />
+                           </div>
+                           <button 
+                              onClick={handleLogInteraction}
+                              disabled={logging || !logNote.trim()}
+                              className="w-full py-4 bg-black dark:bg-white text-white dark:text-black font-label text-[10px] uppercase tracking-widest hover:bg-secondary dark:hover:bg-secondary hover:text-white transition-all disabled:opacity-50"
+                           >
+                              {logging ? 'Committing to Ledger...' : 'Persist Intelligence Timeline'}
+                           </button>
+                        </div>
+
+                        <div className="mt-8 pt-8 border-t border-outline-variant/20">
+                           <h3 className="font-label text-[10px] uppercase tracking-widest text-outline mb-4">Initial Message Ledger</h3>
+                           <p className="text-sm font-body text-on-surface-variant leading-relaxed opacity-80 italic">
+                              "{activeDossier.message || 'No initial message attached to target constraint.'}"
+                           </p>
+                        </div>
+                     </div>
+
+                     {/* Right Panel: Continuous Timeline Ledger */}
+                     <div className="lg:w-2/3 p-8 overflow-y-auto bg-white dark:bg-[#0a0a0a] relative">
+                        <h3 className="font-label text-[10px] uppercase tracking-widest text-primary font-bold mb-8 sticky top-0 bg-white dark:bg-[#0a0a0a] pb-4 z-10 border-b border-outline-variant/20">
+                           Complete Chronological Timeline
+                        </h3>
+                        
+                        <div className="space-y-6 relative before:absolute before:inset-0 before:ml-4 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-px before:bg-gradient-to-b before:from-transparent before:via-outline-variant/20 before:to-transparent">
+                           {(activeDossier.tracking_data?.history || []).length === 0 ? (
+                              <div className="text-center py-20 relative z-10">
+                                 <span className="material-symbols-outlined text-outline/30 text-5xl mb-4">history_toggle_off</span>
+                                 <p className="font-label text-[10px] tracking-widest uppercase text-outline">Intelligence timeline is currently empty.</p>
+                              </div>
+                           ) : (
+                              (activeDossier.tracking_data.history as any[]).map((log, index) => (
+                                 <div key={log.id} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active animate-luxury-fade" style={{animationDelay: `${index * 50}ms`}}>
+                                    
+                                    {/* Timeline Node Point */}
+                                    <div className="flex items-center justify-center w-8 h-8 rounded-full border-2 border-secondary bg-white dark:bg-black text-secondary z-10 shrink-0 mx-auto absolute left-0 md:relative md:left-auto mt-2 md:mt-0 transition-transform group-hover:scale-125">
+                                       <span className="material-symbols-outlined text-[14px]">
+                                          {log.type === 'Email' ? 'mail' : log.type === 'Meeting' ? 'groups' : log.type === 'On-site Viewing' ? 'key' : 'call'}
+                                       </span>
+                                    </div>
+                                    
+                                    {/* Interaction Block */}
+                                    <div className="w-[calc(100%-2rem)] md:w-[calc(50%-2rem)] pl-6 md:pl-0 md:odd:pr-6 md:even:pl-6">
+                                       <div className="p-6 bg-[#f6f3ee] dark:bg-[#1c1b1b] border border-outline-variant/10 shadow-sm hover:shadow-lg transition-all border-l-4 border-l-transparent hover:border-l-secondary inline-block w-full">
+                                          <div className="flex justify-between items-start mb-2">
+                                             <span className="font-label text-[8px] uppercase tracking-widest text-secondary font-bold px-2 py-0.5 bg-secondary/10">
+                                                {log.type}
+                                             </span>
+                                             <span className="font-label text-[8px] uppercase tracking-widest text-outline">
+                                                {new Date(log.date).toLocaleString()}
+                                             </span>
+                                          </div>
+                                          <p className="text-sm font-body text-primary leading-relaxed">
+                                             {log.note}
+                                          </p>
+                                       </div>
+                                    </div>
+                                 </div>
+                              ))
+                           )}
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         )}
       </div>
     </AdminLayout>
-  );
+   );
 };
 
 export default CRM;
-;
