@@ -1,19 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { clsx } from 'clsx';
 import { Globe } from 'lucide-react';
 
 const languages = [
-  { code: 'en', flag: '🇬🇧', label: 'English' },
-  { code: 'fr', flag: '🇫🇷', label: 'Français' },
-  { code: 'es', flag: '🇪🇸', label: 'Español' },
-  { code: 'ru', flag: '🇷🇺', label: 'Русский' },
-  { code: 'de', flag: '🇩🇪', label: 'Deutsch' },
-  { code: 'it', flag: '🇮🇹', label: 'Italiano' },
+  { code: 'en', flag: 'gb', label: 'English' },
+  { code: 'fr', flag: 'fr', label: 'Français' },
+  { code: 'es', flag: 'es', label: 'Español' },
+  { code: 'ru', flag: 'ru', label: 'Русский' },
+  { code: 'de', flag: 'de', label: 'Deutsch' },
+  { code: 'it', flag: 'it', label: 'Italiano' },
 ];
 
 export const LanguageSwitcher = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [currentLang, setCurrentLang] = useState('en');
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     // Identify the active Google Translate cookie safely
@@ -27,6 +28,16 @@ export const LanguageSwitcher = () => {
        }
     };
     identifyLang();
+
+    // Fix: Unbreakable Outside Click Listener Matrix
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   const changeLanguage = (code: string) => {
@@ -45,16 +56,16 @@ export const LanguageSwitcher = () => {
     window.location.reload();
   };
 
-  const currentFlag = languages.find(l => l.code === currentLang)?.flag || '🇬🇧';
+  const currentFlag = languages.find(l => l.code === currentLang)?.flag || 'gb';
 
   return (
-    <div className="relative z-[110]" onMouseLeave={() => setIsOpen(false)}>
+    <div className="relative z-[110]" ref={dropdownRef}>
       <button 
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-1.5 focus:outline-none transition-all duration-300 hover:opacity-70 mt-[2px]"
+        className="flex items-center gap-2 focus:outline-none transition-all duration-300 hover:opacity-70 mt-[2px] pr-2"
       >
-        <Globe size={14} className="text-luxury-charcoal dark:text-white lg:text-inherit" />
-        <span className="text-xl drop-shadow-md">{currentFlag}</span>
+        <Globe size={16} className="text-luxury-charcoal dark:text-white lg:text-inherit" />
+        <img src={`https://flagcdn.com/w20/${currentFlag}.png`} alt="flag" className="w-[18px] shadow-sm rounded-sm" />
       </button>
 
       {isOpen && (
@@ -68,7 +79,7 @@ export const LanguageSwitcher = () => {
                    currentLang === lang.code ? "border-luxury-gold text-luxury-gold font-bold bg-[#f6f3ee]/50 dark:bg-[#1c1b1b]/50" : "text-luxury-charcoal dark:text-outline hover:border-luxury-gold/50"
                 )}
              >
-                <span className="text-lg opacity-90">{lang.flag}</span>
+                <img src={`https://flagcdn.com/w20/${lang.flag}.png`} alt={lang.code} className="w-[16px] shadow-sm rounded-[2px] opacity-90 block" />
                 <span className="mt-[2px]">{lang.label}</span>
              </button>
           ))}
