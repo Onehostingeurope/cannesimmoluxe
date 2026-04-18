@@ -47,9 +47,16 @@ const Home = () => {
             />
           ) : heroData.media_type === 'youtube' ? (
             <div className="absolute inset-0 w-full h-full pointer-events-none scale-[1.3] opacity-60">
+              {/* Desktop Video Stream */}
               <iframe 
                 src={`https://www.youtube.com/embed/${heroData.youtube_id}?autoplay=1&mute=1&loop=1&playlist=${heroData.youtube_id}&controls=0&showinfo=0&rel=0&iv_load_policy=3&vq=hd1080&modestbranding=1`}
-                className="w-full h-full border-0"
+                className="hidden md:block w-full h-full border-0"
+                allow="autoplay; encrypted-media"
+              />
+              {/* Mobile Dedicated Video Stream */}
+              <iframe 
+                src={`https://www.youtube.com/embed/${heroData.youtube_id_mobile || heroData.youtube_id}?autoplay=1&mute=1&loop=1&playlist=${heroData.youtube_id_mobile || heroData.youtube_id}&controls=0&showinfo=0&rel=0&iv_load_policy=3&vq=hd1080&modestbranding=1`}
+                className="block md:hidden w-full h-full border-0"
                 allow="autoplay; encrypted-media"
               />
             </div>

@@ -12,6 +12,7 @@ interface CMSModule {
   media_type?: 'image' | 'video' | 'youtube';
   media_url?: string;
   youtube_id?: string;
+  youtube_id_mobile?: string;
 }
 
 const CMS = () => {
@@ -223,15 +224,27 @@ const CMS = () => {
                                 </div>
 
                                 {module.media_type === 'youtube' ? (
-                                   <div className="space-y-2">
-                                      <label className="font-label text-[8px] tracking-widest uppercase text-outline">YouTube ID</label>
-                                      <input 
-                                        type="text" 
-                                        placeholder="e.g. dQw4w9WgXcQ"
-                                        className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/20 p-4 font-label text-[10px]"
-                                        value={module.youtube_id || ''}
-                                        onChange={(e) => updateModuleContent(module.id, 'youtube_id', e.target.value)}
-                                      />
+                                   <div className="space-y-4">
+                                      <div className="space-y-2">
+                                         <label className="font-label text-[8px] tracking-widest uppercase text-outline">Desktop YouTube ID</label>
+                                         <input 
+                                           type="text" 
+                                           placeholder="e.g. dQw4w9WgXcQ"
+                                           className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/20 p-4 font-label text-[10px]"
+                                           value={module.youtube_id || ''}
+                                           onChange={(e) => updateModuleContent(module.id, 'youtube_id', e.target.value)}
+                                         />
+                                      </div>
+                                      <div className="space-y-2">
+                                         <label className="font-label text-[8px] tracking-widest uppercase text-outline">Mobile YouTube ID (Vertical Optional)</label>
+                                         <input 
+                                           type="text" 
+                                           placeholder="e.g. dQw4w9WgXcQ"
+                                           className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/20 p-4 font-label text-[10px]"
+                                           value={module.youtube_id_mobile || ''}
+                                           onChange={(e) => updateModuleContent(module.id, 'youtube_id_mobile', e.target.value)}
+                                         />
+                                      </div>
                                    </div>
                                 ) : (
                                    <div className="space-y-4">
