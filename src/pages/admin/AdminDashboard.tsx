@@ -260,14 +260,17 @@ const AdminDashboard = () => {
                    <p className="font-label text-[9px] tracking-widest uppercase text-secondary">{onlineAgents.length} Agents Online</p>
                 </div>
              </div>
-             
-             <div className="p-8 border border-outline-variant/20 space-y-6 bg-black dark:bg-[#1c1b1b]">
-                <h4 className="font-label text-[10px] tracking-widest uppercase text-primary font-bold">Live Global Trajectory</h4>
-                <div className="w-full relative z-0">
-                   <GlobalMap />
-                </div>
-             </div>
           </div>
+        </div>
+
+        {/* Full Width Global Telemetry Map */}
+        <div className="w-full">
+           <div className="flex justify-between items-center pb-4 border-b border-outline-variant/20 mb-8">
+              <h3 className="font-headline text-2xl text-primary">Global Intelligence Trajectory</h3>
+           </div>
+           <div className="w-full border border-outline-variant/20 bg-black dark:bg-[#1c1b1b] p-2 relative z-0">
+               <GlobalMap />
+           </div>
         </div>
       </div>
     </AdminLayout>
