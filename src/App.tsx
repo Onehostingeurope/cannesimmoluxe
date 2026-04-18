@@ -14,9 +14,8 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import CRM from './pages/admin/CRM';
 import PropertyManagement from './pages/admin/PropertyManagement';
 import CMS from './pages/admin/CMS';
-import PropertyEditor from './pages/admin/PropertyEditor';
-import { ProtectedRoute } from './components/auth/ProtectedRoute';
-import { useAuthStore } from './store/useAuthStore';
+import Settings from './pages/admin/Settings';
+import { Marketing, Team } from './pages/admin/PlaceholderPages';
 
 function App() {
   const initialize = useAuthStore((state) => state.initialize);
@@ -49,6 +48,9 @@ function App() {
         <Route path="/admin/properties/new" element={<ProtectedRoute requireAdmin><PropertyEditor /></ProtectedRoute>} />
         <Route path="/admin/properties/edit/:id" element={<ProtectedRoute requireAdmin><PropertyEditor /></ProtectedRoute>} />
         <Route path="/admin/cms" element={<ProtectedRoute requireAdmin><CMS /></ProtectedRoute>} />
+        <Route path="/admin/marketing" element={<ProtectedRoute requireAdmin><Marketing /></ProtectedRoute>} />
+        <Route path="/admin/team" element={<ProtectedRoute requireAdmin><Team /></ProtectedRoute>} />
+        <Route path="/admin/settings" element={<ProtectedRoute requireAdmin><Settings /></ProtectedRoute>} />
         
         <Route path="/management" element={<Home />} />
         <Route path="/areas" element={<Home />} />
