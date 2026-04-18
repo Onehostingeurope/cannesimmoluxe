@@ -454,9 +454,26 @@ const CRM = () => {
                            </button>
                         </div>
 
+                        {pipelineCategory === 'Management' && (
+                           <div className="mt-8 pt-8 border-t border-outline-variant/20 space-y-4">
+                              <h3 className="font-label text-[10px] uppercase tracking-widest text-primary font-bold">Property Specifications</h3>
+                              <div className="grid grid-cols-2 gap-4 text-sm font-body text-outline">
+                                 <div><span className="opacity-50 text-[10px] uppercase font-label tracking-widest block mb-1">Asset Class</span><span className="text-primary font-bold">{activeDossier.tracking_data?.property_type || 'N/A'}</span></div>
+                                 <div><span className="opacity-50 text-[10px] uppercase font-label tracking-widest block mb-1">Surface Density</span><span className="text-primary font-bold">{activeDossier.tracking_data?.surface_area ? `${activeDossier.tracking_data.surface_area} m²` : 'N/A'}</span></div>
+                                 <div className="col-span-2"><span className="opacity-50 text-[10px] uppercase font-label tracking-widest block mb-1">Geographic Coordinates</span><span className="text-primary">{activeDossier.tracking_data?.address || 'N/A'}</span></div>
+                              </div>
+                              {activeDossier.tracking_data?.image && (
+                                 <div className="pt-4">
+                                    <span className="opacity-50 leading-none text-[10px] uppercase tracking-widest block mb-2 font-label">Architectural Capture</span>
+                                    <img src={activeDossier.tracking_data.image} alt="Property Verification" className="w-full aspect-video object-cover border border-outline-variant/20 shadow-[0_0_15px_rgba(0,0,0,0.1)]" />
+                                 </div>
+                              )}
+                           </div>
+                        )}
+
                         <div className="mt-8 pt-8 border-t border-outline-variant/20">
                            <h3 className="font-label text-[10px] uppercase tracking-widest text-outline mb-4">Initial Message Ledger</h3>
-                           <p className="text-sm font-body text-on-surface-variant leading-relaxed opacity-80 italic">
+                           <p className="text-sm font-body text-on-surface-variant break-words leading-relaxed opacity-80 italic">
                               "{activeDossier.message || 'No initial message attached to target constraint.'}"
                            </p>
                         </div>

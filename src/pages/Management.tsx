@@ -1,7 +1,85 @@
+import { useState, useRef } from 'react';
 import { Layout } from '../components/layout/Layout';
-import { Link } from 'react-router-dom';
+import { supabase } from '../lib/supabase';
 
 const Management = () => {
+  const [loading, setLoading] = useState(false);
+  const [form, setForm] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    propertyType: '',
+    surface: '',
+    address: '',
+    details: ''
+  });
+  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX_DIM = 800;
+        let { width, height } = img;
+        if (width > height && width > MAX_DIM) {
+          height *= MAX_DIM / width;
+          width = MAX_DIM;
+        } else if (height > MAX_DIM) {
+          width *= MAX_DIM / height;
+          height = MAX_DIM;
+        }
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx?.drawImage(img, 0, 0, width, height);
+        
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+        setUploadedImage(dataUrl);
+      };
+      img.src = e.target?.result as string;
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    const { error } = await supabase
+      .from('inquiries')
+      .insert([
+        {
+          email: form.email,
+          message: form.details,
+          lead_status: 'new',
+          tracking_data: {
+            first_name: form.firstName,
+            last_name: form.lastName,
+            phone: form.phone,
+            category: 'Management',
+            property_type: form.propertyType,
+            surface_area: form.surface,
+            address: form.address,
+            image: uploadedImage
+          }
+        }
+      ]);
+
+    if (error) {
+      alert('Error submitting application: ' + error.message);
+    } else {
+      alert('Your portfolio application has been securely routed to our Management Directors.');
+      setForm({ firstName: '', lastName: '', email: '', phone: '', propertyType: '', surface: '', address: '', details: '' });
+      setUploadedImage(null);
+    }
+    setLoading(false);
+  };
   return (
     <Layout>
       <main className="pt-24 pb-32 bg-[#fcf9f4] text-[#1c1c19] antialiased">
@@ -98,20 +176,83 @@ const Management = () => {
           </div>
         </section>
 
-        {/* CTA Section */}
-        <section className="py-32 px-12 md:px-24 bg-[#f6f3ee] border-t border-[#dcdad5]/20">
-          <div className="max-w-3xl mx-auto text-center">
-            <h2 className="font-headline text-4xl mb-8">Discuss Your Property Needs</h2>
-            <p className="font-body text-base text-gray-600 leading-relaxed mb-12">
-              We invite discerning owners to schedule a private consultation to discuss tailored management strategies for your Riviera estate.
-            </p>
-            <Link 
-              to="/contact" 
-              state={{ category: 'Management' }}
-              className="inline-block bg-black text-white font-sans text-xs tracking-[0.1em] uppercase px-8 py-4 hover:bg-gray-900 transition-colors"
-            >
-              Enquire about Management
-            </Link>
+        {/* Management Onboarding Portal */}
+        <section className="py-32 px-6 md:px-12 lg:px-24 bg-[#0a0a0a] text-white border-t border-[#dcdad5]/20">
+          <div className="max-w-5xl mx-auto">
+            <div className="text-center mb-16">
+               <span className="font-label text-xs uppercase tracking-[0.2em] text-secondary mb-4 block">Confidential Onboarding</span>
+               <h2 className="font-headline text-4xl md:text-5xl">Submit Your Asset for Evaluation</h2>
+               <p className="font-body text-base text-gray-400 leading-relaxed mt-6 max-w-2xl mx-auto">
+                 Provide the exact specifications of your estate. Our directors will review the architectural data and contact you to arrange a private site inspection and management consultation.
+               </p>
+            </div>
+
+            <form onSubmit={handleSubmit} className="bg-[#141414] border border-white/10 p-8 md:p-16 space-y-12">
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  {/* Identity */}
+                  <div className="border-b border-white/20 pb-2">
+                     <input type="text" placeholder="FIRST NAME" className="bg-transparent w-full text-[10px] tracking-widest outline-none placeholder:text-white/30 text-white" value={form.firstName} onChange={e => setForm({...form, firstName: e.target.value})} required />
+                  </div>
+                  <div className="border-b border-white/20 pb-2">
+                     <input type="text" placeholder="LAST NAME" className="bg-transparent w-full text-[10px] tracking-widest outline-none placeholder:text-white/30 text-white" value={form.lastName} onChange={e => setForm({...form, lastName: e.target.value})} required />
+                  </div>
+                  <div className="border-b border-white/20 pb-2">
+                     <input type="email" placeholder="SECURE EMAIL" className="bg-transparent w-full text-[10px] tracking-widest outline-none placeholder:text-white/30 text-white" value={form.email} onChange={e => setForm({...form, email: e.target.value})} required />
+                  </div>
+                  <div className="border-b border-white/20 pb-2">
+                     <input type="tel" placeholder="TELEPHONE" className="bg-transparent w-full text-[10px] tracking-widest outline-none placeholder:text-white/30 text-white" value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} required />
+                  </div>
+
+                  {/* Property Details */}
+                  <div className="md:col-span-2 pt-8">
+                     <span className="font-label text-[10px] uppercase tracking-[0.3em] text-secondary">Asset Specifications</span>
+                  </div>
+                  
+                  <div className="border-b border-white/20 pb-2">
+                     <select className="bg-transparent w-full text-[10px] tracking-widest uppercase outline-none text-white cursor-pointer" value={form.propertyType} onChange={e => setForm({...form, propertyType: e.target.value})} required>
+                        <option value="" disabled className="bg-black">SELECT PROPERTY CLASSIFICATION</option>
+                        <option value="Villa" className="bg-black">Private Villa</option>
+                        <option value="Penthouse" className="bg-black">Penthouse</option>
+                        <option value="Apartment" className="bg-black">Luxury Apartment</option>
+                        <option value="Estate" className="bg-black">Compound / Estate</option>
+                     </select>
+                  </div>
+                  <div className="border-b border-white/20 pb-2">
+                     <input type="number" placeholder="TOTAL SURFACE AREA (M² / SQM)" className="bg-transparent w-full text-[10px] tracking-widest outline-none placeholder:text-white/30 text-white" value={form.surface} onChange={e => setForm({...form, surface: e.target.value})} required />
+                  </div>
+                  <div className="md:col-span-2 border-b border-white/20 pb-2">
+                     <input type="text" placeholder="EXACT LOCATION (CITY & NEIGHBORHOOD)" className="bg-transparent w-full text-[10px] tracking-widest outline-none placeholder:text-white/30 text-white" value={form.address} onChange={e => setForm({...form, address: e.target.value})} required />
+                  </div>
+                  
+                  <div className="md:col-span-2 border-b border-white/20 pb-2 h-32 mt-4">
+                     <textarea placeholder="ADDITIONAL REQUIREMENTS OR SPECIFIC MANAGEMENT NEEDS" className="bg-transparent w-full h-full text-[10px] tracking-widest outline-none placeholder:text-white/30 text-white resize-none font-body" value={form.details} onChange={e => setForm({...form, details: e.target.value})} />
+                  </div>
+
+                  {/* File Upload Engine */}
+                  <div className="md:col-span-2 pt-6 flex flex-col items-start gap-4 border-t border-white/10 mt-4">
+                     <span className="font-label text-[10px] uppercase tracking-[0.2em] text-white/50">Append Architectural / Interior Photograph (Optional)</span>
+                     <div className="flex items-center gap-6 w-full">
+                        <label className="cursor-pointer bg-white/5 border border-white/20 px-6 py-3 font-label text-[10px] uppercase tracking-widest hover:bg-white/10 transition-colors flex items-center gap-2">
+                           <span className="material-symbols-outlined text-[14px]">photo_camera</span>
+                           <span>Upload Asset Image</span>
+                           <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
+                        </label>
+                        {uploadedImage && (
+                           <div className="flex items-center gap-3">
+                              <img src={uploadedImage} alt="Uploaded Asset" className="w-12 h-12 object-cover border border-secondary/50 rounded-sm" />
+                              <span className="font-label text-[9px] uppercase tracking-widest text-green-400 flex items-center gap-1"><span className="material-symbols-outlined text-[12px]">check_circle</span> Secured</span>
+                           </div>
+                        )}
+                     </div>
+                  </div>
+               </div>
+
+               <div className="pt-8">
+                  <button type="submit" disabled={loading} className="w-full bg-secondary text-white font-sans text-xs tracking-[0.1em] uppercase px-8 py-5 hover:bg-secondary/90 transition-colors shadow-[0_0_20px_rgba(212,175,55,0.15)] disabled:opacity-50">
+                     {loading ? 'Transmitting Secure Data...' : 'Submit Estate For Review'}
+                  </button>
+               </div>
+            </form>
           </div>
         </section>
       </main>

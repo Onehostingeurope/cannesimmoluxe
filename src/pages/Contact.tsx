@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { useLocation } from 'react-router-dom';
 import { Layout } from '../components/layout/Layout';
 import { Display, Headline, Body, Label } from '../components/ui/Typography';
 import { Button } from '../components/ui/Button';
@@ -7,15 +6,13 @@ import { Mail, Phone, MapPin } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 const Contact = () => {
-  const location = useLocation();
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
     firstName: '',
     lastName: '',
     email: '',
     phone: '',
-    message: '',
-    category: location.state?.category || 'Real Estate'
+    message: ''
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -33,7 +30,7 @@ const Contact = () => {
             first_name: form.firstName,
             last_name: form.lastName,
             phone: form.phone,
-            category: form.category
+            category: 'Real Estate'
           }
         }
       ]);
@@ -42,7 +39,7 @@ const Contact = () => {
       alert('Error sending enquiry: ' + error.message);
     } else {
       alert('Your enquiry has been securely transmitted to our concierge.');
-      setForm({ firstName: '', lastName: '', email: '', phone: '', message: '', category: 'Real Estate' });
+      setForm({ firstName: '', lastName: '', email: '', phone: '', message: '' });
     }
     setLoading(false);
   };
@@ -108,17 +105,6 @@ const Contact = () => {
                  required
                />
             </div>
-            <div className="md:col-span-2 border-b border-primary/20 pb-2 relative mt-4">
-               <label className="text-[9px] text-primary/60 tracking-widest uppercase absolute -top-5 left-0">Select Nature of Inquiry</label>
-               <select 
-                 className="bg-transparent w-full text-[10px] tracking-widest uppercase outline-none text-primary cursor-pointer font-bold" 
-                 value={form.category}
-                 onChange={(e) => setForm({ ...form, category: e.target.value })}
-                 required
-               >
-                 <option value="Real Estate">Acquisition / Rental / Sale Portfolio</option>
-                 <option value="Management">Property Management & Concierge</option>
-               </select>
             </div>
             <div className="border-b border-primary/20 pb-2">
                <input 
