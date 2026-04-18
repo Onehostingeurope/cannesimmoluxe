@@ -82,10 +82,10 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
                     : "text-[#705b3b] dark:text-[#dcdad5] hover:bg-[#e5e2dd] dark:hover:bg-[#2a2a2a]"
                 )}
               >
-                <span className="material-symbols-outlined text-lg" style={{ fontVariationSettings: isActive ? "'FILL' 1" : "'FILL' 0" }}>
+                <span className="material-symbols-outlined text-lg shrink-0" style={{ fontVariationSettings: isActive ? "'FILL' 1" : "'FILL' 0" }}>
                   {item.icon}
                 </span>
-                <span>{item.label}</span>
+                <span className="truncate whitespace-nowrap">{item.label}</span>
               </button>
             );
           })}
