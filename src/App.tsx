@@ -22,6 +22,7 @@ import PropertyEditor from './pages/admin/PropertyEditor';
 import Settings from './pages/admin/Settings';
 import Marketing from './pages/admin/Marketing';
 import Team from './pages/admin/Team';
+import { Notifications } from './pages/admin/Notifications';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import { useAuthStore } from './store/useAuthStore';
 
@@ -63,6 +64,7 @@ function App() {
         <Route path="/admin/marketing" element={<ProtectedRoute requireAdmin><Marketing /></ProtectedRoute>} />
         <Route path="/admin/team" element={<ProtectedRoute requireAdmin><Team /></ProtectedRoute>} />
         <Route path="/admin/settings" element={<ProtectedRoute requireAdmin><Settings /></ProtectedRoute>} />
+        <Route path="/admin/notifications" element={<ProtectedRoute requireAdmin><Notifications /></ProtectedRoute>} />
         
         <Route path="/management" element={<Management />} />
         <Route path="/areas" element={<Home />} />

@@ -15,6 +15,7 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [profile, setProfile] = useState<any>(null);
+  const [notificationsCount, setNotificationsCount] = useState(0);
 
   useEffect(() => {
     if (user?.id) {
@@ -23,12 +24,33 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
     }
   }, [user?.id]);
 
+  useEffect(() => {
+    if (profile?.role === 'admin') {
+      const fetchNotificationCounts = async () => {
+         const { count: leadCount } = await supabase.from('inquiries').select('*', { count: 'exact', head: true }).eq('lead_status', 'new');
+         
+         const sevenDaysAgo = new Date();
+         sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+         const { count: profileCount } = await supabase.from('profiles').select('*', { count: 'exact', head: true })
+            .eq('role', 'user')
+            .gte('created_at', sevenDaysAgo.toISOString());
+
+         setNotificationsCount((leadCount || 0) + (profileCount || 0));
+      };
+      
+      fetchNotificationCounts();
+      const interval = setInterval(fetchNotificationCounts, 60000); 
+      return () => clearInterval(interval);
+    }
+  }, [profile?.role]);
+
   const isDirector = profile?.role === 'admin';
 
   const menuItems = [
     { label: 'Portfolio Propriety', icon: 'domain', path: '/admin/properties' },
     { label: 'Portfolio Management', icon: 'real_estate_agent', path: '/admin/managed' },
     ...(isDirector ? [{ label: 'Analytics', icon: 'insights', path: '/admin' }] : []),
+    ...(isDirector ? [{ label: 'Notifications', icon: 'notifications_active', path: '/admin/notifications', badge: notificationsCount }] : []),
     { label: 'CRM', icon: 'hub', path: '/admin/crm' },
     ...(isDirector ? [
       { label: 'Editorial CMS', icon: 'auto_stories', path: '/admin/cms' },
@@ -90,7 +112,7 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
                 key={item.label}
                 onClick={() => navigate(item.path)}
                 className={clsx(
-                  "w-full flex items-center gap-3 px-4 py-3 text-sm tracking-wide transition-all duration-300 outline-none",
+                  "w-full flex items-center gap-3 px-4 py-3 text-sm tracking-wide transition-all duration-300 outline-none relative",
                   isActive 
                     ? "bg-black dark:bg-white text-white dark:text-black font-bold opacity-90" 
                     : "text-[#705b3b] dark:text-[#dcdad5] hover:bg-[#e5e2dd] dark:hover:bg-[#2a2a2a]"
@@ -99,7 +121,12 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
                 <span className="material-symbols-outlined text-lg shrink-0" style={{ fontVariationSettings: isActive ? "'FILL' 1" : "'FILL' 0" }}>
                   {item.icon}
                 </span>
-                <span className="truncate whitespace-nowrap">{item.label}</span>
+                <span className="truncate whitespace-nowrap flex-1 text-left">{item.label}</span>
+                {item.badge !== undefined && item.badge > 0 && (
+                   <span className="absolute right-4 bg-red-600 text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full animate-bounce-slow">
+                      {item.badge > 99 ? '99+' : item.badge}
+                   </span>
+                )}
               </button>
             );
           })}
