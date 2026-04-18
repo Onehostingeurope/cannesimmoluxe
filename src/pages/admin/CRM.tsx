@@ -8,6 +8,9 @@ const CRM = () => {
   const [selectedStatus, setSelectedStatus] = useState('All');
   const [leads, setLeads] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showCreate, setShowCreate] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const [newLead, setNewLead] = useState({ email: '', message: '', intensity: 'Low' });
 
   const statuses = ['All', 'new', 'contacted', 'qualified', 'visit', 'offer', 'won', 'lost'];
 
@@ -42,11 +45,30 @@ const CRM = () => {
       .update({ lead_status: newStatus })
       .eq('id', id);
 
+    if (error) alert('Error updating lead status: ' + error.message);
+    else fetchLeads();
+  };
+
+  const handleCreatePrompt = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newLead.email) return;
+    
+    setCreating(true);
+    const { error } = await supabase.from('inquiries').insert([{
+      email: newLead.email,
+      message: newLead.message,
+      lead_status: 'new',
+      intensity: newLead.intensity,
+    }]);
+
     if (error) {
-      alert('Error updating lead status: ' + error.message);
+      alert('Error creating lead: ' + error.message);
     } else {
+      setNewLead({ email: '', message: '', intensity: 'Low' });
+      setShowCreate(false);
       fetchLeads();
     }
+    setCreating(false);
   };
 
   return (
@@ -64,11 +86,43 @@ const CRM = () => {
               Manage the life-cycle of your high-net-worth individual leads. Track engagement intensity, schedule private viewings, and move prospects through the technical sales funnel.
             </p>
           </div>
-          <div className="flex gap-4 w-full md:w-auto">
-            <Button variant="outline" className="flex-1 md:flex-none">Export Registry</Button>
-            <Button variant="primary" className="flex-1 md:flex-none">Create Lead</Button>
+          <div className="flex gap-4 w-full md:w-auto mt-6 md:mt-0">
+            <Button variant="outline" className="flex-1 md:flex-none" onClick={() => alert("CSV Export pipeline requires Data Warehouse coupling.")}>Export Registry</Button>
+            <Button variant="primary" className="flex-1 md:flex-none" onClick={() => setShowCreate(!showCreate)}>
+               {showCreate ? 'Cancel' : 'Create Lead'}
+            </Button>
           </div>
         </div>
+
+        {/* Lead Insertion Panel */}
+        {showCreate && (
+          <form onSubmit={handleCreatePrompt} className="bg-white dark:bg-[#0a0a0a] border border-outline-variant/10 p-8 space-y-6">
+             <h3 className="font-headline text-xl text-primary border-b border-outline-variant/10 pb-4">Manual Lead Injection</h3>
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                   <label className="font-label text-[9px] tracking-widest uppercase text-outline opacity-50">Direct Access Email</label>
+                   <input required type="email" className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/20 p-3 font-body text-sm" value={newLead.email} onChange={e => setNewLead({...newLead, email: e.target.value})} />
+                </div>
+                <div className="space-y-2">
+                   <label className="font-label text-[9px] tracking-widest uppercase text-outline opacity-50">Engagement Intensity</label>
+                   <select className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/20 p-3 font-body text-sm" value={newLead.intensity} onChange={e => setNewLead({...newLead, intensity: e.target.value})}>
+                      <option value="Low">Low Priority</option>
+                      <option value="High">High Visibility</option>
+                      <option value="Critical">Critical Acquisition</option>
+                   </select>
+                </div>
+                <div className="space-y-2 md:col-span-2">
+                   <label className="font-label text-[9px] tracking-widest uppercase text-outline opacity-50">Initial Profile Notes</label>
+                   <textarea rows={3} className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/20 p-3 font-body text-sm" value={newLead.message} onChange={e => setNewLead({...newLead, message: e.target.value})} />
+                </div>
+             </div>
+             <div className="flex justify-end pt-4">
+               <button type="submit" disabled={creating} className="px-8 py-3 bg-secondary text-white font-label text-[10px] tracking-widest uppercase hover:bg-secondary/90 transition-colors disabled:opacity-50">
+                 {creating ? 'Injecting...' : 'Deploy To Registry'}
+               </button>
+             </div>
+          </form>
+        )}
 
         {/* Global Controls & Filters */}
         <div className="flex flex-col md:flex-row gap-8 items-center py-4 bg-[#f6f3ee] dark:bg-[#1c1b1b] px-6 border border-outline-variant/10">
