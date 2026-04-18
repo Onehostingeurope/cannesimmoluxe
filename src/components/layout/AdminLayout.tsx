@@ -92,7 +92,7 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
 
         <div className="mt-auto pt-6 space-y-4">
           <div className="px-6 pb-4 border-b border-outline-variant/10 flex justify-start">
-            <LanguageSwitcher direction="up" />
+            <LanguageSwitcher direction="up" align="left" />
           </div>
           <Button 
             variant="primary" 

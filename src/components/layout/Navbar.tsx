@@ -113,8 +113,8 @@ export const Navbar = () => {
         ))}
         
         <div className="pt-12 flex flex-col items-center gap-8">
-          <div className="flex bg-white/10 px-6 py-2 rounded-full">
-            <LanguageSwitcher />
+          <div className="flex bg-white/10 px-6 py-2 rounded-full relative z-[150]">
+            <LanguageSwitcher direction="up" align="center" />
           </div>
           
           <Link to="/login" onClick={() => setIsMobileMenuOpen(false)}>
