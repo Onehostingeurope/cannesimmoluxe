@@ -105,7 +105,6 @@ const Contact = () => {
                  required
                />
             </div>
-            </div>
             <div className="border-b border-primary/20 pb-2">
                <input 
                  type="email" 
