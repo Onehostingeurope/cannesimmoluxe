@@ -68,8 +68,8 @@ export const Footer = () => {
       </div>
       
       <div className="max-w-7xl mx-auto mt-20 pt-10 border-t border-luxury-charcoal/5 flex flex-col md:flex-row justify-between items-center gap-6">
-        <Label className="text-[9px] text-luxury-charcoal/40 tracking-[0.2em] text-center md:text-left">
-          &copy; {new Date().getFullYear()} CANNESIMMO LUXE. ALL RIGHTS RESERVED.
+        <Label className="text-[9px] text-luxury-charcoal/40 tracking-[0.2em] text-center md:text-left leading-relaxed">
+          &copy; 2026 CANNESIMMO LUXE. ALL RIGHTS RESERVED. Design & Conception <a href="https://onehostingeurope.com" target="_blank" rel="noopener noreferrer" className="text-luxury-charcoal/60 hover:text-luxury-gold transition-colors border-b border-transparent hover:border-luxury-gold pb-0.5">OneHostingEurope</a>.
         </Label>
         <div className="flex gap-8">
           <a href="/legal" className="text-[9px] font-sans tracking-[0.2em] uppercase text-luxury-charcoal/40 hover:text-luxury-gold">Legal Notice</a>
