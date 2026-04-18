@@ -13,7 +13,7 @@ interface AuthState {
   initialize: () => Promise<void>;
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
+export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   profile: null,
   loading: true,
@@ -25,6 +25,10 @@ export const useAuthStore = create<AuthState>((set) => ({
     set({ user: null, profile: null });
   },
   initialize: async () => {
+    // CRITICAL FIX: Prevent React 18 Strict Mode from double-binding auth listeners causing Supabase lock 'steal' aborts
+    if (get().initialized) return;
+    set({ initialized: true });
+
     const { data: { session } } = await supabase.auth.getSession();
     const user = session?.user ?? null;
     
@@ -34,7 +38,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       profile = data;
     }
     
-    set({ user, profile, loading: false, initialized: true });
+    set({ user, profile, loading: false });
     
     supabase.auth.onAuthStateChange(async (_event, session) => {
       const user = session?.user ?? null;
