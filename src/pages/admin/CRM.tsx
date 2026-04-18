@@ -5,6 +5,7 @@ import { supabase } from '../../lib/supabase';
 import { clsx } from 'clsx';
 
 const CRM = () => {
+  const [pipelineCategory, setPipelineCategory] = useState<'Real Estate' | 'Management'>('Real Estate');
   const [selectedStatus, setSelectedStatus] = useState('All');
   const [leads, setLeads] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -30,7 +31,7 @@ const CRM = () => {
 
   useEffect(() => {
     fetchLeads();
-  }, [selectedStatus]);
+  }, [selectedStatus, pipelineCategory]);
 
   const fetchLeads = async () => {
     setLoading(true);
@@ -51,7 +52,13 @@ const CRM = () => {
     if (error) {
       console.error('Error fetching leads:', error);
     } else {
-      setLeads(data || []);
+      let filteredData = data || [];
+      if (pipelineCategory === 'Management') {
+         filteredData = filteredData.filter(lead => lead.tracking_data?.category === 'Management');
+      } else {
+         filteredData = filteredData.filter(lead => lead.tracking_data?.category !== 'Management');
+      }
+      setLeads(filteredData);
     }
     setLoading(false);
   };
@@ -83,7 +90,8 @@ const CRM = () => {
          first_name: newLead.first_name,
          last_name: newLead.last_name,
          phone: newLead.phone,
-         intensity: newLead.intensity
+         intensity: newLead.intensity,
+         category: pipelineCategory
       }
     }]);
 
@@ -156,6 +164,32 @@ const CRM = () => {
                {showCreate ? 'Cancel' : 'Create Lead'}
             </Button>
           </div>
+        </div>
+
+        {/* Pipeline Intelligence Matrix Toggle */}
+        <div className="flex space-x-2 border-b border-outline-variant/20 pt-4">
+          <button
+            onClick={() => setPipelineCategory('Real Estate')}
+            className={clsx(
+              "px-8 py-4 font-headline text-lg transition-all border-b-2 tracking-wide",
+              pipelineCategory === 'Real Estate'
+                ? "border-secondary text-primary bg-secondary/5"
+                : "border-transparent text-outline hover:text-primary hover:bg-black/5 dark:hover:bg-white/5"
+            )}
+          >
+            Real Estate Portfolio
+          </button>
+          <button
+            onClick={() => setPipelineCategory('Management')}
+            className={clsx(
+              "px-8 py-4 font-headline text-lg transition-all border-b-2 tracking-wide",
+              pipelineCategory === 'Management'
+                ? "border-secondary text-primary bg-secondary/5"
+                : "border-transparent text-outline hover:text-primary hover:bg-black/5 dark:hover:bg-white/5"
+            )}
+          >
+            Property Management
+          </button>
         </div>
 
         {/* Lead Insertion Panel */}

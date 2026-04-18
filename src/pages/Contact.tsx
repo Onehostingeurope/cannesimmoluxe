@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Layout } from '../components/layout/Layout';
 import { Display, Headline, Body, Label } from '../components/ui/Typography';
 import { Button } from '../components/ui/Button';
@@ -6,12 +7,14 @@ import { Mail, Phone, MapPin } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 const Contact = () => {
+  const location = useLocation();
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
     firstName: '',
     lastName: '',
     email: '',
-    message: ''
+    message: '',
+    category: location.state?.category || 'Real Estate'
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -24,7 +27,12 @@ const Contact = () => {
         {
           email: form.email,
           message: form.message,
-          lead_status: 'new'
+          lead_status: 'new',
+          tracking_data: {
+            first_name: form.firstName,
+            last_name: form.lastName,
+            category: form.category
+          }
         }
       ]);
 
@@ -32,7 +40,7 @@ const Contact = () => {
       alert('Error sending enquiry: ' + error.message);
     } else {
       alert('Your enquiry has been securely transmitted to our concierge.');
-      setForm({ firstName: '', lastName: '', email: '', message: '' });
+      setForm({ firstName: '', lastName: '', email: '', message: '', category: 'Real Estate' });
     }
     setLoading(false);
   };
@@ -97,6 +105,17 @@ const Contact = () => {
                  onChange={(e) => setForm({ ...form, lastName: e.target.value })}
                  required
                />
+            </div>
+            <div className="md:col-span-2 border-b border-primary/20 pb-2">
+               <select 
+                 className="bg-transparent w-full text-[10px] tracking-widest uppercase outline-none text-primary/80 appearance-none cursor-pointer" 
+                 value={form.category}
+                 onChange={(e) => setForm({ ...form, category: e.target.value })}
+                 required
+               >
+                 <option value="Real Estate">Acquisition / Rental / Sale Portfolio</option>
+                 <option value="Management">Property Management & Concierge</option>
+               </select>
             </div>
             <div className="md:col-span-2 border-b border-primary/20 pb-2">
                <input 

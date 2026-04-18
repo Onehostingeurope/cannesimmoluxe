@@ -1,4 +1,5 @@
 import { Layout } from '../components/layout/Layout';
+import { Link } from 'react-router-dom';
 
 const Management = () => {
   return (
@@ -104,9 +105,13 @@ const Management = () => {
             <p className="font-body text-base text-gray-600 leading-relaxed mb-12">
               We invite discerning owners to schedule a private consultation to discuss tailored management strategies for your Riviera estate.
             </p>
-            <button className="bg-black text-white font-sans text-xs tracking-[0.1em] uppercase px-8 py-4 hover:bg-gray-900 transition-colors">
+            <Link 
+              to="/contact" 
+              state={{ category: 'Management' }}
+              className="inline-block bg-black text-white font-sans text-xs tracking-[0.1em] uppercase px-8 py-4 hover:bg-gray-900 transition-colors"
+            >
               Enquire about Management
-            </button>
+            </Link>
           </div>
         </section>
       </main>
