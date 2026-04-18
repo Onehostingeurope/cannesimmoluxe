@@ -24,7 +24,8 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
   }, [user?.id]);
 
   const menuItems = [
-    { label: 'Portfolio', icon: 'domain', path: '/admin/properties' },
+    { label: 'Portfolio Propriety', icon: 'domain', path: '/admin/properties' },
+    { label: 'Portfolio Management', icon: 'real_estate_agent', path: '/admin/managed' },
     { label: 'Analytics', icon: 'insights', path: '/admin' },
     { label: 'CRM', icon: 'hub', path: '/admin/crm' },
     { label: 'Editorial CMS', icon: 'auto_stories', path: '/admin/cms' },

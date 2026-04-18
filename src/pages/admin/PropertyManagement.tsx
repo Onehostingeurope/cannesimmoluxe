@@ -24,6 +24,7 @@ const PropertyManagement = () => {
     const { data, error } = await supabase
       .from('properties')
       .select('*')
+      .neq('mode', 'management')
       .order('created_at', { ascending: false });
 
     if (error) {

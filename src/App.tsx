@@ -16,6 +16,7 @@ import Inquiries from './pages/dashboard/Inquiries';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import CRM from './pages/admin/CRM';
 import PropertyManagement from './pages/admin/PropertyManagement';
+import ManagedAssets from './pages/admin/ManagedAssets';
 import CMS from './pages/admin/CMS';
 import PropertyEditor from './pages/admin/PropertyEditor';
 import Settings from './pages/admin/Settings';
@@ -55,6 +56,7 @@ function App() {
         <Route path="/admin" element={<ProtectedRoute requireAdmin><AdminDashboard /></ProtectedRoute>} />
         <Route path="/admin/crm" element={<ProtectedRoute requireAdmin><CRM /></ProtectedRoute>} />
         <Route path="/admin/properties" element={<ProtectedRoute requireAdmin><PropertyManagement /></ProtectedRoute>} />
+        <Route path="/admin/managed" element={<ProtectedRoute requireAdmin><ManagedAssets /></ProtectedRoute>} />
         <Route path="/admin/properties/new" element={<ProtectedRoute requireAdmin><PropertyEditor /></ProtectedRoute>} />
         <Route path="/admin/properties/edit/:id" element={<ProtectedRoute requireAdmin><PropertyEditor /></ProtectedRoute>} />
         <Route path="/admin/cms" element={<ProtectedRoute requireAdmin><CMS /></ProtectedRoute>} />
