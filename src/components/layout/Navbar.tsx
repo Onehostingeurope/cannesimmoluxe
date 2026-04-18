@@ -37,14 +37,14 @@ export const Navbar = () => {
       className={clsx(
         "fixed top-0 left-0 right-0 z-50 transition-all duration-500 px-6 md:px-12",
         isScrolled 
-          ? "luxury-glass py-4 shadow-sm" 
-          : "bg-white/5 backdrop-blur-md py-6"
+          ? "luxury-glass py-2 shadow-sm" 
+          : "bg-white/5 backdrop-blur-md py-3"
       )}
     >
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         {/* Logo */}
         <Link to="/" className="flex items-center">
-          <img src="/logo.png" alt="CannesImmo Luxe" className="h-[45px] w-auto scale-[1.3] origin-left transition-transform duration-500 hover:scale-[1.4]" />
+          <img src="/logo.png" alt="CannesImmo Luxe" className="h-[75px] w-auto origin-left transition-transform duration-500 hover:scale-[1.05]" />
         </Link>
 
         {/* Desktop Navigation */}
