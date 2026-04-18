@@ -79,7 +79,7 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
                   "w-full flex items-center gap-3 px-4 py-3 text-sm tracking-wide transition-all duration-300 outline-none",
                   isActive 
                     ? "bg-black dark:bg-white text-white dark:text-black font-bold opacity-90" 
-                    : "text-[#705b3b] dark:text-[#dcdad5] hover:bg-[#e5e2dd] dark:hover:bg-[#2a2a2a] hover:pl-5"
+                    : "text-[#705b3b] dark:text-[#dcdad5] hover:bg-[#e5e2dd] dark:hover:bg-[#2a2a2a]"
                 )}
               >
                 <span className="material-symbols-outlined text-lg" style={{ fontVariationSettings: isActive ? "'FILL' 1" : "'FILL' 0" }}>
@@ -104,7 +104,7 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
           </Button>
           <button 
             onClick={handleSignOut}
-            className="flex items-center gap-3 px-4 py-3 text-[#705b3b] dark:text-[#dcdad5] hover:bg-[#e5e2dd] dark:hover:bg-[#2a2a2a] hover:pl-5 transition-all duration-300 w-full text-left"
+            className="flex items-center gap-3 px-4 py-3 text-[#705b3b] dark:text-[#dcdad5] hover:bg-[#e5e2dd] dark:hover:bg-[#2a2a2a] transition-all duration-300 w-full text-left"
           >
             <span className="material-symbols-outlined text-lg">logout</span>
             <span>Sign Out</span>
