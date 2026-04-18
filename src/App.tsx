@@ -24,6 +24,7 @@ function App() {
   const initialize = useAuthStore((state) => state.initialize);
 
   useEffect(() => {
+    console.log('CannesImmo Luxe - Admin Orchestration v1.0.5 - Status: Settings Live');
     initialize();
   }, [initialize]);
   return (
