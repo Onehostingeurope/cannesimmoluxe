@@ -4,6 +4,7 @@ import Home from './pages/Home';
 import PropertiesPage from './pages/Properties';
 import PropertyDetail from './pages/PropertyDetail';
 import About from './pages/About';
+import Management from './pages/Management';
 import Contact from './pages/Contact';
 import Register from './pages/Register';
 import Login from './pages/Login';
@@ -61,7 +62,7 @@ function App() {
         <Route path="/admin/team" element={<ProtectedRoute requireAdmin><Team /></ProtectedRoute>} />
         <Route path="/admin/settings" element={<ProtectedRoute requireAdmin><Settings /></ProtectedRoute>} />
         
-        <Route path="/management" element={<Home />} />
+        <Route path="/management" element={<Management />} />
         <Route path="/areas" element={<Home />} />
         
         {/* Fallback */}
