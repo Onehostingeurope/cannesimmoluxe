@@ -294,9 +294,15 @@ const CRM = () => {
                       <div className="text-lg font-bold text-primary">
                         {lead.profiles ? `${lead.profiles.first_name || ''} ${lead.profiles.last_name || ''}` : lead.tracking_data?.first_name ? `${lead.tracking_data.first_name} ${lead.tracking_data.last_name || ''}` : 'Anonymous Lead'}
                       </div>
-                      <div className="font-label text-[9px] text-outline uppercase tracking-widest opacity-60 flex items-center gap-2">
-                         <span className="material-symbols-outlined text-sm">alternate_email</span>
-                         {lead.profiles?.phone || lead.profiles?.email || lead.tracking_data?.phone || lead.tracking_data?.email || 'No Contact Data'}
+                      <div className="font-label text-[9px] text-outline uppercase tracking-widest opacity-60 flex flex-col gap-1.5 mt-2">
+                         <span className="flex items-center gap-2">
+                            <span className="material-symbols-outlined text-[13px]">alternate_email</span>
+                            {lead.profiles?.email || lead.tracking_data?.email || 'No Email'}
+                         </span>
+                         <span className="flex items-center gap-2">
+                            <span className="material-symbols-outlined text-[13px]">phone</span>
+                            {lead.profiles?.phone || lead.tracking_data?.phone || 'No Phone'}
+                         </span>
                       </div>
                    </div>
                 </div>
