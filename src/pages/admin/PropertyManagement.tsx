@@ -67,7 +67,7 @@ const PropertyManagement = () => {
               <span className="material-symbols-outlined text-secondary text-base">inventory_2</span>
               <p className="font-label text-[10px] tracking-[0.2em] uppercase text-outline">Supply Chain</p>
             </div>
-            <h2 className="font-headline text-4xl text-primary">Portfolio Management</h2>
+            <h2 className="font-headline text-4xl text-primary">Portfolio Propriety</h2>
             <p className="text-sm text-on-surface-variant max-w-xl opacity-70">
               Manage, curate, and deploy your most prestigious listings across the French Riviera. Use the technical matrix to update market status and media assets.
             </p>
