@@ -48,7 +48,7 @@ const Home = () => {
           ) : heroData.media_type === 'youtube' ? (
             <div className="absolute inset-0 w-full h-full pointer-events-none scale-[1.3] opacity-60">
               <iframe 
-                src={`https://www.youtube.com/embed/${heroData.youtube_id}?autoplay=1&mute=1&loop=1&playlist=${heroData.youtube_id}&controls=0&showinfo=0&rel=0&iv_load_policy=3`}
+                src={`https://www.youtube.com/embed/${heroData.youtube_id}?autoplay=1&mute=1&loop=1&playlist=${heroData.youtube_id}&controls=0&showinfo=0&rel=0&iv_load_policy=3&vq=hd1080&modestbranding=1`}
                 className="w-full h-full border-0"
                 allow="autoplay; encrypted-media"
               />
@@ -59,11 +59,7 @@ const Home = () => {
 
         {/* Brand Narrative */}
         <div className="relative z-10 text-center space-y-12 px-6 max-w-6xl animate-luxury-fade">
-          <div className="flex flex-col items-center space-y-4">
-             <div className="w-px h-16 bg-gradient-to-b from-transparent to-secondary"></div>
-             <p className="font-label text-[10px] tracking-[0.5em] uppercase text-secondary">CannesImmo Luxe</p>
-          </div>
-          <h1 className="font-headline text-white text-6xl md:text-8xl lg:text-9xl tracking-tighter leading-none italic">
+          <h1 className="font-headline text-white text-6xl md:text-8xl lg:text-9xl tracking-tighter leading-none italic mt-16">
             {heroData?.title?.split(' ').slice(0, -1).join(' ') || "L'Art de"} <br /> 
             <span className="not-italic text-secondary">{heroData?.title?.split(' ').slice(-1) || "Vivre."}</span>
           </h1>
