@@ -135,6 +135,36 @@ const CMS = () => {
     }
   };
 
+  const handleGridFileUpload = async (moduleId: string, itemIdx: number, file: File) => {
+    try {
+      setUploading(`${moduleId}-${itemIdx}`);
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Math.random()}.${fileExt}`;
+      const filePath = `cms/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('assets')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('assets')
+        .getPublicUrl(filePath);
+
+      const newModules = [...modules];
+      const mIdx = newModules.findIndex(m => m.id === moduleId);
+      if (newModules[mIdx].grid_items) {
+        newModules[mIdx].grid_items[itemIdx].img = publicUrl;
+        setModules(newModules);
+      }
+    } catch (error: any) {
+      alert('Error uploading file: ' + error.message);
+    } finally {
+      setUploading(null);
+    }
+  };
+
   return (
     <AdminLayout>
       <div className="space-y-12 animate-luxury-fade font-body">
@@ -245,20 +275,36 @@ const CMS = () => {
                                               if (newModules[mIdx].grid_items) newModules[mIdx].grid_items[idx].name = e.target.value;
                                               setModules(newModules);
                                            }}
-                                           className="w-1/3 bg-[#f6f3ee] dark:bg-[#1c1b1b] py-3 px-3 font-label text-[9px] uppercase tracking-widest border-0"
+                                            className="w-1/3 bg-[#f6f3ee] dark:bg-[#1c1b1b] py-3 px-3 font-label text-[9px] uppercase tracking-widest border-0"
                                            placeholder="Label"
                                          />
-                                         <input 
-                                           value={item.img}
-                                           onChange={(e) => {
-                                              const newModules = [...modules];
-                                              const mIdx = newModules.findIndex(m => m.id === module.id);
-                                              if (newModules[mIdx].grid_items) newModules[mIdx].grid_items[idx].img = e.target.value;
-                                              setModules(newModules);
-                                           }}
-                                           className="w-2/3 bg-[#f6f3ee] dark:bg-[#1c1b1b] py-3 px-3 font-label text-[10px] border-0"
-                                           placeholder="Image URL"
-                                         />
+                                         <div className="relative w-2/3">
+                                            <input 
+                                              value={item.img}
+                                              onChange={(e) => {
+                                                  const newModules = [...modules];
+                                                  const mIdx = newModules.findIndex(m => m.id === module.id);
+                                                  if (newModules[mIdx].grid_items) newModules[mIdx].grid_items[idx].img = e.target.value;
+                                                  setModules(newModules);
+                                              }}
+                                              className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] py-3 px-3 pr-10 font-label text-[10px] border-0 outline-none"
+                                              placeholder="Image URL"
+                                            />
+                                            <div className="absolute right-2 top-1/2 -translate-y-1/2 overflow-hidden w-6 h-6 flex items-center justify-center text-outline hover:text-primary cursor-pointer transition-colors bg-[#f6f3ee] dark:bg-[#1c1b1b]">
+                                               {uploading === `${module.id}-${idx}` ? (
+                                                  <div className="w-3 h-3 border-t-2 border-primary animate-spin rounded-full"></div>
+                                               ) : (
+                                                  <span className="material-symbols-outlined text-[14px]">upload</span>
+                                               )}
+                                               <input 
+                                                 type="file" 
+                                                 accept="image/*"
+                                                 className="absolute inset-0 opacity-0 cursor-pointer"
+                                                 onChange={(e) => e.target.files && handleGridFileUpload(module.id, idx, e.target.files[0])}
+                                                 disabled={uploading === `${module.id}-${idx}`}
+                                               />
+                                            </div>
+                                         </div>
                                       </div>
                                    ))}
                                  </div>
