@@ -35,11 +35,13 @@ const PropertyEditor = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const isEdit = !!id;
-  const [loading, setLoading] = useState(isEdit);
+  const [loading, setLoading] = useState(isEdit ? true : false);
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [newImageUrl, setNewImageUrl] = useState('');
+  const [crmLeads, setCrmLeads] = useState<any[]>([]);
+  const [assignedLeadId, setAssignedLeadId] = useState<string>('');
 
-  const { register, handleSubmit, reset, watch, setValue, formState: { errors, isSubmitting } } = useForm<any>({
+  const { register, handleSubmit, reset, watch, setValue, formState: { errors, isSubmitting } } = useForm<PropertyFormData>({
     resolver: zodResolver(propertySchema),
     defaultValues: {
       mode: 'sale',
@@ -51,6 +53,18 @@ const PropertyEditor = () => {
   const priceOnRequest = watch('price_on_request');
 
   useEffect(() => {
+    const orchestrateLeads = async () => {
+      const { data } = await supabase.from('inquiries').select('id, tracking_data, created_at').order('created_at', { ascending: false });
+      if (data) {
+        const mgmtLeads = data.filter(lead => 
+          lead.tracking_data?.category === 'Management' || 
+          lead.tracking_data?.category === 'Real Estate'
+        );
+        setCrmLeads(mgmtLeads);
+      }
+    };
+    orchestrateLeads();
+
     if (isEdit) {
       fetchProperty();
     }
@@ -88,6 +102,12 @@ const PropertyEditor = () => {
         youtube_id: data.youtube_id,
       });
       setImageUrls(data.images || []);
+      
+      const { data: leadReq } = await supabase.from('inquiries').select('id').eq('property_id', id).maybeSingle();
+      if (leadReq && leadReq.id) {
+         setAssignedLeadId(leadReq.id);
+      }
+      
       setLoading(false);
     }
   };
@@ -101,6 +121,7 @@ const PropertyEditor = () => {
       updated_at: new Date().toISOString(),
     };
 
+    let targetPropertyId = id;
     let error;
     if (isEdit) {
       const { error: updateError } = await supabase
@@ -109,15 +130,21 @@ const PropertyEditor = () => {
         .eq('id', id);
       error = updateError;
     } else {
-      const { error: insertError } = await supabase
+      const { error: insertError, data: insertData } = await supabase
         .from('properties')
-        .insert([propertyData]);
+        .insert([propertyData])
+        .select()
+        .single();
       error = insertError;
+      if (insertData) targetPropertyId = insertData.id;
     }
 
     if (error) {
       alert('Error saving property: ' + error.message);
     } else {
+      if (assignedLeadId && targetPropertyId) {
+         await supabase.from('inquiries').update({ property_id: targetPropertyId }).eq('id', assignedLeadId);
+      }
       navigate('/admin/properties');
     }
   };
@@ -245,6 +272,25 @@ const PropertyEditor = () => {
                        </select>
                     </div>
                  </div>
+
+                 <div className="space-y-2 pt-4 border-t border-outline-variant/10">
+                     <label className="font-label text-[9px] tracking-widest uppercase text-outline opacity-60 flex items-center gap-2">
+                       <span className="material-symbols-outlined text-xs text-secondary">diversity_3</span>
+                       CRM Owner / Lead Association
+                     </label>
+                     <select 
+                        value={assignedLeadId}
+                        onChange={(e) => setAssignedLeadId(e.target.value)}
+                        className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/20 p-4 font-label text-[10px] tracking-widest uppercase cursor-pointer text-primary"
+                     >
+                        <option value="">-- NO OWNER ASSOCIATED --</option>
+                        {crmLeads.map(lead => (
+                           <option key={lead.id} value={lead.id}>
+                              {lead.tracking_data?.first_name || lead.tracking_data?.firstName} {lead.tracking_data?.last_name || lead.tracking_data?.lastName} — [{lead.tracking_data?.category || 'Legacy'}]
+                           </option>
+                        ))}
+                     </select>
+                  </div>
               </div>
            </div>
 
