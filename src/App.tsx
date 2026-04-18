@@ -18,7 +18,8 @@ import PropertyManagement from './pages/admin/PropertyManagement';
 import CMS from './pages/admin/CMS';
 import PropertyEditor from './pages/admin/PropertyEditor';
 import Settings from './pages/admin/Settings';
-import { Marketing, Team } from './pages/admin/PlaceholderPages';
+import Marketing from './pages/admin/Marketing';
+import Team from './pages/admin/Team';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import { useAuthStore } from './store/useAuthStore';
 
