@@ -106,7 +106,7 @@ const CMS = () => {
   };
 
   const updateModuleContent = (id: string, field: string, value: any) => {
-    setModules(modules.map(m => m.id === id ? { ...m, [field]: value } : m));
+    setModules(prev => prev.map(m => m.id === id ? { ...m, [field]: value } : m));
   };
 
   const handleFileUpload = async (moduleId: string, file: File) => {
@@ -147,6 +147,10 @@ const CMS = () => {
           updateModuleContent(moduleId, 'media_type', 'image');
           setUploading(null);
         };
+        img.onerror = () => {
+          alert("Operating System Error: This image matrix is corrupt or an unsupported iPhone HDR (HEIC) file format. Please upload a standard JPEG or PNG.");
+          setUploading(null);
+        };
         img.src = event.target?.result as string;
       };
       reader.readAsDataURL(file);
@@ -185,12 +189,18 @@ const CMS = () => {
           
           const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
           
-          const newModules = [...modules];
-          const mIdx = newModules.findIndex(m => m.id === moduleId);
-          if (newModules[mIdx].grid_items) {
-            newModules[mIdx].grid_items[itemIdx].img = dataUrl;
-            setModules(newModules);
-          }
+          setModules(prev => {
+            const newModules = [...prev];
+            const mIdx = newModules.findIndex(m => m.id === moduleId);
+            if (mIdx !== -1 && newModules[mIdx].grid_items) {
+              newModules[mIdx].grid_items[itemIdx].img = dataUrl;
+            }
+            return newModules;
+          });
+          setUploading(null);
+        };
+        img.onerror = () => {
+          alert("Operating System Error: This image matrix is corrupt or an unsupported iPhone HDR (HEIC) file format. Please upload a standard JPEG or PNG.");
           setUploading(null);
         };
         img.src = event.target?.result as string;
