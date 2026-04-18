@@ -44,7 +44,7 @@ export const Navbar = () => {
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         {/* Logo */}
         <Link to="/" className="flex items-center">
-          <img src="/logo.png" alt="CannesImmo Luxe" className="h-[40px] w-auto transition-transform duration-500 hover:scale-105" />
+          <img src="/logo.png" alt="CannesImmo Luxe" className="h-[75px] w-auto transition-transform duration-500 hover:scale-105" />
         </Link>
 
         {/* Desktop Navigation */}
