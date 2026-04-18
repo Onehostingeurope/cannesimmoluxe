@@ -15,6 +15,7 @@ const AdminDashboard = () => {
   });
   const [recentActivities, setRecentActivities] = useState<any[]>([]);
   const [recentProfiles, setRecentProfiles] = useState<any[]>([]);
+  const [onlineAgents, setOnlineAgents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -44,6 +45,12 @@ const AdminDashboard = () => {
       .order('created_at', { ascending: false })
       .limit(5);
 
+    // 4. Fetch Active Agents (Admins)
+    const { data: agents } = await supabase
+      .from('profiles')
+      .select('avatar_url, first_name')
+      .eq('role', 'admin');
+
     setStats(prev => ({
       ...prev,
       totalValue,
@@ -52,6 +59,7 @@ const AdminDashboard = () => {
 
     setRecentActivities(recentInquiries || []);
     setRecentProfiles(fetchedProfiles || []);
+    setOnlineAgents(agents || []);
     setLoading(false);
   };
 
@@ -213,13 +221,23 @@ const AdminDashboard = () => {
                 </div>
                 <div className="pt-8 border-t border-white/10 flex justify-between items-center">
                    <div className="flex -space-x-3">
-                      {[1, 2, 3].map(i => (
-                        <div key={i} className="w-8 h-8 rounded-full border-2 border-black bg-outline-variant overflow-hidden">
-                           <img src={`https://i.pravatar.cc/100?img=${i+10}`} alt="Agent" className="w-full h-full object-cover" />
+                      {onlineAgents.map((agent, i) => (
+                        <div key={i} className="w-8 h-8 rounded-full border-2 border-black bg-outline-variant text-black flex items-center justify-center font-headline italic overflow-hidden z-20 group relative hover:z-50 transition-all hover:scale-110">
+                           {agent.avatar_url ? (
+                              <img src={agent.avatar_url} alt="Agent" className="w-full h-full object-cover" />
+                           ) : (
+                              <span>{agent.first_name?.[0] || 'A'}</span>
+                           )}
+                           <div className="absolute -top-6 left-1/2 -translate-x-1/2 bg-black text-white text-[8px] tracking-widest px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap border border-white/20">
+                             {agent.first_name || 'Agent'}
+                           </div>
                         </div>
                       ))}
+                      {onlineAgents.length === 0 && (
+                         <div className="text-[10px] uppercase tracking-widest text-outline">No active agents</div>
+                      )}
                    </div>
-                   <p className="font-label text-[9px] tracking-widest uppercase text-secondary">3 Agents Online</p>
+                   <p className="font-label text-[9px] tracking-widest uppercase text-secondary">{onlineAgents.length} Agents Online</p>
                 </div>
              </div>
              
