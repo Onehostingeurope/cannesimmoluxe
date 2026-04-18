@@ -5,9 +5,11 @@ import { MOCK_PROPERTIES } from '../data/mockProperties';
 import { useAuthStore } from '../store/useAuthStore';
 import { PDFDownloadLink } from '@react-pdf/renderer';
 import { PropertyPDF } from '../components/property/PropertyPDF';
+import { useTracking } from '../hooks/useTracking';
 
 const PropertyDetail = () => {
   const { slug } = useParams<{ slug: string }>();
+  useTracking('view_property', slug);
   const navigate = useNavigate();
   const { user } = useAuthStore();
   const isGated = !user; 

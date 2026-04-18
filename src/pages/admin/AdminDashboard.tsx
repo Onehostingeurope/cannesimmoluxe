@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { AdminLayout } from '../../components/layout/AdminLayout';
+import { GlobalMap } from '../../components/admin/GlobalMap';
 import { Button } from '../../components/ui/Button';
 import { supabase } from '../../lib/supabase';
 import { clsx } from 'clsx';
@@ -61,6 +62,15 @@ const AdminDashboard = () => {
     setRecentProfiles(fetchedProfiles || []);
     setOnlineAgents(agents || []);
     setLoading(false);
+  };
+
+  const handleApproveUser = async (userId: string) => {
+    const { error } = await supabase.from('profiles').update({ approval_status: 'approved' }).eq('id', userId);
+    if (!error) {
+       setRecentProfiles(prev => prev.map(p => p.id === userId ? { ...p, approval_status: 'approved' } : p));
+    } else {
+       alert("Authorization Check Failed: " + error.message);
+    }
   };
 
   return (
@@ -191,16 +201,26 @@ const AdminDashboard = () => {
                              </p>
                           </div>
                        </div>
-                       <div className="text-right">
-                          <p className="font-label text-[9px] tracking-widest uppercase text-outline mb-1">
+                       <div className="text-right flex flex-col items-end gap-2">
+                          <p className="font-label text-[9px] tracking-widest uppercase text-outline">
                             {profile.created_at ? new Date(profile.created_at).toLocaleDateString() : 'Active'}
                           </p>
-                          <span className={clsx(
-                            "px-2 py-0.5 text-[8px] tracking-widest uppercase font-bold",
-                            profile.role === 'admin' ? "bg-red-500 text-white" : "bg-outline-variant/20 text-outline"
-                          )}>
-                             {profile.role || 'client'}
-                          </span>
+                          <div className="flex items-center gap-2">
+                             {profile.approval_status === 'pending' && (
+                                <button 
+                                   onClick={() => handleApproveUser(profile.id)}
+                                   className="px-3 py-1 bg-secondary text-white text-[9px] font-label uppercase tracking-widest hover:bg-white hover:text-black transition-colors border border-transparent shadow-[0_0_10px_rgba(212,175,55,0.2)]"
+                                >
+                                   Approve Access
+                                </button>
+                             )}
+                             <span className={clsx(
+                               "px-2 py-0.5 text-[8px] tracking-widest uppercase font-bold",
+                               profile.role === 'admin' ? "bg-red-500 text-white" : "bg-outline-variant/20 text-outline"
+                             )}>
+                                {profile.role || 'client'}
+                             </span>
+                          </div>
                        </div>
                     </div>
                   ))
@@ -241,19 +261,10 @@ const AdminDashboard = () => {
                 </div>
              </div>
              
-             <div className="p-8 border border-outline-variant/20 space-y-6">
-                <h4 className="font-label text-[10px] tracking-widest uppercase text-primary font-bold">Global Status</h4>
-                <div className="space-y-4">
-                   {[
-                     { label: 'Cloud Persistence', status: 'Operational' },
-                     { label: 'Asset CDN', status: 'Operational' },
-                     { label: 'CRM API Cluster', status: 'Optimal' },
-                   ].map((sys, sIdx) => (
-                     <div key={sIdx} className="flex justify-between items-center">
-                        <span className="text-[10px] font-label tracking-widest uppercase text-outline">{sys.label}</span>
-                        <span className="w-2 h-2 rounded-full bg-green-500"></span>
-                     </div>
-                   ))}
+             <div className="p-8 border border-outline-variant/20 space-y-6 bg-black dark:bg-[#1c1b1b]">
+                <h4 className="font-label text-[10px] tracking-widest uppercase text-primary font-bold">Live Global Trajectory</h4>
+                <div className="w-full relative z-0">
+                   <GlobalMap />
                 </div>
              </div>
           </div>
