@@ -120,17 +120,22 @@ body {
 #google_translate_element {
   display: none !important;
 }
-.goog-tooltip {
-  display: none !important;
-}
+#goog-gt-tt, 
+.goog-te-balloon-frame,
+.goog-tooltip,
 .goog-tooltip:hover {
   display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
 }
+
 .goog-text-highlight {
   background-color: transparent !important;
   border: none !important; 
   box-shadow: none !important;
 }
+
 font {
    background-color: transparent !important;
 }
