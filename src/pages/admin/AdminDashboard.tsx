@@ -151,8 +151,9 @@ const AdminDashboard = () => {
                           </span>
                        </div>
                     </div>
-              </div>
-
+                  ))
+                )}
+             </div>
              <div className="flex justify-between items-center pb-4 pt-12 border-b border-outline-variant/20">
                 <h3 className="font-headline text-2xl text-primary">Client Registry</h3>
              </div>
