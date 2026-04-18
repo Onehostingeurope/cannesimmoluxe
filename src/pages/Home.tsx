@@ -7,6 +7,7 @@ import { supabase } from '../lib/supabase';
 const Home = () => {
   const navigate = useNavigate();
   const [heroData, setHeroData] = useState<any>(null);
+  const [gridData, setGridData] = useState<any>(null);
 
   useEffect(() => {
     const fetchHero = async () => {
@@ -19,6 +20,8 @@ const Home = () => {
       if (data && data.modules) {
         const hero = data.modules.find((m: any) => m.type === 'hero');
         if (hero) setHeroData(hero);
+        const grid = data.modules.find((m: any) => m.type === 'grid');
+        if (grid) setGridData(grid);
       }
     };
     fetchHero();
@@ -199,15 +202,15 @@ const Home = () => {
       <section className="bg-[#f6f3ee] dark:bg-[#0a0a0a] py-32">
         <div className="px-6 md:px-12 lg:px-24 mb-20 text-center space-y-4">
            <p className="font-label text-[10px] tracking-[0.4em] uppercase text-secondary">Our Influence</p>
-           <h2 className="font-headline text-5xl md:text-6xl text-primary tracking-tight">The Enclaves</h2>
+           <h2 className="font-headline text-5xl md:text-6xl text-primary tracking-tight">{gridData?.title || 'The Enclaves'}</h2>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-1">
-          {[
+          {(gridData?.grid_items || [
             { name: 'Cannes', img: 'https://images.unsplash.com/photo-1533105079780-92b9be482077?auto=format&fit=crop&q=80&w=800' },
             { name: 'Antibes', img: 'https://images.unsplash.com/photo-1549439602-43ebca2327af?auto=format&fit=crop&q=80&w=800' },
             { name: 'St. Tropez', img: 'https://images.unsplash.com/photo-1493246507139-91e8bef99c02?auto=format&fit=crop&q=80&w=800' }
-          ].map((city, idx) => (
+          ]).map((city: any, idx: number) => (
             <div key={idx} className="group relative aspect-[3/5] overflow-hidden cursor-pointer" onClick={() => navigate('/properties')}>
               <img 
                 src={city.img} 

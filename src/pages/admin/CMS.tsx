@@ -13,6 +13,7 @@ interface CMSModule {
   media_url?: string;
   youtube_id?: string;
   youtube_id_mobile?: string;
+  grid_items?: { name: string, img: string }[];
 }
 
 const CMS = () => {
@@ -47,7 +48,20 @@ const CMS = () => {
     if (error) {
       console.error('Error fetching CMS content:', error);
     } else if (data) {
-      setModules(data.modules || []);
+      let loadedModules = data.modules || [];
+      if (!loadedModules.find((m: any) => m.type === 'grid') && activePage === 'Homepage') {
+         loadedModules.push({
+           id: 'img-grid-1',
+           type: 'grid',
+           title: 'The Enclaves',
+           grid_items: [
+             { name: 'Cannes', img: 'https://images.unsplash.com/photo-1533105079780-92b9be482077?auto=format&fit=crop&q=80&w=800' },
+             { name: 'Antibes', img: 'https://images.unsplash.com/photo-1549439602-43ebca2327af?auto=format&fit=crop&q=80&w=800' },
+             { name: 'St. Tropez', img: 'https://images.unsplash.com/photo-1493246507139-91e8bef99c02?auto=format&fit=crop&q=80&w=800' }
+           ]
+         });
+      }
+      setModules(loadedModules);
     } else {
       setModules([
         { 
@@ -195,18 +209,53 @@ const CMS = () => {
                                      onChange={(e) => updateModuleContent(module.id, 'title', e.target.value)}
                                    />
                                 </div>
-                                <div className="space-y-2">
-                                   <label className="font-label text-[9px] tracking-widest uppercase text-outline opacity-50">Narrative Content</label>
-                                   <textarea 
-                                     className="w-full bg-transparent border-0 border-b border-outline-variant/30 focus:border-primary focus:ring-0 px-0 pb-2 font-body text-sm text-on-surface-variant h-24 resize-none" 
-                                     value={module.content || ''}
-                                     onChange={(e) => updateModuleContent(module.id, 'content', e.target.value)}
-                                   />
-                                </div>
+                                {module.type !== 'grid' && (
+                                   <div className="space-y-2">
+                                      <label className="font-label text-[9px] tracking-widest uppercase text-outline opacity-50">Narrative Content</label>
+                                      <textarea 
+                                        className="w-full bg-transparent border-0 border-b border-outline-variant/30 focus:border-primary focus:ring-0 px-0 pb-2 font-body text-sm text-on-surface-variant h-24 resize-none" 
+                                        value={module.content || ''}
+                                        onChange={(e) => updateModuleContent(module.id, 'content', e.target.value)}
+                                      />
+                                   </div>
+                                )}
                              </div>
 
-                             <div className="space-y-6">
-                                <label className="font-label text-[9px] tracking-widest uppercase text-outline opacity-50 block">Media Orchestration</label>
+                             {module.type === 'grid' ? (
+                               <div className="space-y-6">
+                                 <label className="font-label text-[9px] tracking-widest uppercase text-outline opacity-50 block">Property Enclaves Configuration</label>
+                                 <div className="space-y-4">
+                                   {module.grid_items?.map((item, idx) => (
+                                      <div key={idx} className="flex gap-4 items-center border border-outline-variant/10 p-2 dark:bg-[#111]">
+                                         <input 
+                                           value={item.name} 
+                                           onChange={(e) => {
+                                              const newModules = [...modules];
+                                              const mIdx = newModules.findIndex(m => m.id === module.id);
+                                              if (newModules[mIdx].grid_items) newModules[mIdx].grid_items[idx].name = e.target.value;
+                                              setModules(newModules);
+                                           }}
+                                           className="w-1/3 bg-[#f6f3ee] dark:bg-[#1c1b1b] py-3 px-3 font-label text-[9px] uppercase tracking-widest border-0"
+                                           placeholder="Label"
+                                         />
+                                         <input 
+                                           value={item.img}
+                                           onChange={(e) => {
+                                              const newModules = [...modules];
+                                              const mIdx = newModules.findIndex(m => m.id === module.id);
+                                              if (newModules[mIdx].grid_items) newModules[mIdx].grid_items[idx].img = e.target.value;
+                                              setModules(newModules);
+                                           }}
+                                           className="w-2/3 bg-[#f6f3ee] dark:bg-[#1c1b1b] py-3 px-3 font-label text-[10px] border-0"
+                                           placeholder="Image URL"
+                                         />
+                                      </div>
+                                   ))}
+                                 </div>
+                               </div>
+                             ) : (
+                               <div className="space-y-6">
+                                  <label className="font-label text-[9px] tracking-widest uppercase text-outline opacity-50 block">Media Orchestration</label>
                                 
                                 <div className="flex gap-4 mb-4">
                                    {['image', 'video', 'youtube'].map((m) => (
@@ -283,6 +332,7 @@ const CMS = () => {
                                    </div>
                                 )}
                              </div>
+                             )}
                           </div>
                           
                           <div className="absolute top-6 right-6 flex gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
