@@ -7,6 +7,7 @@ import About from './pages/About';
 import Contact from './pages/Contact';
 import Register from './pages/Register';
 import Login from './pages/Login';
+import AdminLogin from './pages/admin/AdminLogin';
 import DashboardHome from './pages/dashboard/DashboardHome';
 import SavedProperties from './pages/dashboard/SavedProperties';
 import Inquiries from './pages/dashboard/Inquiries';
@@ -39,6 +40,7 @@ function App() {
         <Route path="/contact" element={<Contact />} />
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/admin/login" element={<AdminLogin />} />
         
         {/* Dashboard Routes (Protected) */}
         <Route path="/dashboard" element={<ProtectedRoute><DashboardHome /></ProtectedRoute>} />

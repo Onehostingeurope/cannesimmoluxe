@@ -3,10 +3,17 @@ import { clsx } from 'clsx';
 import { Menu, X, Lock } from 'lucide-react';
 import { Title } from '../ui/Typography';
 import { Button } from '../ui/Button';
+import { useLocation, Link } from 'react-router-dom';
 
 export const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const location = useLocation();
+
+  const isHome = location.pathname === '/';
+  
+  // Force contrasting text (charcoal) if we are not on the home page OR if we've scrolled
+  const showContrast = !isHome || isScrolled;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -28,58 +35,50 @@ export const Navbar = () => {
   return (
     <nav 
       className={clsx(
-        "fixed top-0 left-0 right-0 z-50 transition-all duration-500 px-6 md:px-12 py-6",
-        isScrolled ? "luxury-glass py-4 shadow-sm" : "bg-transparent py-8"
+        "fixed top-0 left-0 right-0 z-50 transition-all duration-500 px-6 md:px-12",
+        isScrolled 
+          ? "luxury-glass py-4 shadow-sm" 
+          : "bg-white/5 backdrop-blur-md py-6"
       )}
     >
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         {/* Logo */}
-        <a href="/" className="flex flex-col">
-          <span className={clsx(
-            "font-serif text-xl tracking-tighter transition-colors duration-500",
-            isScrolled ? "text-luxury-charcoal" : "text-white"
-          )}>
+        <Link to="/" className="flex flex-col">
+          <span className="font-serif text-xl tracking-tighter text-luxury-charcoal transition-colors duration-500">
             CANNEIMMO
           </span>
           <span className="font-sans text-[10px] tracking-[0.4em] uppercase text-luxury-gold ml-0.5">LUXE</span>
-        </a>
+        </Link>
 
         {/* Desktop Navigation */}
         <div className="hidden lg:flex items-center space-x-10">
           {navLinks.map((link) => (
-            <a 
+            <Link 
               key={link.label} 
-              href={link.href}
-              className={clsx(
-                "font-sans text-[11px] tracking-[0.2em] uppercase transition-colors duration-500 hover:text-luxury-gold",
-                isScrolled ? "text-luxury-charcoal/70" : "text-white/80"
-              )}
+              to={link.href}
+              className="font-sans text-[11px] tracking-[0.2em] uppercase text-luxury-charcoal/70 transition-colors duration-500 hover:text-luxury-gold"
             >
               {link.label}
-            </a>
+            </Link>
           ))}
         </div>
 
         {/* Action Button */}
         <div className="hidden lg:flex items-center space-x-6">
-          <Button 
-            variant="ghost" 
-            className={clsx(
-              "px-4 py-2 flex items-center gap-2 group transition-colors duration-500",
-              isScrolled ? "text-luxury-charcoal" : "text-white hover:bg-white/10"
-            )}
-          >
-            <Lock className="w-3 h-3 transition-transform group-hover:-translate-y-0.5" />
-            <span className="text-[10px]">Private Access</span>
-          </Button>
+          <Link to="/login">
+            <Button 
+              variant="ghost" 
+              className="px-4 py-2 flex items-center gap-2 group transition-colors duration-500 text-luxury-charcoal hover:bg-black/5"
+            >
+              <Lock className="w-3 h-3 transition-transform group-hover:-translate-y-0.5" />
+              <span className="text-[10px]">Private Access</span>
+            </Button>
+          </Link>
         </div>
 
         {/* Mobile Menu Toggle */}
         <button 
-          className={clsx(
-            "lg:hidden p-2 transition-colors duration-500",
-            isScrolled ? "text-luxury-charcoal" : "text-white"
-          )}
+          className="lg:hidden p-2 transition-colors duration-500 text-luxury-charcoal"
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
         >
           {isMobileMenuOpen ? <X /> : <Menu />}
@@ -101,23 +100,26 @@ export const Navbar = () => {
         </button>
 
         {navLinks.map((link) => (
-          <a 
+          <Link 
             key={link.label} 
-            href={link.href}
+            to={link.href}
             onClick={() => setIsMobileMenuOpen(false)}
             className="font-serif text-3xl text-luxury-charcoal hover:text-luxury-gold transition-colors"
           >
             {link.label}
-          </a>
+          </Link>
         ))}
         
         <div className="pt-12">
-          <Button variant="primary" className="flex items-center gap-3">
-            <Lock className="w-4 h-4" />
-            Private Access
-          </Button>
+          <Link to="/login" onClick={() => setIsMobileMenuOpen(false)}>
+            <Button variant="primary" className="flex items-center gap-3">
+              <Lock className="w-4 h-4" />
+              Private Access
+            </Button>
+          </Link>
         </div>
       </div>
     </nav>
   );
 };
+

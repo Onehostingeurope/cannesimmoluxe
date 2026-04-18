@@ -20,11 +20,12 @@ export const ProtectedRoute = ({ children, requireAdmin = false }: ProtectedRout
   }
 
   if (!user) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
+    const loginPath = requireAdmin ? '/admin/login' : '/login';
+    return <Navigate to={loginPath} state={{ from: location }} replace />;
   }
 
   if (requireAdmin && profile?.role !== 'admin') {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to="/admin/login" state={{ error: 'Administrative clearance required.' }} replace />;
   }
 
   return <>{children}</>;
