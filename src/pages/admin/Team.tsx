@@ -3,10 +3,15 @@ import { AdminLayout } from '../../components/layout/AdminLayout';
 import { supabase } from '../../lib/supabase';
 import { clsx } from 'clsx';
 import { useAuthStore } from '../../store/useAuthStore';
+import { createClient } from '@supabase/supabase-js';
 
 const Team = () => {
   const [profiles, setProfiles] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showCreate, setShowCreate] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const [newOperative, setNewOperative] = useState({ email: '', password: '', first_name: '', last_name: '' });
+  
   const currentUser = useAuthStore(state => state.user);
 
   useEffect(() => {
@@ -41,6 +46,58 @@ const Team = () => {
     }
   };
 
+  const handleCreate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newOperative.email || !newOperative.password) return;
+    setCreating(true);
+    
+    try {
+      // Use isolated client to avoid persisting session and logging out the admin
+      const tempClient = createClient(
+        import.meta.env.VITE_SUPABASE_URL,
+        import.meta.env.VITE_SUPABASE_ANON_KEY,
+        { auth: { persistSession: false } }
+      );
+
+      const { data, error } = await tempClient.auth.signUp({
+        email: newOperative.email,
+        password: newOperative.password,
+      });
+
+      if (error) throw error;
+
+      if (data?.user?.id) {
+        // Wait 1 second to ensure DB trigger completed
+        await new Promise(r => setTimeout(r, 1000));
+        
+        await supabase.from('profiles').update({
+          first_name: newOperative.first_name,
+          last_name: newOperative.last_name,
+          role: 'user' // Default to user, admin can upgrade them 
+        }).eq('id', data.user.id);
+      }
+
+      setShowCreate(false);
+      setNewOperative({ email: '', password: '', first_name: '', last_name: '' });
+      fetchProfiles();
+    } catch (err: any) {
+      alert('Creation Error: ' + err.message);
+    } finally {
+      setCreating(false);
+    }
+  };
+
+  const deleteProfile = async (id: string) => {
+    if (!window.confirm('Are you sure you want to revoke this operative? This will permanently delete their directory profile and revoke all administrative access.')) return;
+    
+    const { error } = await supabase.from('profiles').delete().eq('id', id);
+    if (error) {
+      alert('Error revoking operative: ' + error.message);
+    } else {
+      fetchProfiles();
+    }
+  };
+
   return (
     <AdminLayout>
       <div className="space-y-12 animate-luxury-fade font-body">
@@ -56,7 +113,50 @@ const Team = () => {
               Manage the credentials and hierarchical roles of your organization's core operators. Ensure the utmost security by verifying administrative privileges.
             </p>
           </div>
+          {currentUser && (
+            <div className="flex gap-4 w-full md:w-auto mt-6 md:mt-0">
+               <button 
+                 onClick={() => setShowCreate(!showCreate)}
+                 className="px-6 py-3 bg-primary text-white font-label text-[10px] tracking-widest uppercase hover:bg-secondary transition-colors"
+               >
+                 {showCreate ? 'Cancel Deployment' : 'Deploy New Operative'}
+               </button>
+            </div>
+          )}
         </div>
+
+        {showCreate && (
+          <form onSubmit={handleCreate} className="bg-white dark:bg-[#0a0a0a] border border-outline-variant/10 p-8 space-y-6">
+             <h3 className="font-headline text-xl text-primary border-b border-outline-variant/10 pb-4">New Operative Credentials</h3>
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                   <label className="font-label text-[9px] tracking-widest uppercase text-outline opacity-50">First Name</label>
+                   <input required type="text" className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/20 p-3 font-body text-sm" value={newOperative.first_name} onChange={e => setNewOperative({...newOperative, first_name: e.target.value})} />
+                </div>
+                <div className="space-y-2">
+                   <label className="font-label text-[9px] tracking-widest uppercase text-outline opacity-50">Last Name</label>
+                   <input type="text" className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/20 p-3 font-body text-sm" value={newOperative.last_name} onChange={e => setNewOperative({...newOperative, last_name: e.target.value})} />
+                </div>
+                <div className="space-y-2">
+                   <label className="font-label text-[9px] tracking-widest uppercase text-outline opacity-50">Email Access</label>
+                   <input required type="email" className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/20 p-3 font-body text-sm" value={newOperative.email} onChange={e => setNewOperative({...newOperative, email: e.target.value})} />
+                </div>
+                <div className="space-y-2">
+                   <label className="font-label text-[9px] tracking-widest uppercase text-outline opacity-50">Initial Password</label>
+                   <input required type="text" className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/20 p-3 font-body text-sm" value={newOperative.password} onChange={e => setNewOperative({...newOperative, password: e.target.value})} />
+                </div>
+             </div>
+             <div className="flex justify-end pt-4">
+               <button 
+                 type="submit" 
+                 disabled={creating}
+                 className="px-8 py-3 bg-secondary text-white font-label text-[10px] tracking-widest uppercase hover:bg-secondary/90 transition-colors disabled:opacity-50"
+               >
+                 {creating ? 'Authenticating...' : 'Sign Up Operative'}
+               </button>
+             </div>
+          </form>
+        )}
 
         {/* Directory Matrix */}
         <div className="space-y-6">
@@ -95,7 +195,7 @@ const Team = () => {
                 </div>
 
                 {/* Role Status Control */}
-                <div className="w-full lg:w-1/4 flex flex-col lg:items-center gap-2 lg:border-l lg:border-outline-variant/10 lg:pl-8">
+                <div className="w-full lg:w-1/4 flex flex-col lg:items-center gap-2 lg:border-l lg:border-outline-variant/10 lg:pl-8 relative group/actions">
                    <select 
                      value={profile.role}
                      onChange={(e) => updateRole(profile.id, e.target.value)}
@@ -110,6 +210,16 @@ const Team = () => {
                      <option value="admin">Director (Admin)</option>
                    </select>
                    <p className="font-label text-[8px] text-outline uppercase tracking-[0.3em] font-medium">Clearance Level</p>
+                   
+                   {profile.id !== currentUser?.id && (
+                     <button 
+                       onClick={() => deleteProfile(profile.id)}
+                       title="Revoke Operative"
+                       className="absolute top-1/2 -translate-y-1/2 right-0 lg:right-auto lg:-right-6 opacity-0 group-hover/actions:opacity-100 material-symbols-outlined text-outline hover:text-red-500 transition-all font-bold"
+                     >
+                       delete
+                     </button>
+                   )}
                 </div>
               </div>
             ))
