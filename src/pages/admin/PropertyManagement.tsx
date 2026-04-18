@@ -111,8 +111,14 @@ const PropertyManagement = () => {
         </div>
 
         {/* Global Cartographic Registry */}
-        <div className="w-full">
-           <GlobalMap filter="sale-rent" />
+        <div className="w-full space-y-3">
+           <div className="flex flex-wrap items-center gap-4 md:gap-8 px-4 py-3 bg-[#f6f3ee] dark:bg-[#1c1b1b] border border-outline-variant/20 font-label text-[9px] tracking-widest uppercase text-outline">
+              <span className="flex items-center gap-2"><div className="w-3 h-3 bg-blue-500 rounded-full shadow-sm border border-white dark:border-black"></div> Managed Properties</span>
+              <span className="flex items-center gap-2"><div className="w-3 h-3 bg-green-500 rounded-full shadow-sm border border-white dark:border-black"></div> Properties For Sale</span>
+              <span className="flex items-center gap-2"><div className="w-3 h-3 bg-yellow-500 rounded-full shadow-sm border border-white dark:border-black"></div> Seasonal Rentals</span>
+              <span className="flex items-center gap-2"><div className="w-3 h-3 bg-red-500 rounded-full shadow-sm border border-white dark:border-black"></div> Assets Marked "Sold"</span>
+           </div>
+           <GlobalMap />
         </div>
 
         {/* Listings Matrix */}
