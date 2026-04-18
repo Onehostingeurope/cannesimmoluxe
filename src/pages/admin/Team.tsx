@@ -34,13 +34,16 @@ const Team = () => {
   };
 
   const updateRole = async (id: string, newRole: string) => {
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from('profiles')
       .update({ role: newRole })
-      .eq('id', id);
+      .eq('id', id)
+      .select();
 
     if (error) {
       alert('Error updating role: ' + error.message);
+    } else if (!data || data.length === 0) {
+      alert('SECURITY BLOCK: PostgreSQL Row Level Security (RLS) blocked this transaction. You must execute an administrative policy in your SQL Editor to allow directors to modify other roles.');
     } else {
       fetchProfiles();
     }
@@ -91,9 +94,11 @@ const Team = () => {
   const deleteProfile = async (id: string) => {
     if (!window.confirm('Are you sure you want to revoke this operative? This will permanently delete their directory profile and revoke all administrative access.')) return;
     
-    const { error } = await supabase.from('profiles').delete().eq('id', id);
+    const { data, error } = await supabase.from('profiles').delete().eq('id', id).select();
     if (error) {
       alert('Error revoking operative: ' + error.message);
+    } else if (!data || data.length === 0) {
+      alert('SECURITY BLOCK: PostgreSQL Row Level Security (RLS) blocked this transaction. You must execute an administrative policy in your SQL Editor to allow directors to delete other personnel.');
     } else {
       fetchProfiles();
     }
