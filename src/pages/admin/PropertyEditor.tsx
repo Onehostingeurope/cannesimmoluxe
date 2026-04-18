@@ -25,6 +25,8 @@ const propertySchema = z.object({
   bathrooms: z.number().nullable().optional(),
   description_short: z.string().nullable().optional(),
   description_long: z.string().nullable().optional(),
+  dpe: z.string().nullable().optional(),
+  youtube_id: z.string().nullable().optional(),
 });
 
 type PropertyFormData = z.infer<typeof propertySchema>;
@@ -82,6 +84,8 @@ const PropertyEditor = () => {
         bathrooms: data.bathrooms,
         description_short: data.description_short,
         description_long: data.description_long,
+        dpe: data.dpe,
+        youtube_id: data.youtube_id,
       });
       setImageUrls(data.images || []);
       setLoading(false);
@@ -127,6 +131,40 @@ const PropertyEditor = () => {
 
   const removeImage = (url: string) => {
     setImageUrls(imageUrls.filter(u => u !== url));
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX_DIM = 1200;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height && width > MAX_DIM) {
+          height *= MAX_DIM / width;
+          width = MAX_DIM;
+        } else if (height > MAX_DIM) {
+          width *= MAX_DIM / height;
+          height = MAX_DIM;
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx?.drawImage(img, 0, 0, width, height);
+        
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+        setImageUrls(prev => [...prev, dataUrl]);
+      };
+      img.src = event.target?.result as string;
+    };
+    reader.readAsDataURL(file);
   };
 
   if (loading) {
@@ -266,6 +304,22 @@ const PropertyEditor = () => {
                       />
                    </div>
                  ))}
+                 <div className="space-y-2">
+                    <label className="font-label text-[9px] tracking-widest uppercase text-outline opacity-60 flex items-center gap-2">
+                       <span className="material-symbols-outlined text-xs">energy_savings_leaf</span>
+                       DPE Rating
+                    </label>
+                    <select {...register('dpe')} className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/20 p-4 font-label text-[11px]">
+                       <option value="">Undefined</option>
+                       <option value="A">A - Exceptional</option>
+                       <option value="B">B - Excellent</option>
+                       <option value="C">C - Good</option>
+                       <option value="D">D - Average</option>
+                       <option value="E">E - Poor</option>
+                       <option value="F">F - Very Poor</option>
+                       <option value="G">G - Extremely Poor</option>
+                    </select>
+                 </div>
               </div>
            </div>
 
@@ -273,7 +327,28 @@ const PropertyEditor = () => {
            <div className="space-y-8">
               <h3 className="font-label text-[10px] tracking-[0.3em] uppercase text-secondary font-bold border-l-2 border-secondary pl-4">Media Orchestration</h3>
               <div className="space-y-4">
-                 <div className="flex gap-2">
+                 <div className="space-y-2">
+                    <label className="font-label text-[9px] tracking-widest uppercase text-outline opacity-60">YouTube Cinematic Video ID (Optional)</label>
+                    <input {...register('youtube_id')} placeholder="e.g. dQw4w9WgXcQ" className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/20 p-4 font-label text-[10px]" />
+                    <p className="text-[10px] text-outline opacity-50">Upload your massive hero videos exclusively to YouTube and paste the ID here.</p>
+                 </div>
+              </div>
+
+              <div className="space-y-4 pt-4 border-t border-outline-variant/10">
+                 <label className="font-label text-[9px] tracking-widest uppercase text-outline opacity-60">Architectural Photography Library (Base64 Injection)</label>
+                 <div className="flex gap-4 items-center">
+                    <div className="relative overflow-hidden inline-block group">
+                       <Button variant="secondary" type="button" className="px-8 whitespace-nowrap group-hover:bg-secondary/90">
+                          <span className="material-symbols-outlined text-sm mr-2 align-middle">cloud_upload</span> Upload Local Image
+                       </Button>
+                       <input 
+                         type="file" 
+                         accept="image/*" 
+                         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" 
+                         onChange={handleFileUpload}
+                       />
+                    </div>
+                    <p className="text-[10px] uppercase tracking-widest text-outline">OR</p>
                     <input 
                       value={newImageUrl}
                       onChange={(e) => setNewImageUrl(e.target.value)}

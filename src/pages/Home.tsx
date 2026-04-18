@@ -85,11 +85,9 @@ const Home = () => {
         </div>
 
         {/* Scroll Indicator */}
-        <div className="hidden md:flex absolute bottom-12 left-1/2 -translate-x-1/2 flex-col items-center gap-4 z-10" style={{ opacity: 1, transform: 'none' }}>
-           <div className="w-[18px] h-[30px] border-2 border-primary rounded-full flex justify-center p-1 shadow-sm">
-              <div className="w-1 h-2 bg-primary rounded-full" style={{ transform: 'translateY(0.463229px)' }}></div>
-           </div>
-           <span className="font-label text-[8px] tracking-[0.5em] uppercase text-primary vertical-text whitespace-nowrap drop-shadow-sm" style={{ writingMode: 'vertical-rl' }}>Scroll</span>
+        <div className="hidden md:flex absolute bottom-12 left-1/2 -translate-x-1/2 flex-col items-center gap-4 z-10 animate-bounce cursor-pointer group" onClick={() => window.scrollTo({ top: window.innerHeight, behavior: 'smooth' })}>
+           <span className="font-label text-[10px] tracking-[0.5em] uppercase text-white/50 group-hover:text-white transition-colors duration-500">Explore</span>
+           <span className="material-symbols-outlined text-white/50 group-hover:text-white transition-colors duration-500 font-light text-3xl">expand_more</span>
         </div>
       </section>
 

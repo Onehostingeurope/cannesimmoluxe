@@ -33,7 +33,9 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
       {/* SideNavBar */}
       <aside className="bg-[#f6f3ee] dark:bg-[#1c1b1b] border-r border-outline-variant/10 text-[#705b3b] dark:text-[#dcdad5] font-['Inter'] text-sm tracking-wide fixed left-0 w-64 h-screen flex flex-col py-8 px-4 z-40 transition-colors duration-300">
         <div className="mb-10 px-4">
-          <h1 className="font-headline text-lg text-black dark:text-white mb-6">CanneImmo Admin</h1>
+          <div className="mb-8">
+             <img src="/logo.png" alt="CannesImmo Luxe" className="h-[45px] w-auto origin-left opacity-80 mix-blend-multiply dark:mix-blend-screen dark:invert" />
+          </div>
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-surface-container-highest rounded-none overflow-hidden flex-shrink-0">
               <img 
