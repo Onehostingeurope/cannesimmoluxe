@@ -11,7 +11,7 @@ const languages = [
   { code: 'it', flag: 'it', label: 'Italiano' },
 ];
 
-export const LanguageSwitcher = () => {
+export const LanguageSwitcher = ({ direction = 'down' }: { direction?: 'up' | 'down' }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [currentLang, setCurrentLang] = useState('en');
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -69,7 +69,10 @@ export const LanguageSwitcher = () => {
       </button>
 
       {isOpen && (
-        <div className="absolute top-full lg:-right-4 right-0 mt-4 py-3 w-40 bg-white dark:bg-[#0a0a0a] shadow-2xl border border-outline-variant/10 flex flex-col items-start font-label text-[10px] uppercase tracking-widest animate-luxury-fade rounded-none">
+        <div className={clsx(
+           "absolute lg:-right-4 right-0 py-3 w-40 bg-white dark:bg-[#0a0a0a] shadow-2xl border border-outline-variant/10 flex flex-col items-start font-label text-[10px] uppercase tracking-widest animate-luxury-fade rounded-none",
+           direction === 'up' ? "bottom-full mb-4" : "top-full mt-4"
+        )}>
           {languages.map((lang) => (
              <button
                 key={lang.code}
