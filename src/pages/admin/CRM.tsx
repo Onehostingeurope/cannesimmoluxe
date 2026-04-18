@@ -10,7 +10,16 @@ const CRM = () => {
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
   const [creating, setCreating] = useState(false);
-  const [newLead, setNewLead] = useState({ email: '', message: '', intensity: 'Low' });
+  const [availableProperties, setAvailableProperties] = useState<any[]>([]);
+  const [newLead, setNewLead] = useState({ 
+    email: '', 
+    first_name: '', 
+    last_name: '', 
+    phone: '', 
+    message: '', 
+    intensity: 'Low',
+    property_id: ''
+  });
 
   const statuses = ['All', 'new', 'contacted', 'qualified', 'visit', 'offer', 'won', 'lost'];
 
@@ -30,6 +39,9 @@ const CRM = () => {
     }
 
     const { data, error } = await query;
+
+    const { data: props } = await supabase.from('properties').select('id, title').order('title');
+    if (props) setAvailableProperties(props);
 
     if (error) {
       console.error('Error fetching leads:', error);
@@ -51,20 +63,29 @@ const CRM = () => {
 
   const handleCreatePrompt = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newLead.email) return;
+    if (!newLead.email || !newLead.property_id) {
+       alert("Email and Property Association are strictly required payload attributes.");
+       return;
+    }
     
     setCreating(true);
     const { error } = await supabase.from('inquiries').insert([{
-      email: newLead.email,
+      property_id: newLead.property_id,
       message: newLead.message,
       lead_status: 'new',
-      intensity: newLead.intensity,
+      tracking_data: {
+         email: newLead.email,
+         first_name: newLead.first_name,
+         last_name: newLead.last_name,
+         phone: newLead.phone,
+         intensity: newLead.intensity
+      }
     }]);
 
     if (error) {
       alert('Error creating lead: ' + error.message);
     } else {
-      setNewLead({ email: '', message: '', intensity: 'Low' });
+      setNewLead({ email: '', first_name: '', last_name: '', phone: '', message: '', intensity: 'Low', property_id: '' });
       setShowCreate(false);
       fetchLeads();
     }
@@ -100,8 +121,29 @@ const CRM = () => {
              <h3 className="font-headline text-xl text-primary border-b border-outline-variant/10 pb-4">Manual Lead Injection</h3>
              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                   <label className="font-label text-[9px] tracking-widest uppercase text-outline opacity-50">Direct Access Email</label>
+                   <label className="font-label text-[9px] tracking-widest uppercase text-outline opacity-50">First Name</label>
+                   <input type="text" className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/20 p-3 font-body text-sm" value={newLead.first_name} onChange={e => setNewLead({...newLead, first_name: e.target.value})} />
+                </div>
+                <div className="space-y-2">
+                   <label className="font-label text-[9px] tracking-widest uppercase text-outline opacity-50">Last Name</label>
+                   <input type="text" className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/20 p-3 font-body text-sm" value={newLead.last_name} onChange={e => setNewLead({...newLead, last_name: e.target.value})} />
+                </div>
+                <div className="space-y-2">
+                   <label className="font-label text-[9px] tracking-widest uppercase text-outline opacity-50">Direct Access Email *</label>
                    <input required type="email" className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/20 p-3 font-body text-sm" value={newLead.email} onChange={e => setNewLead({...newLead, email: e.target.value})} />
+                </div>
+                <div className="space-y-2">
+                   <label className="font-label text-[9px] tracking-widest uppercase text-outline opacity-50">Secure Phone Matrix</label>
+                   <input type="tel" className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/20 p-3 font-body text-sm" value={newLead.phone} onChange={e => setNewLead({...newLead, phone: e.target.value})} />
+                </div>
+                <div className="space-y-2">
+                   <label className="font-label text-[9px] tracking-widest uppercase text-outline opacity-50">Target Property Association *</label>
+                   <select required className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/20 p-3 font-body text-sm" value={newLead.property_id} onChange={e => setNewLead({...newLead, property_id: e.target.value})}>
+                      <option value="" disabled>Select Target Asset</option>
+                      {availableProperties.map(p => (
+                         <option key={p.id} value={p.id}>{p.title}</option>
+                      ))}
+                   </select>
                 </div>
                 <div className="space-y-2">
                    <label className="font-label text-[9px] tracking-widest uppercase text-outline opacity-50">Engagement Intensity</label>
@@ -169,15 +211,15 @@ const CRM = () => {
                 {/* Profile Bio */}
                 <div className="flex items-center gap-8 w-full lg:w-1/3">
                    <div className="w-14 h-14 bg-[#f6f3ee] dark:bg-[#1c1b1b] border border-outline-variant/20 flex items-center justify-center font-headline italic text-2xl text-primary group-hover:scale-110 transition-transform">
-                     {lead.profiles?.first_name?.[0] || 'L'}
+                     {lead.profiles?.first_name?.[0] || lead.tracking_data?.first_name?.[0] || 'L'}
                    </div>
                    <div className="space-y-1">
                       <div className="text-lg font-bold text-primary">
-                        {lead.profiles ? `${lead.profiles.first_name} ${lead.profiles.last_name || ''}` : 'Anonymous Lead'}
+                        {lead.profiles ? `${lead.profiles.first_name || ''} ${lead.profiles.last_name || ''}` : lead.tracking_data?.first_name ? `${lead.tracking_data.first_name} ${lead.tracking_data.last_name || ''}` : 'Anonymous Lead'}
                       </div>
                       <div className="font-label text-[9px] text-outline uppercase tracking-widest opacity-60 flex items-center gap-2">
                          <span className="material-symbols-outlined text-sm">alternate_email</span>
-                         {lead.profiles?.phone || lead.profiles?.email || 'No Contact Data'}
+                         {lead.profiles?.phone || lead.profiles?.email || lead.tracking_data?.phone || lead.tracking_data?.email || 'No Contact Data'}
                       </div>
                    </div>
                 </div>
@@ -185,7 +227,7 @@ const CRM = () => {
                 {/* Engagement Insight */}
                 <div className="w-full lg:w-1/4 space-y-2 lg:border-l lg:border-outline-variant/10 lg:pl-8">
                    <p className="font-label text-[8px] text-outline uppercase tracking-widest opacity-40">Portfolio Focus</p>
-                   <div className="text-sm font-headline text-primary group-hover:text-secondary transition-colors">
+                   <div className="text-sm font-headline text-primary group-hover:text-secondary transition-colors line-clamp-1">
                       {lead.properties?.title || 'General Inquiry'}
                    </div>
                    <p className="text-[10px] text-on-surface-variant opacity-60 italic">
@@ -197,9 +239,9 @@ const CRM = () => {
                 <div className="w-full lg:w-1/4 flex flex-col lg:items-center gap-2 lg:border-l lg:border-outline-variant/10 lg:pl-8">
                    <div className="flex items-center gap-3">
                       <span className={clsx(
-                        "w-2 h-2 rounded-full",
-                        lead.intensity === 'Critical' ? 'bg-red-500 animate-pulse' : 
-                        lead.intensity === 'High' ? 'bg-orange-500' : 'bg-green-500'
+                        "w-2 h-2 rounded-full shadow-[0_0_8px_rgba(0,0,0,0.5)]",
+                        lead.tracking_data?.intensity === 'Critical' ? 'bg-red-500 animate-pulse' : 
+                        lead.tracking_data?.intensity === 'High' ? 'bg-orange-500' : 'bg-green-500'
                       )}></span>
                       <select 
                         value={lead.lead_status}
