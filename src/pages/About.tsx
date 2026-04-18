@@ -30,7 +30,7 @@ const About = () => {
           <Body className="text-xl">
             {content?.content || 'Established in 1984, CannesImmo Luxe has been at the forefront of the luxury real estate market in Cannes, offering unparalleled expertise and a commitment to excellence.'}
           </Body>
-          <Body opacity={0.6}>
+          <Body className="opacity-60">
             Our firm specialises in the acquisition, sale, and management of the most prestigious properties on the French Riviera. We understand that luxury is built on trust, discretion, and a deep appreciation for architectural beauty.
           </Body>
         </div>

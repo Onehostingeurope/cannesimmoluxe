@@ -14,8 +14,11 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import CRM from './pages/admin/CRM';
 import PropertyManagement from './pages/admin/PropertyManagement';
 import CMS from './pages/admin/CMS';
+import PropertyEditor from './pages/admin/PropertyEditor';
 import Settings from './pages/admin/Settings';
 import { Marketing, Team } from './pages/admin/PlaceholderPages';
+import { ProtectedRoute } from './components/auth/ProtectedRoute';
+import { useAuthStore } from './store/useAuthStore';
 
 function App() {
   const initialize = useAuthStore((state) => state.initialize);
