@@ -61,6 +61,16 @@ const CMS = () => {
            ]
          });
       }
+      if (!loadedModules.find((m: any) => m.type === 'text') && activePage === 'Homepage') {
+         loadedModules.push({
+           id: 'text-curator-1',
+           type: 'text',
+           title: 'The Curator\'s Perspective',
+           content: 'For over two decades, we have provided unparalleled representation for the Riviera\'s most elite property owners. Every transaction is handled with absolute discretion and technical precision.',
+           media_type: 'image',
+           media_url: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=1000'
+         });
+      }
       setModules(loadedModules);
     } else {
       setModules([

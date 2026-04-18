@@ -9,12 +9,12 @@ import {
 
 export const Footer = () => {
   return (
-    <footer className="bg-luxury-ivory-low section-padding mt-20">
-      <div className="max-w-7xl mx-auto editorial-grid">
+    <footer className="bg-luxury-ivory-low py-12 px-6 md:py-20 md:px-12 lg:px-24 mt-12 md:mt-20">
+      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-10 md:gap-6">
         {/* Brand Section */}
-        <div className="md:col-span-4 space-y-8">
+        <div className="md:col-span-4 space-y-6 md:space-y-8">
           <div className="flex flex-col">
-            <span className="font-serif text-2xl tracking-tighter text-luxury-charcoal">CANNEIMMO</span>
+            <span className="font-serif text-2xl tracking-tighter text-luxury-charcoal">CANNESIMMO</span>
             <span className="font-sans text-[11px] tracking-[0.4em] uppercase text-luxury-gold ml-0.5">LUXE</span>
           </div>
           <Body className="text-sm max-w-xs">
@@ -61,15 +61,15 @@ export const Footer = () => {
             </li>
             <li className="flex items-center gap-4">
               <Mail className="w-4 h-4 text-luxury-gold" />
-              <Body className="text-sm">contact@canneimmoluxe.com</Body>
+              <Body className="text-sm">contact@cannesimmoluxe.com</Body>
             </li>
           </ul>
         </div>
       </div>
       
       <div className="max-w-7xl mx-auto mt-20 pt-10 border-t border-luxury-charcoal/5 flex flex-col md:flex-row justify-between items-center gap-6">
-        <Label className="text-[9px] text-luxury-charcoal/40 tracking-[0.2em]">
-          &copy; {new Date().getFullYear()} CANNEIMMO LUXE. ALL RIGHTS RESERVED.
+        <Label className="text-[9px] text-luxury-charcoal/40 tracking-[0.2em] text-center md:text-left">
+          &copy; {new Date().getFullYear()} CANNESIMMO LUXE. ALL RIGHTS RESERVED.
         </Label>
         <div className="flex gap-8">
           <a href="/legal" className="text-[9px] font-sans tracking-[0.2em] uppercase text-luxury-charcoal/40 hover:text-luxury-gold">Legal Notice</a>

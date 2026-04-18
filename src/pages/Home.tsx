@@ -8,6 +8,7 @@ const Home = () => {
   const navigate = useNavigate();
   const [heroData, setHeroData] = useState<any>(null);
   const [gridData, setGridData] = useState<any>(null);
+  const [textData, setTextData] = useState<any>(null);
 
   useEffect(() => {
     const fetchHero = async () => {
@@ -22,6 +23,8 @@ const Home = () => {
         if (hero) setHeroData(hero);
         const grid = data.modules.find((m: any) => m.type === 'grid');
         if (grid) setGridData(grid);
+        const text = data.modules.find((m: any) => m.type === 'text');
+        if (text) setTextData(text);
       }
     };
     fetchHero();
@@ -164,7 +167,7 @@ const Home = () => {
           <div className="lg:col-span-5 relative order-2 lg:order-1">
              <div className="aspect-[3/4] overflow-hidden bg-black border-[20px] border-[#f6f3ee] dark:border-[#1c1b1b] shadow-2xl">
                 <img 
-                  src="https://images.unsplash.com/photo-1600607687940-4e2303c00427?auto=format&fit=crop&q=80&w=1000" 
+                  src={textData?.media_url || "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=1000"} 
                   className="w-full h-full object-cover grayscale transition-all duration-[5s] hover:grayscale-0"
                 />
              </div>
@@ -177,10 +180,10 @@ const Home = () => {
           <div className="lg:col-span-7 space-y-12 order-1 lg:order-2">
             <div className="space-y-6">
               <p className="font-label text-[10px] tracking-[0.4em] uppercase text-secondary">The Riviera Office</p>
-              <h2 className="font-headline text-5xl md:text-6xl text-primary leading-[1.1]">The Curator's <br /> <span className="italic">Perspective.</span></h2>
+              <h2 className="font-headline text-5xl md:text-6xl text-primary leading-[1.1]">{textData?.title || 'The Curator\'s Perspective'}</h2>
             </div>
             <p className="text-lg text-on-surface-variant max-w-xl opacity-80 leading-relaxed font-body">
-              For over two decades, we have provided unparalleled representation for the Riviera's most elite property owners. Every transaction is handled with absolute discretion and technical precision.
+              {textData?.content || "For over two decades, we have provided unparalleled representation for the Riviera's most elite property owners. Every transaction is handled with absolute discretion and technical precision."}
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-12 pt-4">
               {[
