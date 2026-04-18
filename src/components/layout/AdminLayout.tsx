@@ -1,17 +1,26 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { clsx } from 'clsx';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../../store/useAuthStore';
 import { Button } from '../ui/Button';
+import { supabase } from '../../lib/supabase';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
 }
 
 export const AdminLayout = ({ children }: AdminLayoutProps) => {
-  const { signOut } = useAuthStore();
+  const { signOut, user } = useAuthStore();
   const navigate = useNavigate();
   const location = useLocation();
+  const [profile, setProfile] = useState<any>(null);
+
+  useEffect(() => {
+    if (user?.id) {
+       supabase.from('profiles').select('*').eq('id', user.id).single()
+         .then(({ data }) => setProfile(data));
+    }
+  }, [user?.id]);
 
   const menuItems = [
     { label: 'Portfolio', icon: 'domain', path: '/admin/properties' },
@@ -37,16 +46,22 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
              <img src="/logo.png" alt="CannesImmo Luxe" className="h-[45px] w-auto origin-left opacity-80 mix-blend-multiply dark:mix-blend-screen dark:invert" />
           </div>
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-surface-container-highest rounded-none overflow-hidden flex-shrink-0">
-              <img 
-                alt="Executive Profile" 
-                className="w-full h-full object-cover" 
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBiXlj6ix2KN3mS6eQvxJKBfFz2VTXmdlD37hJWHAAfeyYTvPdcrRhfvPTKG_YXgM62LblGwC0H-yS1iax9HH0vPFJjj8Rtr2o2kUmI7C5luLF1yG9tfrF9PUYOs0889Fl-e4YQuwWbvRSQ1gF2KH5Iq6lwM6lwHKA4cmZP1vKbBC35W2QQgtekUd7bUPaY-7Sp_wggSXZSj48nhoRxZgcPwn9s6r4ui03osHOK_ESV4oeTuTt8sz-EuPhUvFFFFypKsfWfiABbVE8" 
-              />
+            <div className="w-10 h-10 bg-[#f6f3ee] dark:bg-[#1c1b1b] border border-outline-variant/20 rounded-none overflow-hidden flex-shrink-0 flex items-center justify-center font-headline text-lg text-primary">
+              {profile?.avatar_url ? (
+                <img 
+                  alt="Executive Profile" 
+                  className="w-full h-full object-cover" 
+                  src={profile.avatar_url} 
+                />
+              ) : (
+                profile?.first_name ? profile.first_name[0] : 'U'
+              )}
             </div>
             <div>
-              <p className="font-bold text-primary text-xs">Admin User</p>
-              <p className="text-[10px] text-secondary">Managing Director</p>
+              <p className="font-bold text-primary text-xs truncate max-w-[120px]">
+                 {profile?.first_name ? `${profile.first_name} ${profile.last_name || ''}` : 'Admin User'}
+              </p>
+              <p className="text-[10px] text-secondary capitalize">{profile?.role === 'admin' ? 'Managing Director' : 'Operative'}</p>
             </div>
           </div>
         </div>
