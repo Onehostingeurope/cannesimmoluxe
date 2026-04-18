@@ -7,6 +7,7 @@ import { Button } from '../../components/ui/Button';
 import { supabase } from '../../lib/supabase';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { ShieldCheck, Lock, ArrowRight, Info } from 'lucide-react';
+import { useAuthStore } from '../../store/useAuthStore';
 
 const schema = z.object({
   email: z.string().email('Invalid email address'),
@@ -47,6 +48,8 @@ const AdminLogin = () => {
           throw new Error('Verification Failed: Account lacks administrative clearance.');
         }
         
+        useAuthStore.getState().setUser(authData.user);
+        useAuthStore.getState().setProfile(profile);
         navigate('/admin');
       }
     } catch (error: any) {

@@ -5,6 +5,7 @@ import { Layout } from '../components/layout/Layout';
 import { Button } from '../components/ui/Button';
 import { supabase } from '../lib/supabase';
 import { useNavigate } from 'react-router-dom';
+import { useAuthStore } from '../store/useAuthStore';
 
 const schema = z.object({
   email: z.string().email('Invalid email address'),
@@ -21,12 +22,24 @@ const Login = () => {
 
   const onSubmit = async (data: FormData) => {
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data: authData, error } = await supabase.auth.signInWithPassword({
         email: data.email,
         password: data.password,
       });
 
       if (error) throw error;
+      
+      if (authData.user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', authData.user.id)
+          .single();
+          
+        useAuthStore.getState().setUser(authData.user);
+        useAuthStore.getState().setProfile(profile);
+      }
+
       navigate('/dashboard');
     } catch (error: any) {
       alert(error.message);
