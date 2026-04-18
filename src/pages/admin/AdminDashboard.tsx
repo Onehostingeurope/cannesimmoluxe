@@ -14,6 +14,7 @@ const AdminDashboard = () => {
     momentum: '+14.2%'
   });
   const [recentActivities, setRecentActivities] = useState<any[]>([]);
+  const [recentProfiles, setRecentProfiles] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -29,10 +30,17 @@ const AdminDashboard = () => {
     
     const totalValue = properties?.reduce((sum, p) => sum + (p.price || 0), 0) || 0;
     
-    // 2. Fetch Recent Activities (Inquiries + New Profiles)
+    // 2. Fetch Recent Activities (Inquiries)
     const { data: recentInquiries } = await supabase
       .from('inquiries')
       .select('*, profiles(first_name, last_name), properties(title)')
+      .order('created_at', { ascending: false })
+      .limit(5);
+
+    // 3. Fetch Recent User Registrations (Profiles)
+    const { data: fetchedProfiles } = await supabase
+      .from('profiles')
+      .select('*')
       .order('created_at', { ascending: false })
       .limit(5);
 
@@ -43,6 +51,7 @@ const AdminDashboard = () => {
     }));
 
     setRecentActivities(recentInquiries || []);
+    setRecentProfiles(fetchedProfiles || []);
     setLoading(false);
   };
 
@@ -142,9 +151,53 @@ const AdminDashboard = () => {
                           </span>
                        </div>
                     </div>
+              </div>
+
+             <div className="flex justify-between items-center pb-4 pt-12 border-b border-outline-variant/20">
+                <h3 className="font-headline text-2xl text-primary">Client Registry</h3>
+             </div>
+
+             <div className="space-y-1">
+                {loading ? (
+                   <div className="py-20 text-center">
+                      <div className="w-10 h-10 border-t-2 border-secondary animate-spin rounded-full mx-auto"></div>
+                   </div>
+                ) : recentProfiles.length === 0 ? (
+                  <div className="p-12 text-center bg-[#f6f3ee] dark:bg-[#1c1b1b] border border-dashed border-outline-variant/20">
+                     <p className="font-label text-[10px] tracking-widest uppercase text-outline">No user registrations detected.</p>
+                  </div>
+                ) : (
+                  recentProfiles.map((profile) => (
+                    <div key={profile.id} className="p-6 bg-[#f6f3ee] dark:bg-[#1c1b1b] border-l-2 border-transparent hover:border-secondary hover:bg-white dark:hover:bg-black transition-all group flex items-center justify-between">
+                       <div className="flex items-center gap-6">
+                          <div className="w-10 h-10 bg-white dark:bg-black border border-outline-variant/20 flex items-center justify-center font-headline italic text-lg text-primary">
+                             {profile.first_name?.[0] || 'U'}
+                          </div>
+                          <div>
+                             <p className="font-label text-[10px] tracking-widest uppercase text-primary font-bold">
+                                {profile.first_name || 'Anonymous'} {profile.last_name || ''}
+                             </p>
+                             <p className="text-[11px] text-on-surface-variant opacity-70">
+                                Global Clearance: <span className="text-secondary font-medium">{profile.role || 'user'}</span>
+                             </p>
+                          </div>
+                       </div>
+                       <div className="text-right">
+                          <p className="font-label text-[9px] tracking-widest uppercase text-outline mb-1">
+                            {profile.created_at ? new Date(profile.created_at).toLocaleDateString() : 'Active'}
+                          </p>
+                          <span className={clsx(
+                            "px-2 py-0.5 text-[8px] tracking-widest uppercase font-bold",
+                            profile.role === 'admin' ? "bg-red-500 text-white" : "bg-outline-variant/20 text-outline"
+                          )}>
+                             {profile.role || 'client'}
+                          </span>
+                       </div>
+                    </div>
                   ))
                 )}
              </div>
+
           </div>
 
           {/* System Health & Briefing */}
