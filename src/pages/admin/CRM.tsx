@@ -46,7 +46,7 @@ const CRM = () => {
 
     const { data, error } = await query;
 
-    const { data: props } = await supabase.from('properties').select('id, title').order('title');
+    const { data: props } = await supabase.from('properties').select('id, title, mode').order('title');
     if (props) setAvailableProperties(props);
 
     if (error) {
@@ -217,7 +217,9 @@ const CRM = () => {
                    <label className="font-label text-[9px] tracking-widest uppercase text-outline opacity-50">Target Property Association *</label>
                    <select required className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/20 p-3 font-body text-sm" value={newLead.property_id} onChange={e => setNewLead({...newLead, property_id: e.target.value})}>
                       <option value="" disabled>Select Target Asset</option>
-                      {availableProperties.map(p => (
+                      {availableProperties
+                         .filter(p => pipelineCategory === 'Management' ? p.mode === 'management' : p.mode !== 'management')
+                         .map(p => (
                          <option key={p.id} value={p.id}>{p.title}</option>
                       ))}
                    </select>
