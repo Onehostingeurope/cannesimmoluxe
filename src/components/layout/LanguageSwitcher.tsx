@@ -70,8 +70,8 @@ export const LanguageSwitcher = ({ direction = 'down' }: { direction?: 'up' | 'd
 
       {isOpen && (
         <div className={clsx(
-           "absolute lg:-right-4 right-0 py-3 w-40 bg-white dark:bg-[#0a0a0a] shadow-2xl border border-outline-variant/10 flex flex-col items-start font-label text-[10px] uppercase tracking-widest animate-luxury-fade rounded-none",
-           direction === 'up' ? "bottom-full mb-4" : "top-full mt-4"
+           "absolute py-3 w-40 bg-white dark:bg-[#0a0a0a] shadow-2xl border border-outline-variant/10 flex flex-col items-start font-label text-[10px] uppercase tracking-widest animate-luxury-fade rounded-none",
+           direction === 'up' ? "bottom-full mb-4 left-0" : "top-full mt-4 lg:-right-4 right-0"
         )}>
           {languages.map((lang) => (
              <button
