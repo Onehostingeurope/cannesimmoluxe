@@ -42,7 +42,7 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
   return (
     <div className="bg-background text-on-surface font-body antialiased min-h-screen flex">
       {/* SideNavBar */}
-      <aside className="bg-[#f6f3ee] dark:bg-[#1c1b1b] border-r border-outline-variant/10 text-[#705b3b] dark:text-[#dcdad5] font-['Inter'] text-sm tracking-wide fixed left-0 w-64 h-screen flex flex-col py-8 px-4 z-40 transition-colors duration-300">
+      <aside className="bg-[#f6f3ee] dark:bg-[#1c1b1b] border-r border-outline-variant/10 text-[#705b3b] dark:text-[#dcdad5] font-['Inter'] text-sm tracking-wide fixed left-0 w-72 h-screen flex flex-col py-8 px-4 z-40 transition-colors duration-300">
         <div className="mb-10 px-4">
           <div className="mb-8">
              <img src="/logo.png" alt="CannesImmo Luxe" className="h-[45px] w-auto origin-left opacity-80 mix-blend-multiply dark:mix-blend-screen dark:invert" />
@@ -113,7 +113,7 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 md:ml-64 bg-background min-h-screen p-8 lg:p-12 pb-24">
+      <main className="flex-1 md:ml-72 bg-background min-h-screen p-8 lg:p-12 pb-24">
         <div className="max-w-7xl mx-auto animate-luxury-fade">
           {children}
         </div>
