@@ -43,11 +43,8 @@ export const Navbar = () => {
     >
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         {/* Logo */}
-        <Link to="/" className="flex flex-col">
-          <span className="font-serif text-xl tracking-tighter text-luxury-charcoal transition-colors duration-500">
-            CANNEIMMO
-          </span>
-          <span className="font-sans text-[10px] tracking-[0.4em] uppercase text-luxury-gold ml-0.5">LUXE</span>
+        <Link to="/" className="flex items-center">
+          <img src="/logo.png" alt="CannesImmo Luxe" className="h-[40px] w-auto transition-transform duration-500 hover:scale-105" />
         </Link>
 
         {/* Desktop Navigation */}

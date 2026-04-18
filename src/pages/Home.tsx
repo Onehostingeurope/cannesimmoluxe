@@ -85,11 +85,11 @@ const Home = () => {
         </div>
 
         {/* Scroll Indicator */}
-        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-4 opacity-40">
-           <span className="font-label text-[8px] tracking-[0.4em] uppercase text-white">Scroll to Discover</span>
-           <div className="w-px h-10 bg-white/30 relative overflow-hidden">
-              <div className="absolute inset-0 bg-secondary animate-[scroll-down_2s_infinite]"></div>
+        <div className="hidden md:flex absolute bottom-12 left-1/2 -translate-x-1/2 flex-col items-center gap-4 z-10" style={{ opacity: 1, transform: 'none' }}>
+           <div className="w-[18px] h-[30px] border-2 border-primary rounded-full flex justify-center p-1 shadow-sm">
+              <div className="w-1 h-2 bg-primary rounded-full" style={{ transform: 'translateY(0.463229px)' }}></div>
            </div>
+           <span className="font-label text-[8px] tracking-[0.5em] uppercase text-primary vertical-text whitespace-nowrap drop-shadow-sm" style={{ writingMode: 'vertical-rl' }}>Scroll</span>
         </div>
       </section>
 
