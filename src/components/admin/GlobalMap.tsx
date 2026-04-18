@@ -47,11 +47,11 @@ export const GlobalMap = () => {
   const validLogs = logs.filter(l => l.lat && l.lng);
 
   return (
-    <div className="w-full h-[400px] border border-outline-variant/20 bg-[#1c1b1b] relative z-0">
+    <div className="w-full h-[70vh] min-h-[600px] border border-outline-variant/20 bg-[#1c1b1b] relative z-0">
       <MapContainer 
          center={[43.5528, 7.0174]} // Default Cannes
-         zoom={2} 
-         scrollWheelZoom={false} 
+         zoom={3} 
+         scrollWheelZoom={true} 
          style={{ height: '100%', width: '100%', zIndex: 1 }}
       >
         <TileLayer
