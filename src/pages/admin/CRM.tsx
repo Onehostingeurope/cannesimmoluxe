@@ -173,8 +173,8 @@ const CRM = () => {
             className={clsx(
               "px-8 py-4 font-headline text-lg transition-all border-b-2 tracking-wide",
               pipelineCategory === 'Real Estate'
-                ? "border-secondary text-primary bg-secondary/5"
-                : "border-transparent text-outline hover:text-primary hover:bg-black/5 dark:hover:bg-white/5"
+                ? "border-primary dark:border-white text-primary dark:text-white font-bold opacity-100"
+                : "border-transparent text-outline opacity-50 hover:opacity-100 hover:bg-black/5 dark:hover:bg-white/5"
             )}
           >
             Real Estate Portfolio
@@ -184,8 +184,8 @@ const CRM = () => {
             className={clsx(
               "px-8 py-4 font-headline text-lg transition-all border-b-2 tracking-wide",
               pipelineCategory === 'Management'
-                ? "border-secondary text-primary bg-secondary/5"
-                : "border-transparent text-outline hover:text-primary hover:bg-black/5 dark:hover:bg-white/5"
+                ? "border-primary dark:border-white text-primary dark:text-white font-bold opacity-100"
+                : "border-transparent text-outline opacity-50 hover:opacity-100 hover:bg-black/5 dark:hover:bg-white/5"
             )}
           >
             Property Management
