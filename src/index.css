@@ -106,3 +106,31 @@
 .animate-luxury-fade {
   animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
+
+/* =========================================
+   Google Translate Aesthetics Firewall
+   ========================================= */
+body {
+  top: 0 !important;
+}
+.skiptranslate iframe,
+.skiptranslate .goog-te-banner-frame {
+  display: none !important;
+}
+#google_translate_element {
+  display: none !important;
+}
+.goog-tooltip {
+  display: none !important;
+}
+.goog-tooltip:hover {
+  display: none !important;
+}
+.goog-text-highlight {
+  background-color: transparent !important;
+  border: none !important; 
+  box-shadow: none !important;
+}
+font {
+   background-color: transparent !important;
+}

@@ -4,6 +4,7 @@ import { Menu, X, Lock } from 'lucide-react';
 import { Title } from '../ui/Typography';
 import { Button } from '../ui/Button';
 import { useLocation, Link } from 'react-router-dom';
+import { LanguageSwitcher } from './LanguageSwitcher';
 
 export const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -61,12 +62,14 @@ export const Navbar = () => {
             ))}
           </div>
 
-          {/* Action Button */}
+          {/* Action Component Sector */}
           <div className="hidden lg:flex items-center space-x-6">
+            <LanguageSwitcher />
+            
             <Link to="/login">
               <Button 
                 variant="ghost" 
-                className="px-4 py-2 flex items-center gap-2 group transition-colors duration-500 text-luxury-charcoal hover:bg-black/5"
+                className="px-4 py-2 flex items-center gap-2 group transition-colors duration-500 text-luxury-charcoal hover:bg-black/5 dark:text-white"
               >
                 <Lock className="w-3 h-3 transition-transform group-hover:-translate-y-0.5" />
                 <span className="text-[10px]">Private Access</span>
@@ -109,9 +112,13 @@ export const Navbar = () => {
           </Link>
         ))}
         
-        <div className="pt-12">
+        <div className="pt-12 flex flex-col items-center gap-8">
+          <div className="flex bg-white/10 px-6 py-2 rounded-full">
+            <LanguageSwitcher />
+          </div>
+          
           <Link to="/login" onClick={() => setIsMobileMenuOpen(false)}>
-            <Button variant="secondary" className="flex items-center gap-3 px-8 h-12 bg-white text-black hover:bg-secondary hover:text-white rounded-none">
+            <Button variant="secondary" className="flex items-center gap-3 px-8 h-12 bg-white text-black hover:bg-secondary hover:text-white rounded-none shadow-[0_0_20px_rgba(255,255,255,0.1)]">
               <Lock className="w-4 h-4" />
               Private Access
             </Button>
