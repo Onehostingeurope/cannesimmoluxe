@@ -44,7 +44,7 @@ export const Navbar = () => {
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         {/* Logo */}
         <Link to="/" className="flex items-center">
-          <img src="/logo.png" alt="CannesImmo Luxe" className="h-[75px] w-auto origin-left transition-transform duration-500 hover:scale-[1.05]" />
+          <img src="/logo.png" alt="CannesImmo Luxe" className="h-[45px] md:h-[75px] w-auto origin-left transition-transform duration-500 hover:scale-[1.05]" />
         </Link>
 
         {/* Desktop Navigation */}
@@ -75,7 +75,7 @@ export const Navbar = () => {
 
         {/* Mobile Menu Toggle */}
         <button 
-          className="lg:hidden p-2 transition-colors duration-500 text-luxury-charcoal"
+          className={clsx("lg:hidden p-2 transition-colors duration-500", showContrast ? "text-luxury-charcoal" : "text-white")}
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
         >
           {isMobileMenuOpen ? <X /> : <Menu />}

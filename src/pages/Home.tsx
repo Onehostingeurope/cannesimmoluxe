@@ -58,8 +58,8 @@ const Home = () => {
         </div>
 
         {/* Brand Narrative */}
-        <div className="relative z-10 text-center space-y-12 px-6 max-w-6xl animate-luxury-fade">
-          <h1 className="font-headline text-white text-6xl md:text-8xl lg:text-9xl tracking-tighter leading-none italic mt-16">
+        <div className="relative z-10 text-center space-y-6 md:space-y-12 px-6 max-w-6xl animate-luxury-fade mt-16 md:mt-24">
+          <h1 className="font-headline text-white text-5xl md:text-8xl lg:text-9xl tracking-tighter leading-none italic">
             {heroData?.title?.split(' ').slice(0, -1).join(' ') || "L'Art de"} <br /> 
             <span className="not-italic text-secondary">{heroData?.title?.split(' ').slice(-1) || "Vivre."}</span>
           </h1>
