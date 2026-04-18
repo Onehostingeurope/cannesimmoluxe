@@ -23,7 +23,7 @@ const CMS = () => {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState<string | null>(null);
   
-  const pages = ['Homepage', 'Buy', 'Rent', 'About Us', 'Contact', 'Services'];
+  const pages = ['Homepage', 'Buy', 'Rent', 'Management', 'About Us', 'Contact', 'Services'];
   
   const availableModules = [
     { type: 'hero', label: 'Cinematic Hero', icon: 'movie' },

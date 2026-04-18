@@ -1,9 +1,21 @@
-import { useState, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Layout } from '../components/layout/Layout';
 import { supabase } from '../lib/supabase';
 
 const Management = () => {
   const [loading, setLoading] = useState(false);
+  const [textData, setTextData] = useState<any>(null);
+  
+  useEffect(() => {
+    const fetchCMS = async () => {
+      const { data } = await supabase.from('cms_content').select('*').eq('page_name', 'Management').maybeSingle();
+      if (data && data.modules) {
+        const text = data.modules.find((m: any) => m.type === 'text');
+        if (text) setTextData(text);
+      }
+    };
+    fetchCMS();
+  }, []);
   const [form, setForm] = useState({
     firstName: '',
     lastName: '',
@@ -176,8 +188,26 @@ const Management = () => {
           </div>
         </section>
 
+        {/* CMS Injected Narrative Block */}
+        <section className="py-32 px-6 md:px-12 text-center bg-[#fcf9f4]">
+          <div className="max-w-3xl mx-auto space-y-8">
+            <h2 className="font-headline text-5xl md:text-6xl text-primary">{textData?.title || 'Discuss Your Property Needs'}</h2>
+            <p className="font-body text-base text-gray-500 leading-relaxed max-w-2xl mx-auto">
+              {textData?.content || 'We invite discerning owners to schedule a private consultation to discuss tailored management strategies for your Riviera estate.'}
+            </p>
+            <div className="pt-8">
+              <button 
+                onClick={() => document.getElementById('management-portal')?.scrollIntoView({ behavior: 'smooth' })}
+                className="bg-primary text-white font-sans text-[11px] tracking-[0.2em] uppercase px-10 py-5 hover:bg-secondary transition-colors"
+              >
+                Enquire About Management
+              </button>
+            </div>
+          </div>
+        </section>
+
         {/* Management Onboarding Portal */}
-        <section className="py-32 px-6 md:px-12 lg:px-24 bg-[#0a0a0a] text-white border-t border-[#dcdad5]/20">
+        <section id="management-portal" className="py-32 px-6 md:px-12 lg:px-24 bg-[#0a0a0a] text-white border-t border-[#dcdad5]/20">
           <div className="max-w-5xl mx-auto">
             <div className="text-center mb-16">
                <span className="font-label text-xs uppercase tracking-[0.2em] text-secondary mb-4 block">Confidential Onboarding</span>
