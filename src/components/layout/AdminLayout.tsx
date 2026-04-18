@@ -23,16 +23,30 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
     }
   }, [user?.id]);
 
+  const isDirector = profile?.role === 'admin';
+
   const menuItems = [
     { label: 'Portfolio Propriety', icon: 'domain', path: '/admin/properties' },
     { label: 'Portfolio Management', icon: 'real_estate_agent', path: '/admin/managed' },
-    { label: 'Analytics', icon: 'insights', path: '/admin' },
+    ...(isDirector ? [{ label: 'Analytics', icon: 'insights', path: '/admin' }] : []),
     { label: 'CRM', icon: 'hub', path: '/admin/crm' },
-    { label: 'Editorial CMS', icon: 'auto_stories', path: '/admin/cms' },
-    { label: 'Marketing', icon: 'campaign', path: '/admin/marketing' },
-    { label: 'Team', icon: 'groups', path: '/admin/team' },
-    { label: 'Settings', icon: 'settings', path: '/admin/settings' },
+    ...(isDirector ? [
+      { label: 'Editorial CMS', icon: 'auto_stories', path: '/admin/cms' },
+      { label: 'Marketing', icon: 'campaign', path: '/admin/marketing' },
+      { label: 'Team', icon: 'groups', path: '/admin/team' },
+      { label: 'Settings', icon: 'settings', path: '/admin/settings' },
+    ] : [])
   ];
+
+  // RBAC Routing Interceptor: Bounces agents if they force-load a locked URL
+  useEffect(() => {
+     if (profile && profile.role !== 'admin') {
+        const lockedRoutes = ['/admin', '/admin/cms', '/admin/marketing', '/admin/team', '/admin/settings'];
+        if (lockedRoutes.includes(location.pathname)) {
+           navigate('/admin/properties');
+        }
+     }
+  }, [profile, location.pathname, navigate]);
 
   const handleSignOut = async () => {
     await signOut();

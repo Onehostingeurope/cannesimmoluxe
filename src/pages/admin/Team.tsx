@@ -10,7 +10,7 @@ const Team = () => {
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
   const [creating, setCreating] = useState(false);
-  const [newOperative, setNewOperative] = useState({ email: '', password: '', first_name: '', last_name: '' });
+  const [newOperative, setNewOperative] = useState({ email: '', password: '', first_name: '', last_name: '', role: 'user' });
   
   const currentUser = useAuthStore(state => state.user);
 
@@ -76,12 +76,12 @@ const Team = () => {
         await supabase.from('profiles').update({
           first_name: newOperative.first_name,
           last_name: newOperative.last_name,
-          role: 'user' // Default to user, admin can upgrade them 
+          role: newOperative.role
         }).eq('id', data.user.id);
       }
 
       setShowCreate(false);
-      setNewOperative({ email: '', password: '', first_name: '', last_name: '' });
+      setNewOperative({ email: '', password: '', first_name: '', last_name: '', role: 'user' });
       fetchProfiles();
     } catch (err: any) {
       alert('Creation Error: ' + err.message);
@@ -200,6 +200,13 @@ const Team = () => {
                 <div className="space-y-2">
                    <label className="font-label text-[9px] tracking-widest uppercase text-outline opacity-50">Initial Password</label>
                    <input required type="text" className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/20 p-3 font-body text-sm" value={newOperative.password} onChange={e => setNewOperative({...newOperative, password: e.target.value})} />
+                </div>
+                <div className="space-y-2 md:col-span-2">
+                   <label className="font-label text-[9px] tracking-widest uppercase text-outline opacity-50">System Clearance Level</label>
+                   <select required className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/20 p-3 font-body text-sm" value={newOperative.role} onChange={e => setNewOperative({...newOperative, role: e.target.value})}>
+                      <option value="user">Agent (Standard Operative)</option>
+                      <option value="admin">Director (System Administrator)</option>
+                   </select>
                 </div>
              </div>
              <div className="flex justify-end pt-4">
