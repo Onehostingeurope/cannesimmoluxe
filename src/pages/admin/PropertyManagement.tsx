@@ -4,6 +4,7 @@ import { Button } from '../../components/ui/Button';
 import { supabase } from '../../lib/supabase';
 import { clsx } from 'clsx';
 import { useNavigate } from 'react-router-dom';
+import { GlobalMap } from '../../components/admin/GlobalMap';
 
 const PropertyManagement = () => {
   const navigate = useNavigate();
@@ -107,6 +108,11 @@ const PropertyManagement = () => {
                 className="bg-transparent border-0 border-b border-outline-variant/30 w-full pl-10 pr-4 py-3 text-[10px] tracking-[0.2em] uppercase outline-none focus:border-primary transition-all placeholder:text-outline/40" 
               />
            </div>
+        </div>
+
+        {/* Global Cartographic Registry */}
+        <div className="w-full">
+           <GlobalMap filter="sale-rent" />
         </div>
 
         {/* Listings Matrix */}

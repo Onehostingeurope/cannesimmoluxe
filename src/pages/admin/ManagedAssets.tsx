@@ -4,6 +4,7 @@ import { Button } from '../../components/ui/Button';
 import { supabase } from '../../lib/supabase';
 import { clsx } from 'clsx';
 import { useNavigate } from 'react-router-dom';
+import { GlobalMap } from '../../components/admin/GlobalMap';
 
 const ManagedAssets = () => {
   const navigate = useNavigate();
@@ -233,6 +234,11 @@ const ManagedAssets = () => {
               </div>
            </form>
         )}
+
+        {/* Global Cartographic Registry Matrix */}
+        <div className="w-full pt-4">
+           <GlobalMap filter="management" />
+        </div>
 
         {/* Global Matrix Tracker */}
         <div className="space-y-6 pt-4">

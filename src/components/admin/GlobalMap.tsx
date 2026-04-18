@@ -35,16 +35,24 @@ const getCustomPin = (color: string) => {
   });
 };
 
-export const GlobalMap = () => {
+export const GlobalMap = ({ filter }: { filter?: 'sale-rent' | 'management' }) => {
   const [properties, setProperties] = useState<any[]>([]);
   const [geoCache, setGeoCache] = useState<Record<string, {lat: number, lng: number}>>({});
 
   useEffect(() => {
     fetchPropertiesAndGeocode();
-  }, []);
+  }, [filter]);
 
   const fetchPropertiesAndGeocode = async () => {
-    const { data: props } = await supabase.from('properties').select('*').order('created_at', { ascending: false });
+    let query = supabase.from('properties').select('*').order('created_at', { ascending: false });
+    
+    if (filter === 'sale-rent') {
+       query = query.neq('mode', 'management');
+    } else if (filter === 'management') {
+       query = query.eq('mode', 'management');
+    }
+
+    const { data: props } = await query;
     if (!props) return;
 
     // We implement an intelligent Geocoding memory to prevent repeating identical structural API queries
