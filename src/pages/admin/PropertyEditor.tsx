@@ -210,7 +210,7 @@ const PropertyEditor = () => {
         <div className="flex justify-between items-end border-b border-outline-variant/20 pb-8">
            <div className="space-y-4">
               <div className="flex items-center gap-3">
-                 <span className="material-symbols-outlined text-secondary text-base">edit_square</span>
+                 <span className="material-symbols-outlined notranslate text-secondary text-base" translate="no">edit_square</span>
                  <p className="font-label text-[10px] tracking-[0.2em] uppercase text-outline">Technical Dossier Editor</p>
               </div>
               <h2 className="font-headline text-4xl text-primary">{isEdit ? 'Refine Asset' : 'Deploy New Estate'}</h2>
@@ -275,7 +275,7 @@ const PropertyEditor = () => {
 
                  <div className="space-y-2 pt-4 border-t border-outline-variant/10">
                      <label className="font-label text-[9px] tracking-widest uppercase text-outline opacity-60 flex items-center gap-2">
-                       <span className="material-symbols-outlined text-xs text-secondary">diversity_3</span>
+                       <span className="material-symbols-outlined notranslate text-xs text-secondary" translate="no">diversity_3</span>
                        CRM Owner / Lead Association
                      </label>
                      <select 
@@ -341,7 +341,7 @@ const PropertyEditor = () => {
                  ].map((spec) => (
                    <div key={spec.id} className="space-y-2">
                       <label className="font-label text-[9px] tracking-widest uppercase text-outline opacity-60 flex items-center gap-2">
-                         <span className="material-symbols-outlined text-xs">{spec.icon}</span>
+                         <span className="material-symbols-outlined notranslate text-xs" translate="no">{spec.icon}</span>
                          {spec.label}
                       </label>
                       <input 
@@ -353,7 +353,7 @@ const PropertyEditor = () => {
                  ))}
                  <div className="space-y-2">
                     <label className="font-label text-[9px] tracking-widest uppercase text-outline opacity-60 flex items-center gap-2">
-                       <span className="material-symbols-outlined text-xs">energy_savings_leaf</span>
+                       <span className="material-symbols-outlined notranslate text-xs" translate="no">energy_savings_leaf</span>
                        DPE Rating
                     </label>
                     <select {...register('dpe')} className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/20 p-4 font-label text-[11px]">
@@ -386,7 +386,7 @@ const PropertyEditor = () => {
                  <div className="flex gap-4 items-center">
                     <div className="relative overflow-hidden inline-block group">
                        <Button variant="secondary" type="button" className="px-8 whitespace-nowrap group-hover:bg-secondary/90">
-                          <span className="material-symbols-outlined text-sm mr-2 align-middle">cloud_upload</span> Upload Local Image
+                          <span className="material-symbols-outlined notranslate text-sm mr-2 align-middle" translate="no">cloud_upload</span> Upload Local Image
                        </Button>
                        <input 
                          type="file" 
@@ -413,7 +413,7 @@ const PropertyEditor = () => {
                             onClick={() => removeImage(url)}
                             className="absolute inset-0 bg-red-500/80 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                           >
-                             <span className="material-symbols-outlined text-sm">delete</span>
+                             <span className="material-symbols-outlined notranslate text-sm" translate="no">delete</span>
                           </button>
                        </div>
                     ))}

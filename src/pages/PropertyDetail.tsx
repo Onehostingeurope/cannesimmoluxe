@@ -63,7 +63,7 @@ const PropertyDetail = () => {
               </div>
               <h1 className="font-headline text-5xl md:text-6xl text-primary mb-6 leading-tight">{property.title}</h1>
               <div className="flex items-center text-on-surface-variant opacity-70">
-                <span className="material-symbols-outlined mr-2">location_on</span>
+                <span className="material-symbols-outlined notranslate mr-2" translate="no">location_on</span>
                 <span className="font-label text-xs tracking-widest uppercase">{property.district}, {property.city}</span>
               </div>
             </div>
@@ -71,22 +71,22 @@ const PropertyDetail = () => {
             {/* Core Stats Bar */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8 py-8 border-y border-outline-variant/20">
               <div className="flex flex-col items-center justify-center text-center space-y-2">
-                <span className="material-symbols-outlined text-secondary text-3xl">bed</span>
+                <span className="material-symbols-outlined notranslate text-secondary text-3xl" translate="no">bed</span>
                 <p className="font-label text-xs tracking-widest uppercase text-outline">Bedrooms</p>
                 <p className="font-headline text-2xl text-primary">{property.bedrooms}</p>
               </div>
               <div className="flex flex-col items-center justify-center text-center space-y-2 border-l border-outline-variant/20">
-                <span className="material-symbols-outlined text-secondary text-3xl">bathtub</span>
+                <span className="material-symbols-outlined notranslate text-secondary text-3xl" translate="no">bathtub</span>
                 <p className="font-label text-xs tracking-widest uppercase text-outline">Bathrooms</p>
                 <p className="font-headline text-2xl text-primary">{property.bathrooms}</p>
               </div>
               <div className="flex flex-col items-center justify-center text-center space-y-2 border-l border-outline-variant/20">
-                <span className="material-symbols-outlined text-secondary text-3xl">straighten</span>
+                <span className="material-symbols-outlined notranslate text-secondary text-3xl" translate="no">straighten</span>
                 <p className="font-label text-xs tracking-widest uppercase text-outline">Living Area</p>
                 <p className="font-headline text-2xl text-primary">{property.surface}m²</p>
               </div>
               <div className="flex flex-col items-center justify-center text-center space-y-2 border-l border-outline-variant/20">
-                <span className="material-symbols-outlined text-secondary text-3xl">landscape</span>
+                <span className="material-symbols-outlined notranslate text-secondary text-3xl" translate="no">landscape</span>
                 <p className="font-label text-xs tracking-widest uppercase text-outline">Land Size</p>
                 <p className="font-headline text-2xl text-primary">{property.land_surface || 'N/A'}m²</p>
               </div>
@@ -107,13 +107,13 @@ const PropertyDetail = () => {
             <div className="space-y-8">
               <h2 className="font-headline text-2xl text-primary flex items-center">
                 Technical Matrix
-                {isGated && <span className="material-symbols-outlined ml-3 text-secondary text-xl">lock</span>}
+                {isGated && <span className="material-symbols-outlined notranslate ml-3 text-secondary text-xl" translate="no">lock</span>}
               </h2>
               
               {isGated ? (
                 <div className="bg-[#f6f3ee] p-12 relative overflow-hidden group">
                   <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:scale-110 transition-transform">
-                    <span className="material-symbols-outlined text-[120px]">security</span>
+                    <span className="material-symbols-outlined notranslate text-[120px]" translate="no">security</span>
                   </div>
                   <div className="relative z-10 max-w-md">
                     <h3 className="font-headline text-xl text-primary mb-4">Verified Access Required</h3>
@@ -190,7 +190,7 @@ const PropertyDetail = () => {
                 >
                   {({ loading }) => (
                     <Button variant="outline" className="w-full flex items-center justify-center gap-3" disabled={loading}>
-                      <span className="material-symbols-outlined text-lg">description</span>
+                      <span className="material-symbols-outlined notranslate text-lg" translate="no">description</span>
                       <span>{loading ? 'Compiling Dossier...' : 'Download PDF'}</span>
                     </Button>
                   )}
@@ -201,7 +201,7 @@ const PropertyDetail = () => {
                   className="w-full flex items-center justify-center gap-3 opacity-50 cursor-not-allowed"
                   onClick={() => navigate('/register')}
                 >
-                  <span className="material-symbols-outlined text-lg">lock</span>
+                  <span className="material-symbols-outlined notranslate text-lg" translate="no">lock</span>
                   <span>Register to Download</span>
                 </Button>
               )}

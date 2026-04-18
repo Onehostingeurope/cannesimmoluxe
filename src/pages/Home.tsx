@@ -88,7 +88,7 @@ const Home = () => {
                Explore Collection
              </Button>
              <button className="font-label text-[10px] tracking-[0.2em] uppercase text-white hover:text-secondary group flex items-center gap-3 transition-colors">
-               The Riviera Office <span className="material-symbols-outlined text-sm group-hover:translate-x-1 transition-transform">arrow_forward</span>
+               The Riviera Office <span className="material-symbols-outlined notranslate text-sm group-hover:translate-x-1 transition-transform" translate="no">arrow_forward</span>
              </button>
           </div>
         </div>
@@ -96,7 +96,7 @@ const Home = () => {
         {/* Scroll Indicator */}
         <div className="hidden md:flex absolute bottom-12 left-1/2 -translate-x-1/2 flex-col items-center gap-4 z-10 animate-bounce cursor-pointer group" onClick={() => window.scrollTo({ top: window.innerHeight, behavior: 'smooth' })}>
            <span className="font-label text-[10px] tracking-[0.5em] uppercase text-white/50 group-hover:text-white transition-colors duration-500">Explore</span>
-           <span className="material-symbols-outlined text-white/50 group-hover:text-white transition-colors duration-500 font-light text-3xl">expand_more</span>
+           <span className="material-symbols-outlined notranslate text-white/50 group-hover:text-white transition-colors duration-500 font-light text-3xl" translate="no">expand_more</span>
         </div>
       </section>
 
@@ -106,7 +106,7 @@ const Home = () => {
           <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-12 border-b border-outline-variant/20 pb-12">
             <div className="space-y-6">
               <div className="flex items-center gap-3">
-                <span className="material-symbols-outlined text-secondary">auto_awesome</span>
+                <span className="material-symbols-outlined notranslate text-secondary" translate="no">auto_awesome</span>
                 <p className="font-label text-[10px] tracking-[0.3em] uppercase text-outline">Digital Curator</p>
               </div>
               <h2 className="font-headline text-5xl md:text-6xl text-primary">Curated Selection</h2>
@@ -191,7 +191,7 @@ const Home = () => {
                 { icon: 'account_balance', title: 'Asset Orchestration', desc: 'Comprehensive management of your Riviera real estate portfolio, from maintenance to tax optimization.' }
               ].map((service, sidx) => (
                 <div key={sidx} className="space-y-4">
-                  <span className="material-symbols-outlined text-secondary text-3xl">{service.icon}</span>
+                  <span className="material-symbols-outlined notranslate text-secondary text-3xl" translate="no">{service.icon}</span>
                   <h3 className="font-headline text-xl text-primary">{service.title}</h3>
                   <p className="text-sm text-on-surface-variant opacity-60 leading-relaxed">{service.desc}</p>
                 </div>
@@ -242,7 +242,7 @@ const Home = () => {
         
         <div className="relative z-10 text-center max-w-4xl px-8 space-y-12 animate-luxury-fade">
            <div className="space-y-6">
-              <span className="material-symbols-outlined text-secondary text-5xl">key</span>
+              <span className="material-symbols-outlined notranslate text-secondary text-5xl" translate="no">key</span>
               <h2 className="font-headline text-5xl md:text-7xl text-white">Enter the <br /> <span className="italic">Private Circle.</span></h2>
               <p className="text-white/40 text-lg font-body max-w-2xl mx-auto leading-relaxed">
                 Verification unlocks access to our classified portfolio and direct consultation lines with our senior partners.

@@ -64,7 +64,7 @@ const PropertyManagement = () => {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8 pb-8 border-b border-outline-variant/20">
           <div className="space-y-4">
             <div className="flex items-center gap-3 mb-2">
-              <span className="material-symbols-outlined text-secondary text-base">inventory_2</span>
+              <span className="material-symbols-outlined notranslate text-secondary text-base" translate="no">inventory_2</span>
               <p className="font-label text-[10px] tracking-[0.2em] uppercase text-outline">Supply Chain</p>
             </div>
             <h2 className="font-headline text-4xl text-primary">Portfolio Propriety</h2>
@@ -90,7 +90,7 @@ const PropertyManagement = () => {
           ].map((stat, idx) => (
              <div key={idx} className="bg-[#f6f3ee] dark:bg-[#1c1b1b] p-6 flex items-center justify-between border border-outline-variant/10">
                 <div className="flex items-center gap-4">
-                  <span className="material-symbols-outlined text-secondary text-xl">{stat.icon}</span>
+                  <span className="material-symbols-outlined notranslate text-secondary text-xl" translate="no">{stat.icon}</span>
                   <span className="font-label text-[10px] tracking-widest uppercase text-outline">{stat.label}</span>
                 </div>
                 <span className="font-headline text-2xl text-primary">{stat.value}</span>
@@ -101,7 +101,7 @@ const PropertyManagement = () => {
         {/* Search and Filters Strip */}
         <div className="flex flex-col md:flex-row gap-6 items-center py-4">
            <div className="relative flex-grow group w-full">
-              <span className="material-symbols-outlined absolute left-0 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-primary transition-colors">search</span>
+              <span className="material-symbols-outlined notranslate absolute left-0 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-primary transition-colors" translate="no">search</span>
               <input 
                 type="text" 
                 placeholder="SEARCH PORTFOLIO BY NOMENCLATURE OR REF ID..." 
@@ -191,14 +191,14 @@ const PropertyManagement = () => {
                           title={tool.title}
                           className="w-10 h-10 flex items-center justify-center bg-[#f6f3ee] dark:bg-[#1c1b1b] border border-outline-variant/10 text-outline hover:text-secondary hover:border-secondary transition-all duration-300"
                         >
-                          <span className="material-symbols-outlined text-xl">{tool.icon}</span>
+                          <span className="material-symbols-outlined notranslate text-xl" translate="no">{tool.icon}</span>
                         </button>
                       ))}
                       <button 
                         onClick={() => handleDelete(property.id)}
                         className="w-10 h-10 flex items-center justify-center bg-red-50 dark:bg-red-950/20 border border-red-100 dark:border-red-900 text-red-400 hover:bg-red-500 hover:text-white transition-all duration-300"
                       >
-                         <span className="material-symbols-outlined text-xl">delete_sweep</span>
+                         <span className="material-symbols-outlined notranslate text-xl" translate="no">delete_sweep</span>
                       </button>
                     </div>
                  </div>

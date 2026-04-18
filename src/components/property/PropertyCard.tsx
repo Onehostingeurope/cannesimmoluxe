@@ -48,7 +48,7 @@ export const PropertyCard = ({ property }: PropertyCardProps) => {
         <div className="absolute top-6 left-6 flex flex-col gap-3">
           {isOffMarket && (
             <div className="bg-black text-white px-4 py-1.5 text-[9px] tracking-[0.2em] uppercase font-label border border-white/20 shadow-xl flex items-center gap-2">
-              <span className="material-symbols-outlined text-[10px]">shield_lock</span>
+              <span className="material-symbols-outlined notranslate text-[10px]" translate="no">shield_lock</span>
               Confidential Off-Market
             </div>
           )}
@@ -66,13 +66,13 @@ export const PropertyCard = ({ property }: PropertyCardProps) => {
         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-700 flex items-center justify-center p-8">
            {isLocked ? (
              <div className="w-full border border-white/30 p-6 text-center transform translate-y-4 group-hover:translate-y-0 transition-transform duration-700 bg-black/80 backdrop-blur-sm">
-                <span className="material-symbols-outlined text-white text-3xl mb-2">lock</span>
+                <span className="material-symbols-outlined notranslate text-white text-3xl mb-2" translate="no">lock</span>
                 <p className="font-label text-[10px] tracking-[0.3em] uppercase text-white mb-2">Private Operations Data</p>
                 <p className="font-label text-[8px] tracking-widest text-[#dcdad5]">Authenticate Required To Decrypt</p>
              </div>
            ) : (
              <div className="w-full border border-white/30 p-6 text-center transform translate-y-4 group-hover:translate-y-0 transition-transform duration-700">
-                <span className="material-symbols-outlined text-white text-3xl mb-2">visibility</span>
+                <span className="material-symbols-outlined notranslate text-white text-3xl mb-2" translate="no">visibility</span>
                 <p className="font-label text-[10px] tracking-[0.3em] uppercase text-white">View Technical Dossier</p>
              </div>
            )}
@@ -85,7 +85,7 @@ export const PropertyCard = ({ property }: PropertyCardProps) => {
            <div className="flex items-center justify-between">
               <p className="font-label text-[10px] tracking-[0.2em] uppercase text-secondary font-bold">{property.type}</p>
               <div className="flex items-center gap-2 text-outline/40">
-                 <span className="material-symbols-outlined text-sm">location_on</span>
+                 <span className="material-symbols-outlined notranslate text-sm" translate="no">location_on</span>
                  <p className="font-label text-[9px] tracking-widest uppercase">{property.city}</p>
               </div>
            </div>
@@ -102,7 +102,7 @@ export const PropertyCard = ({ property }: PropertyCardProps) => {
              { label: 'M²', value: property.surface, icon: 'straighten' }
            ].map((spec, sidx) => (
              <div key={sidx} className="flex flex-col items-center">
-                <span className="material-symbols-outlined text-outline/30 text-base mb-1">{spec.icon}</span>
+                <span className="material-symbols-outlined notranslate text-outline/30 text-base mb-1" translate="no">{spec.icon}</span>
                 <p className="font-label text-[10px] font-bold text-primary tracking-widest">{spec.value}<span className="text-[8px] text-outline font-normal ml-0.5">{spec.label}</span></p>
              </div>
            ))}
@@ -114,7 +114,7 @@ export const PropertyCard = ({ property }: PropertyCardProps) => {
           ) : (
             <p className="font-headline text-2xl text-primary">{formattedPrice}</p>
           )}
-          <button className="material-symbols-outlined text-outline/40 hover:text-secondary transition-colors">favorite</button>
+          <button className="material-symbols-outlined notranslate text-outline/40 hover:text-secondary transition-colors">favorite</button>
         </div>
       </div>
     </div>

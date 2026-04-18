@@ -73,7 +73,7 @@ const Marketing = () => {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8 pb-8 border-b border-outline-variant/20">
           <div className="space-y-4">
             <div className="flex items-center gap-3 mb-2">
-              <span className="material-symbols-outlined text-secondary text-base">campaign</span>
+              <span className="material-symbols-outlined notranslate text-secondary text-base" translate="no">campaign</span>
               <p className="font-label text-[10px] tracking-[0.2em] uppercase text-outline">Outreach Strategy</p>
             </div>
             <h2 className="font-headline text-4xl text-primary">Marketing Orchestrator</h2>
@@ -102,7 +102,7 @@ const Marketing = () => {
                 {/* Visual Bio */}
                 <div className="flex items-center gap-8 w-full lg:w-1/3">
                    <div className="w-14 h-14 bg-[#f6f3ee] dark:bg-[#1c1b1b] border border-outline-variant/20 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
-                     <span className="material-symbols-outlined">mail</span>
+                     <span className="material-symbols-outlined notranslate" translate="no">mail</span>
                    </div>
                    <div className="space-y-1">
                       <div className="text-lg font-bold text-primary">{campaign.title}</div>
@@ -152,7 +152,7 @@ const Marketing = () => {
                      onClick={() => deleteCampaign(campaign.id)}
                      className="w-12 h-12 flex items-center justify-center bg-[#f6f3ee] dark:bg-[#1c1b1b] border border-outline-variant/10 text-red-500/50 hover:text-red-500 hover:border-red-500 transition-all cursor-pointer"
                    >
-                     <span className="material-symbols-outlined text-xl">delete</span>
+                     <span className="material-symbols-outlined notranslate text-xl" translate="no">delete</span>
                    </button>
                 </div>
               </div>

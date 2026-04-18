@@ -80,7 +80,7 @@ const AdminDashboard = () => {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8 pb-8 border-b border-outline-variant/20">
           <div className="space-y-4">
             <div className="flex items-center gap-3 mb-2">
-              <span className="material-symbols-outlined text-secondary text-base">monitoring</span>
+              <span className="material-symbols-outlined notranslate text-secondary text-base" translate="no">monitoring</span>
               <p className="font-label text-[10px] tracking-[0.2em] uppercase text-outline">Executive Intelligence</p>
             </div>
             <h2 className="font-headline text-4xl text-primary">Control Center</h2>
@@ -110,7 +110,7 @@ const AdminDashboard = () => {
           ].map((kpi, idx) => (
             <div key={idx} className="bg-white dark:bg-[#0a0a0a] p-8 border border-outline-variant/10 group hover:border-secondary transition-all duration-500">
                <div className="flex justify-between items-start mb-6">
-                  <span className="material-symbols-outlined text-secondary text-2xl group-hover:scale-110 transition-transform">{kpi.icon}</span>
+                  <span className="material-symbols-outlined notranslate text-secondary text-2xl group-hover:scale-110 transition-transform" translate="no">{kpi.icon}</span>
                   <span className="text-[10px] font-label tracking-widest text-green-500 dark:text-green-400 font-bold">{kpi.trend}</span>
                </div>
                <div className="space-y-1">

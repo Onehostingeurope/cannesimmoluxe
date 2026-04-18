@@ -150,7 +150,7 @@ const CRM = () => {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8 pb-8 border-b border-outline-variant/20">
           <div className="space-y-4">
             <div className="flex items-center gap-3 mb-2">
-              <span className="material-symbols-outlined text-secondary text-base">diversity_3</span>
+              <span className="material-symbols-outlined notranslate text-secondary text-base" translate="no">diversity_3</span>
               <p className="font-label text-[10px] tracking-[0.2em] uppercase text-outline">Client Intelligence</p>
             </div>
             <h2 className="font-headline text-4xl text-primary">Lead Orchestration</h2>
@@ -265,7 +265,7 @@ const CRM = () => {
           </div>
           
           <div className="relative flex-grow group w-full md:w-auto border-l-0 md:border-l border-outline-variant/20 pl-0 md:pl-8">
-            <span className="material-symbols-outlined absolute left-0 md:left-8 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-primary transition-colors">person_search</span>
+            <span className="material-symbols-outlined notranslate absolute left-0 md:left-8 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-primary transition-colors" translate="no">person_search</span>
             <input 
               type="text" 
               placeholder="SEARCH THE REGISTRY..." 
@@ -298,11 +298,11 @@ const CRM = () => {
                       </div>
                       <div className="font-label text-[9px] text-outline uppercase tracking-widest opacity-60 flex flex-col gap-1.5 mt-2">
                          <span className="flex items-center gap-2">
-                            <span className="material-symbols-outlined text-[13px]">alternate_email</span>
+                            <span className="material-symbols-outlined notranslate text-[13px]" translate="no">alternate_email</span>
                             {lead.profiles?.email || lead.tracking_data?.email || 'No Email'}
                          </span>
                          <span className="flex items-center gap-2">
-                            <span className="material-symbols-outlined text-[13px]">phone</span>
+                            <span className="material-symbols-outlined notranslate text-[13px]" translate="no">phone</span>
                             {lead.profiles?.phone || lead.tracking_data?.phone || 'No Phone'}
                          </span>
                       </div>
@@ -348,7 +348,7 @@ const CRM = () => {
                      className="px-6 py-3 flex items-center justify-center gap-3 bg-black dark:bg-white text-white dark:text-black font-label text-[10px] uppercase tracking-widest hover:bg-secondary hover:text-white transition-all shadow-[0_0_15px_rgba(212,175,55,0.1)]"
                    >
                      <span>Open Dossier</span>
-                     <span className="material-symbols-outlined text-sm">arrow_forward_ios</span>
+                     <span className="material-symbols-outlined notranslate text-sm" translate="no">arrow_forward_ios</span>
                    </button>
                 </div>
               </div>
@@ -359,7 +359,7 @@ const CRM = () => {
         {/* Intelligence Statistics */}
         <div className="pt-12 border-t border-outline-variant/20 flex flex-col md:flex-row justify-between items-center gap-10">
            <div className="flex items-center gap-3 opacity-60">
-              <span className="material-symbols-outlined text-secondary">cloud_sync</span>
+              <span className="material-symbols-outlined notranslate text-secondary" translate="no">cloud_sync</span>
               <p className="font-label text-[10px] tracking-widest uppercase text-outline">Real-time sync with executive cluster — {leads.length} active leads</p>
            </div>
            
@@ -392,7 +392,7 @@ const CRM = () => {
                            </h2>
                            <div className="flex items-center gap-4 text-xs font-label uppercase tracking-widest text-outline">
                               <span className="flex items-center gap-1">
-                                 <span className="material-symbols-outlined text-[14px]">alternate_email</span>
+                                 <span className="material-symbols-outlined notranslate text-[14px]" translate="no">alternate_email</span>
                                  <a 
                                     href={`mailto:${activeDossier.profiles?.email || activeDossier.tracking_data?.email}`} 
                                     className="hover:text-secondary underline decoration-outline-variant/40 underline-offset-4"
@@ -402,14 +402,14 @@ const CRM = () => {
                               </span>
                               |
                               <span className="flex items-center gap-1">
-                                 <span className="material-symbols-outlined text-[14px]">phone</span>
+                                 <span className="material-symbols-outlined notranslate text-[14px]" translate="no">phone</span>
                                  {activeDossier.profiles?.phone || activeDossier.tracking_data?.phone || 'No Phone Data'}
                               </span>
                            </div>
                         </div>
                      </div>
                      <button onClick={() => setActiveDossier(null)} className="w-12 h-12 border border-outline-variant/20 flex items-center justify-center hover:bg-red-500 hover:text-white transition-colors hover:border-red-500 text-outline">
-                        <span className="material-symbols-outlined text-xl">close</span>
+                        <span className="material-symbols-outlined notranslate text-xl" translate="no">close</span>
                      </button>
                   </div>
 
@@ -490,7 +490,7 @@ const CRM = () => {
                         <div className="space-y-6 relative before:absolute before:inset-0 before:ml-4 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-px before:bg-gradient-to-b before:from-transparent before:via-outline-variant/20 before:to-transparent">
                            {(activeDossier.tracking_data?.history || []).length === 0 ? (
                               <div className="text-center py-20 relative z-10">
-                                 <span className="material-symbols-outlined text-outline/30 text-5xl mb-4">history_toggle_off</span>
+                                 <span className="material-symbols-outlined notranslate text-outline/30 text-5xl mb-4" translate="no">history_toggle_off</span>
                                  <p className="font-label text-[10px] tracking-widest uppercase text-outline">Intelligence timeline is currently empty.</p>
                               </div>
                            ) : (
@@ -499,7 +499,7 @@ const CRM = () => {
                                     
                                     {/* Timeline Node Point */}
                                     <div className="flex items-center justify-center w-8 h-8 rounded-full border-2 border-secondary bg-white dark:bg-black text-secondary z-10 shrink-0 mx-auto absolute left-0 md:relative md:left-auto mt-2 md:mt-0 transition-transform group-hover:scale-125">
-                                       <span className="material-symbols-outlined text-[14px]">
+                                       <span className="material-symbols-outlined notranslate text-[14px]" translate="no">
                                           {log.type === 'Email' ? 'mail' : log.type === 'Meeting' ? 'groups' : log.type === 'On-site Viewing' ? 'key' : 'call'}
                                        </span>
                                     </div>

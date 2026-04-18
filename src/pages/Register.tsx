@@ -217,7 +217,7 @@ const Register = () => {
         <div className="absolute inset-0 bg-primary/20 pointer-events-none"></div>
         {/* Glassmorphism overlay for trust badge */}
         <div className="absolute bottom-16 right-16 luxury-glass p-8 max-w-sm border border-white/10 shadow-2xl">
-          <span className="material-symbols-outlined text-secondary text-3xl mb-4 block" style={{ fontVariationSettings: "'FILL' 1" }}>
+          <span className="material-symbols-outlined notranslate text-secondary text-3xl mb-4 block" style={{ fontVariationSettings: "'FILL' 1" }} translate="no">
             vpn_key
           </span>
           <p className="font-headline text-lg text-white mb-2">Private Portfolio</p>

@@ -9,7 +9,7 @@ const SavedProperties = () => {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8 pb-8 border-b border-outline-variant/20">
           <div className="space-y-4">
             <div className="flex items-center gap-3 mb-2">
-              <span className="material-symbols-outlined text-secondary text-base">book_online</span>
+              <span className="material-symbols-outlined notranslate text-secondary text-base" translate="no">book_online</span>
               <p className="font-label text-[10px] tracking-[0.2em] uppercase text-outline">Exclusive Access</p>
             </div>
             <h2 className="font-headline text-4xl text-primary">Private Collection</h2>

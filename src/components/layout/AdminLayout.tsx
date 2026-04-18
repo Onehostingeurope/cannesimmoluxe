@@ -118,7 +118,7 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
                     : "text-[#705b3b] dark:text-[#dcdad5] hover:bg-[#e5e2dd] dark:hover:bg-[#2a2a2a]"
                 )}
               >
-                <span className="material-symbols-outlined text-lg shrink-0" style={{ fontVariationSettings: isActive ? "'FILL' 1" : "'FILL' 0" }}>
+                <span className="material-symbols-outlined notranslate text-lg shrink-0" style={{ fontVariationSettings: isActive ? "'FILL' 1" : "'FILL' 0" }} translate="no">
                   {item.icon}
                 </span>
                 <span className="truncate whitespace-nowrap flex-1 text-left">{item.label}</span>
@@ -147,7 +147,7 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
             onClick={handleSignOut}
             className="flex items-center gap-3 px-4 py-3 text-[#705b3b] dark:text-[#dcdad5] hover:bg-[#e5e2dd] dark:hover:bg-[#2a2a2a] transition-all duration-300 w-full text-left"
           >
-            <span className="material-symbols-outlined text-lg">logout</span>
+            <span className="material-symbols-outlined notranslate text-lg" translate="no">logout</span>
             <span>Sign Out</span>
           </button>
         </div>

@@ -61,7 +61,7 @@ const Login = () => {
           <div className="relative z-10 p-16 lg:p-24 flex flex-col justify-end h-full">
             <div className="space-y-6">
               <div className="inline-flex items-center space-x-3 bg-secondary/20 backdrop-blur-md px-4 py-2 border border-secondary/30">
-                <span className="material-symbols-outlined text-secondary text-sm">security</span>
+                <span className="material-symbols-outlined notranslate text-secondary text-sm" translate="no">security</span>
                 <span className="font-label text-[10px] tracking-[0.3em] uppercase text-white">Encrypted Workspace</span>
               </div>
               <h2 className="font-headline text-5xl lg:text-7xl text-white leading-tight">

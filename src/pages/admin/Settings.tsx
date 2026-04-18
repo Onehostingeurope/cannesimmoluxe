@@ -78,7 +78,7 @@ const Settings = () => {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8 pb-8 border-b border-outline-variant/20">
           <div className="space-y-4">
             <div className="flex items-center gap-3 mb-2">
-              <span className="material-symbols-outlined text-secondary text-base">settings_accessibility</span>
+              <span className="material-symbols-outlined notranslate text-secondary text-base" translate="no">settings_accessibility</span>
               <p className="font-label text-[10px] tracking-[0.2em] uppercase text-outline">Executive Control</p>
             </div>
             <h2 className="font-headline text-4xl text-primary">Agency Configuration</h2>
@@ -93,7 +93,7 @@ const Settings = () => {
               onClick={handleSave}
               disabled={saving}
             >
-              <span className="material-symbols-outlined text-sm">{saving ? 'sync' : 'save'}</span>
+              <span className="material-symbols-outlined notranslate text-sm" translate="no">{saving ? 'sync' : 'save'}</span>
               {saving ? 'Synchronizing...' : 'Save Configuration'}
             </Button>
           </div>
@@ -197,14 +197,14 @@ const Settings = () => {
 
              <div className="bg-primary p-8 text-white relative overflow-hidden group">
                 <div className="relative z-10 space-y-4">
-                   <span className="material-symbols-outlined text-secondary">verified_user</span>
+                   <span className="material-symbols-outlined notranslate text-secondary" translate="no">verified_user</span>
                    <h4 className="font-headline text-xl">Security Protocol</h4>
                    <p className="text-xs text-white/60 leading-relaxed font-body">
                       Global settings modification requires administrative clearance. All changes are logged in the architectural record.
                    </p>
                 </div>
                 <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                   <span className="material-symbols-outlined text-9xl">shield</span>
+                   <span className="material-symbols-outlined notranslate text-9xl" translate="no">shield</span>
                 </div>
              </div>
           </div>

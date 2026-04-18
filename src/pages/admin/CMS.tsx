@@ -220,7 +220,7 @@ const CMS = () => {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8 pb-8 border-b border-outline-variant/20">
           <div className="space-y-4">
             <div className="flex items-center gap-3 mb-2">
-              <span className="material-symbols-outlined text-secondary text-base">auto_stories</span>
+              <span className="material-symbols-outlined notranslate text-secondary text-base" translate="no">auto_stories</span>
               <p className="font-label text-[10px] tracking-[0.2em] uppercase text-outline">Editorial Hub</p>
             </div>
             <h2 className="font-headline text-4xl text-primary">Content Orchestrator</h2>
@@ -236,7 +236,7 @@ const CMS = () => {
               onClick={handleDeploy}
               disabled={saving}
             >
-              <span className="material-symbols-outlined text-sm">{saving ? 'sync' : 'cloud_done'}</span>
+              <span className="material-symbols-outlined notranslate text-sm" translate="no">{saving ? 'sync' : 'cloud_done'}</span>
               {saving ? 'Synchronizing...' : 'Deploy Changes'}
             </Button>
           </div>
@@ -278,7 +278,7 @@ const CMS = () => {
                      modules.map((module) => (
                        <div key={module.id} className="bg-white dark:bg-black p-10 border border-outline-variant/20 shadow-sm relative group space-y-8">
                           <div className="flex items-center gap-4 mb-2 text-secondary">
-                             <span className="material-symbols-outlined">
+                             <span className="material-symbols-outlined notranslate" translate="no">
                                 {availableModules.find(am => am.type === module.type)?.icon || 'article'}
                              </span>
                              <span className="font-label text-[10px] tracking-[0.2em] uppercase font-bold">
@@ -342,7 +342,7 @@ const CMS = () => {
                                                {uploading === `${module.id}-${idx}` ? (
                                                   <div className="w-3 h-3 border-t-2 border-primary animate-spin rounded-full"></div>
                                                ) : (
-                                                  <span className="material-symbols-outlined text-[14px]">upload</span>
+                                                  <span className="material-symbols-outlined notranslate text-[14px]" translate="no">upload</span>
                                                )}
                                                <input 
                                                  type="file" 
@@ -409,7 +409,7 @@ const CMS = () => {
                                                <img src={module.media_url} className="w-full h-full object-cover" alt="Media Preview" />
                                             )
                                          ) : (
-                                            <span className="material-symbols-outlined text-4xl text-outline opacity-30">add_photo_alternate</span>
+                                            <span className="material-symbols-outlined notranslate text-4xl text-outline opacity-30" translate="no">add_photo_alternate</span>
                                          )}
                                          <input 
                                            type="file" 
@@ -440,8 +440,8 @@ const CMS = () => {
                           </div>
                           
                           <div className="absolute top-6 right-6 flex gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                             <button className="material-symbols-outlined text-outline hover:text-secondary">drag_indicator</button>
-                             <button className="material-symbols-outlined text-outline hover:text-red-500">delete</button>
+                             <button className="material-symbols-outlined notranslate text-outline hover:text-secondary">drag_indicator</button>
+                             <button className="material-symbols-outlined notranslate text-outline hover:text-red-500">delete</button>
                           </div>
                        </div>
                      ))

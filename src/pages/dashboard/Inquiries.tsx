@@ -29,7 +29,7 @@ const Inquiries = () => {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8 pb-8 border-b border-outline-variant/20">
           <div className="space-y-4">
             <div className="flex items-center gap-3 mb-2">
-              <span className="material-symbols-outlined text-secondary text-base">hub</span>
+              <span className="material-symbols-outlined notranslate text-secondary text-base" translate="no">hub</span>
               <p className="font-label text-[10px] tracking-[0.2em] uppercase text-outline">Engagement Log</p>
             </div>
             <h2 className="font-headline text-4xl text-primary">Consultation History</h2>
@@ -47,7 +47,7 @@ const Inquiries = () => {
             <div key={inquiry.id} className="bg-white dark:bg-[#0a0a0a] border border-outline-variant/10 p-8 flex flex-col lg:flex-row justify-between items-center gap-8 hover:shadow-xl transition-all duration-500 group">
               <div className="flex items-center gap-8 w-full lg:w-1/3">
                  <div className="w-14 h-14 bg-[#f6f3ee] dark:bg-[#1c1b1b] border border-outline-variant/20 flex items-center justify-center text-secondary group-hover:scale-110 transition-transform">
-                   <span className="material-symbols-outlined text-2xl">{inquiry.icon}</span>
+                   <span className="material-symbols-outlined notranslate text-2xl" translate="no">{inquiry.icon}</span>
                  </div>
                  <div className="space-y-1">
                     <div className="font-label text-[9px] text-outline uppercase tracking-widest opacity-60 mb-1">{inquiry.date}</div>
@@ -81,7 +81,7 @@ const Inquiries = () => {
         {/* Support Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-12">
            <div className="bg-[#f6f3ee] dark:bg-[#1c1b1b] p-10 border border-outline-variant/10 space-y-6">
-              <span className="material-symbols-outlined text-secondary text-3xl">concierge</span>
+              <span className="material-symbols-outlined notranslate text-secondary text-3xl" translate="no">concierge</span>
               <h3 className="font-headline text-2xl text-primary">Direct Line</h3>
               <p className="text-sm text-on-surface-variant opacity-70 leading-relaxed">
                 Connect directly with your dedicated property advisor for immediate assistance regarding your portfolio.
@@ -89,7 +89,7 @@ const Inquiries = () => {
               <button className="font-label text-[10px] tracking-widest uppercase text-primary font-bold hover:text-secondary transition-colors">Call Concierge Desk</button>
            </div>
            <div className="bg-[#f6f3ee] dark:bg-[#1c1b1b] p-10 border border-outline-variant/10 space-y-6">
-              <span className="material-symbols-outlined text-secondary text-3xl">quick_reference_all</span>
+              <span className="material-symbols-outlined notranslate text-secondary text-3xl" translate="no">quick_reference_all</span>
               <h3 className="font-headline text-2xl text-primary">Priority Scheduling</h3>
               <p className="text-sm text-on-surface-variant opacity-70 leading-relaxed">
                 As a verified member, your viewing requests are prioritized. Private airport transfers can be orchestrated upon request.

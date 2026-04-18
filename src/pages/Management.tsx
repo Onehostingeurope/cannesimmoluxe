@@ -148,7 +148,7 @@ const Management = () => {
                 src="https://lh3.googleusercontent.com/aida-public/AB6AXuDSz_6bX8TqC7TEsl9JKKDzXMkjTrw2pbu_bxoVmYVVZ6cAM5fJZxX_9T6-fA6EVQgOrwldGrCMDKNq0aTsbmOkFxUsdV32-cADwxRsOzTkT0y_lggxmm6PFfoXAEzcELP2p-koUU-D8tL9fwc3jS7Fmr4oGTPqZS_6B2Bm345HcKnDfzkJpOAv8F1mXzzsFOBY_a1v050KYjnkP58tX4i5C6tJ9KvJoWV7bgkau8ByapQwWMc10fyjNQ9iQ0U-YiSX7qvmbj5ZChU"
               />
               <div className="absolute -bottom-8 -left-8 bg-[#fcf9f4] p-8 shadow-sm">
-                <span className="material-symbols-outlined text-[#705b3b] text-4xl mb-4">diamond</span>
+                <span className="material-symbols-outlined notranslate text-[#705b3b] text-4xl mb-4" translate="no">diamond</span>
                 <p className="font-label text-xs uppercase tracking-[0.1em] font-medium">Uncompromising Quality</p>
               </div>
             </div>
@@ -165,37 +165,37 @@ const Management = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-x-12 gap-y-24 md:px-12">
               {/* Service 1 */}
               <div>
-                <span className="material-symbols-outlined text-[#705b3b] text-3xl mb-6 font-light">admin_panel_settings</span>
+                <span className="material-symbols-outlined notranslate text-[#705b3b] text-3xl mb-6 font-light" translate="no">admin_panel_settings</span>
                 <h3 className="font-label text-sm uppercase tracking-[0.05em] mb-4 font-bold">Full Supervision</h3>
                 <p className="font-body text-base text-gray-600 leading-relaxed">Dedicated estate manager assigned as your single point of contact for total property oversight.</p>
               </div>
               {/* Service 2 */}
               <div>
-                <span className="material-symbols-outlined text-[#705b3b] text-3xl mb-6 font-light">engineering</span>
+                <span className="material-symbols-outlined notranslate text-[#705b3b] text-3xl mb-6 font-light" translate="no">engineering</span>
                 <h3 className="font-label text-sm uppercase tracking-[0.05em] mb-4 font-bold">Preventive Maintenance</h3>
                 <p className="font-body text-base text-gray-600 leading-relaxed">Rigorous, scheduled inspections and upkeep of all mechanical, electrical, and structural systems.</p>
               </div>
               {/* Service 3 */}
               <div>
-                <span className="material-symbols-outlined text-[#705b3b] text-3xl mb-6 font-light">cleaning_services</span>
+                <span className="material-symbols-outlined notranslate text-[#705b3b] text-3xl mb-6 font-light" translate="no">cleaning_services</span>
                 <h3 className="font-label text-sm uppercase tracking-[0.05em] mb-4 font-bold">Housekeeping & Staffing</h3>
                 <p className="font-body text-base text-gray-600 leading-relaxed">Recruitment, training, and management of elite domestic staff, tailored to your household requirements.</p>
               </div>
               {/* Service 4 */}
               <div>
-                <span className="material-symbols-outlined text-[#705b3b] text-3xl mb-6 font-light">account_balance_wallet</span>
+                <span className="material-symbols-outlined notranslate text-[#705b3b] text-3xl mb-6 font-light" translate="no">account_balance_wallet</span>
                 <h3 className="font-label text-sm uppercase tracking-[0.05em] mb-4 font-bold">Financial Administration</h3>
                 <p className="font-body text-base text-gray-600 leading-relaxed">Transparent handling of all property-related expenses, utility payments, and detailed monthly ledger reporting.</p>
               </div>
               {/* Service 5 */}
               <div>
-                <span className="material-symbols-outlined text-[#705b3b] text-3xl mb-6 font-light">security</span>
+                <span className="material-symbols-outlined notranslate text-[#705b3b] text-3xl mb-6 font-light" translate="no">security</span>
                 <h3 className="font-label text-sm uppercase tracking-[0.05em] mb-4 font-bold">Security Protocol</h3>
                 <p className="font-body text-base text-gray-600 leading-relaxed">Implementation and monitoring of advanced security systems, ensuring the absolute safety of the estate.</p>
               </div>
               {/* Service 6 */}
               <div>
-                <span className="material-symbols-outlined text-[#705b3b] text-3xl mb-6 font-light">nature_people</span>
+                <span className="material-symbols-outlined notranslate text-[#705b3b] text-3xl mb-6 font-light" translate="no">nature_people</span>
                 <h3 className="font-label text-sm uppercase tracking-[0.05em] mb-4 font-bold">Landscape & Grounds</h3>
                 <p className="font-body text-base text-gray-600 leading-relaxed">Expert curation and maintenance of gardens, pools, and exterior amenities by specialized professionals.</p>
               </div>
@@ -280,14 +280,14 @@ const Management = () => {
                      <span className="font-label text-[10px] uppercase tracking-[0.2em] text-white/50">Append Architectural / Interior Photograph (Optional)</span>
                      <div className="flex items-center gap-6 w-full">
                         <label className="cursor-pointer bg-white/5 border border-white/20 px-6 py-3 font-label text-[10px] uppercase tracking-widest hover:bg-white/10 transition-colors flex items-center gap-2">
-                           <span className="material-symbols-outlined text-[14px]">photo_camera</span>
+                           <span className="material-symbols-outlined notranslate text-[14px]" translate="no">photo_camera</span>
                            <span>Upload Asset Image</span>
                            <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
                         </label>
                         {uploadedImage && (
                            <div className="flex items-center gap-3">
                               <img src={uploadedImage} alt="Uploaded Asset" className="w-12 h-12 object-cover border border-secondary/50 rounded-sm" />
-                              <span className="font-label text-[9px] uppercase tracking-widest text-green-400 flex items-center gap-1"><span className="material-symbols-outlined text-[12px]">check_circle</span> Secured</span>
+                              <span className="font-label text-[9px] uppercase tracking-widest text-green-400 flex items-center gap-1"><span className="material-symbols-outlined notranslate text-[12px]" translate="no">check_circle</span> Secured</span>
                            </div>
                         )}
                      </div>

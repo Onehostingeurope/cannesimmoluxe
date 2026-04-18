@@ -65,7 +65,7 @@ export const Notifications = () => {
                  <div className="space-y-8">
                      <div className="flex items-center justify-between border-b border-outline-variant/10 pb-4">
                         <div className="flex items-center gap-3">
-                           <span className="material-symbols-outlined text-secondary">support_agent</span>
+                           <span className="material-symbols-outlined notranslate text-secondary" translate="no">support_agent</span>
                            <h3 className="font-headline text-xl text-primary">Unread CRM Requests</h3>
                         </div>
                         <span className="bg-red-600/10 text-red-600 font-bold px-3 py-1 rounded-full text-[10px] tracking-widest">{leads.length} Pending</span>
@@ -103,7 +103,7 @@ export const Notifications = () => {
                  <div className="space-y-8">
                      <div className="flex items-center justify-between border-b border-outline-variant/10 pb-4">
                         <div className="flex items-center gap-3">
-                           <span className="material-symbols-outlined text-secondary">how_to_reg</span>
+                           <span className="material-symbols-outlined notranslate text-secondary" translate="no">how_to_reg</span>
                            <h3 className="font-headline text-xl text-primary">New Client Registrations</h3>
                         </div>
                         <span className="bg-secondary/10 text-secondary font-bold px-3 py-1 rounded-full text-[10px] tracking-widest">{profiles.length} Past 7 Days</span>

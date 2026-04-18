@@ -176,7 +176,7 @@ const ManagedAssets = () => {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8 pb-8 border-b border-outline-variant/20">
           <div className="space-y-4">
             <div className="flex items-center gap-3 mb-2">
-              <span className="material-symbols-outlined text-secondary text-base">real_estate_agent</span>
+              <span className="material-symbols-outlined notranslate text-secondary text-base" translate="no">real_estate_agent</span>
               <p className="font-label text-[10px] tracking-[0.2em] uppercase text-outline">Exclusive Governance</p>
             </div>
             <h2 className="font-headline text-4xl text-primary">Portfolio Management</h2>
@@ -249,7 +249,7 @@ const ManagedAssets = () => {
              <div className="py-20 text-center"><div className="w-12 h-12 border-t-2 border-secondary animate-spin rounded-full mx-auto"></div></div>
            ) : properties.length === 0 ? (
              <div className="py-20 text-center bg-[#f6f3ee] dark:bg-[#1c1b1b] border border-dashed border-outline-variant/20">
-               <span className="material-symbols-outlined text-outline/40 text-4xl mb-4">real_estate_agent</span>
+               <span className="material-symbols-outlined notranslate text-outline/40 text-4xl mb-4" translate="no">real_estate_agent</span>
                <p className="font-label text-[10px] tracking-widest uppercase text-outline">You have 0 Assets under strict Portfolio Management.</p>
              </div>
            ) : (
@@ -265,7 +265,7 @@ const ManagedAssets = () => {
                         {property.images?.[0] ? (
                            <img src={property.images[0]} alt="Property Visual" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
                         ) : (
-                           <span className="material-symbols-outlined text-outline/20 text-5xl">architecture</span>
+                           <span className="material-symbols-outlined notranslate text-outline/20 text-5xl" translate="no">architecture</span>
                         )}
                         <div className="absolute top-4 left-4 bg-black/80 px-2 py-1 flex items-center gap-2">
                            <span className="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse"></span>
@@ -279,13 +279,13 @@ const ManagedAssets = () => {
                            <h3 className="font-headline text-main text-xl group-hover:text-secondary transition-colors">{property.title}</h3>
                         </div>
                         <div className="flex justify-between items-center text-[10px] font-label uppercase tracking-widest text-outline pt-4 border-t border-outline-variant/10">
-                           <span className="flex items-center gap-1"><span className="material-symbols-outlined text-sm">map</span> {property.city}</span>
-                           <span className="flex items-center gap-1"><span className="material-symbols-outlined text-sm">square_foot</span> {property.surface ? `${property.surface} m²` : 'N/A'}</span>
+                           <span className="flex items-center gap-1"><span className="material-symbols-outlined notranslate text-sm" translate="no">map</span> {property.city}</span>
+                           <span className="flex items-center gap-1"><span className="material-symbols-outlined notranslate text-sm" translate="no">square_foot</span> {property.surface ? `${property.surface} m²` : 'N/A'}</span>
                         </div>
                      </div>
                      <div className="w-full text-center py-3 bg-[#f6f3ee] dark:bg-[#1c1b1b] text-[9px] font-label uppercase tracking-widest text-outline group-hover:text-primary transition-colors flex items-center justify-center gap-2">
                         <span>Access Unified Ledger</span>
-                        <span className="material-symbols-outlined text-[14px]">chevron_right</span>
+                        <span className="material-symbols-outlined notranslate text-[14px]" translate="no">chevron_right</span>
                      </div>
                    </div>
                 ))}
@@ -301,7 +301,7 @@ const ManagedAssets = () => {
                  {/* Dossier Header */}
                  <div className="flex justify-between items-center p-6 border-b border-outline-variant/20 bg-[#f6f3ee] dark:bg-[#1c1b1b] relative overflow-hidden">
                     <div className="absolute bottom-0 right-0 opacity-5 pointer-events-none transform translate-y-1/4 translate-x-1/4">
-                       <span className="material-symbols-outlined" style={{ fontSize: '300px' }}>real_estate_agent</span>
+                       <span className="material-symbols-outlined notranslate" style={{ fontSize: '300px' }} translate="no">real_estate_agent</span>
                     </div>
 
                     <div className="flex items-center gap-6 relative z-10 w-full flex-wrap">
@@ -314,9 +314,9 @@ const ManagedAssets = () => {
                              Tracking Client ID: {activeLedger.tracking_data?.first_name || 'System Generated'}
                           </div>
                           <div className="flex items-center gap-4 text-xs font-label uppercase tracking-widest text-outline mt-2">
-                             <a href={`mailto:${activeLedger.email}`} className="hover:text-secondary flex gap-2 items-center"><span className="material-symbols-outlined text-[14px]">mail</span> {activeLedger.email}</a>
+                             <a href={`mailto:${activeLedger.email}`} className="hover:text-secondary flex gap-2 items-center"><span className="material-symbols-outlined notranslate text-[14px]" translate="no">mail</span> {activeLedger.email}</a>
                              <span>|</span>
-                             <span className="flex gap-2 items-center"><span className="material-symbols-outlined text-[14px]">phone</span> {activeLedger.tracking_data?.phone || 'No Auth Phone'}</span>
+                             <span className="flex gap-2 items-center"><span className="material-symbols-outlined notranslate text-[14px]" translate="no">phone</span> {activeLedger.tracking_data?.phone || 'No Auth Phone'}</span>
                           </div>
                        </div>
                        <div className="flex gap-4">
@@ -325,7 +325,7 @@ const ManagedAssets = () => {
                        </div>
                     </div>
                     <button onClick={() => {setActiveProperty(null); setActiveLedger(null)}} className="absolute top-4 right-4 w-10 h-10 border border-outline-variant/20 flex items-center justify-center hover:bg-red-500 hover:text-white transition-colors hover:border-red-500 z-20 bg-white dark:bg-black">
-                       <span className="material-symbols-outlined text-lg">close</span>
+                       <span className="material-symbols-outlined notranslate text-lg" translate="no">close</span>
                     </button>
                  </div>
 
@@ -360,14 +360,14 @@ const ManagedAssets = () => {
                        <div className="space-y-6 relative before:absolute before:inset-0 before:ml-4 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-px before:bg-gradient-to-b before:from-transparent before:via-outline-variant/20 before:to-transparent">
                           {(activeLedger.tracking_data?.history || []).length === 0 ? (
                              <div className="text-center py-20 relative z-10">
-                                <span className="material-symbols-outlined text-outline/30 text-5xl mb-4">gavel</span>
+                                <span className="material-symbols-outlined notranslate text-outline/30 text-5xl mb-4" translate="no">gavel</span>
                                 <p className="font-label text-[10px] tracking-widest uppercase text-outline">No Management Operations Recorded Yet.</p>
                              </div>
                           ) : (
                              (activeLedger.tracking_data.history as any[]).map((log, index) => (
                                 <div key={log.id} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group animate-luxury-fade" style={{animationDelay: `${index * 50}ms`}}>
                                    <div className="flex items-center justify-center w-8 h-8 rounded-full border-2 border-secondary bg-white dark:bg-black text-secondary z-10 shrink-0 mx-auto absolute left-0 md:relative md:left-auto mt-2 md:mt-0 shadow-lg group-hover:scale-110 transition-transform">
-                                      <span className="material-symbols-outlined text-[14px]">
+                                      <span className="material-symbols-outlined notranslate text-[14px]" translate="no">
                                          {log.type === 'Email' ? 'mail' : log.type === 'Incident' ? 'emergency' : log.type === 'Contractual' ? 'description' : 'call'}
                                       </span>
                                    </div>

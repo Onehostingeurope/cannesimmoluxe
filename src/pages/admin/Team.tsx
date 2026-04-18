@@ -196,7 +196,7 @@ const Team = () => {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8 pb-8 border-b border-outline-variant/20">
           <div className="space-y-4">
             <div className="flex items-center gap-3 mb-2">
-              <span className="material-symbols-outlined text-secondary text-base">groups</span>
+              <span className="material-symbols-outlined notranslate text-secondary text-base" translate="no">groups</span>
               <p className="font-label text-[10px] tracking-[0.2em] uppercase text-outline">Executive Core</p>
             </div>
             <h2 className="font-headline text-4xl text-primary">Executive Directory</h2>
@@ -227,7 +227,7 @@ const Team = () => {
                       <img src={newOperative.avatar_url} alt="Profile Template" className="w-full h-full object-cover group-hover/newavatar:opacity-50 transition-opacity" />
                    ) : (
                       <div className="w-full h-full bg-[#f6f3ee] dark:bg-[#1c1b1b] flex flex-col items-center justify-center text-outline group-hover/newavatar:scale-110 transition-transform">
-                        <span className="material-symbols-outlined text-3xl mb-1 opacity-70">add_photo_alternate</span>
+                        <span className="material-symbols-outlined notranslate text-3xl mb-1 opacity-70" translate="no">add_photo_alternate</span>
                         <span className="text-[7px] font-label uppercase tracking-widest opacity-50">Upload</span>
                       </div>
                    )}
@@ -303,7 +303,7 @@ const Team = () => {
                       
                       {/* Upload Overlay */}
                       <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/avatar:opacity-100 transition-opacity bg-black/50 overflow-hidden">
-                          <span className="material-symbols-outlined text-white text-sm">photo_camera</span>
+                          <span className="material-symbols-outlined notranslate text-white text-sm" translate="no">photo_camera</span>
                       </div>
                       <input 
                          type="file" 
@@ -351,7 +351,7 @@ const Team = () => {
                      <button 
                        onClick={() => deleteProfile(profile.id)}
                        title="Revoke Operative"
-                       className="absolute top-1/2 -translate-y-1/2 right-0 lg:right-auto lg:-right-6 opacity-0 group-hover/actions:opacity-100 material-symbols-outlined text-outline hover:text-red-500 transition-all font-bold"
+                       className="absolute top-1/2 -translate-y-1/2 right-0 lg:right-auto lg:-right-6 opacity-0 group-hover/actions:opacity-100 material-symbols-outlined notranslate text-outline hover:text-red-500 transition-all font-bold"
                      >
                        delete
                      </button>

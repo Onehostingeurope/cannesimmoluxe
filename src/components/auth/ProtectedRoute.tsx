@@ -32,7 +32,7 @@ export const ProtectedRoute = ({ children, requireAdmin = false }: ProtectedRout
     return (
        <div className="min-h-screen bg-white dark:bg-black flex flex-col items-center justify-center p-6 text-center font-body animate-luxury-fade">
           <div className="mb-8 w-16 h-16 bg-[#f6f3ee] dark:bg-[#1c1b1b] border border-outline-variant/20 flex items-center justify-center rounded-full scale-110">
-             <span className="material-symbols-outlined text-3xl text-secondary">hourglass_empty</span>
+             <span className="material-symbols-outlined notranslate text-3xl text-secondary" translate="no">hourglass_empty</span>
           </div>
           <h1 className="font-headline text-3xl text-primary mb-4">Clearance Pending</h1>
           <p className="max-w-md text-sm text-on-surface-variant leading-relaxed mb-6 opacity-80">

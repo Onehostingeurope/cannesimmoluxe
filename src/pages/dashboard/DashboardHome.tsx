@@ -19,7 +19,7 @@ const DashboardHome = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
           <div className="lg:col-span-8 space-y-6">
             <div className="flex items-center gap-3">
-              <span className="material-symbols-outlined text-secondary text-base">verified_user</span>
+              <span className="material-symbols-outlined notranslate text-secondary text-base" translate="no">verified_user</span>
               <p className="font-label text-[10px] tracking-[0.2em] uppercase text-outline">Verified Access</p>
             </div>
             <h1 className="font-headline text-5xl md:text-6xl text-primary leading-tight">
@@ -32,7 +32,7 @@ const DashboardHome = () => {
           
           <div className="lg:col-span-4 bg-[#f6f3ee] dark:bg-[#1c1b1b] p-10 border border-outline-variant/10 relative overflow-hidden group">
             <div className="absolute -top-4 -right-4 opacity-5 group-hover:scale-110 transition-transform">
-               <span className="material-symbols-outlined text-[120px]">security</span>
+               <span className="material-symbols-outlined notranslate text-[120px]" translate="no">security</span>
             </div>
             <div className="relative z-10 space-y-4">
               <h3 className="font-headline text-xl text-primary">Identity Verified</h3>
@@ -51,7 +51,7 @@ const DashboardHome = () => {
             { label: 'Digital Dossiers', value: '1 Ready', icon: 'description', path: '/dashboard/documents' },
           ].map((action, idx) => (
             <div key={idx} className="bg-[#f6f3ee] dark:bg-[#1c1b1b] p-8 space-y-8 border border-outline-variant/10 hover:shadow-xl transition-all duration-500 group">
-              <span className="material-symbols-outlined text-secondary text-3xl group-hover:scale-110 transition-transform">{action.icon}</span>
+              <span className="material-symbols-outlined notranslate text-secondary text-3xl group-hover:scale-110 transition-transform" translate="no">{action.icon}</span>
               <div className="space-y-2">
                 <h4 className="font-headline text-2xl text-primary">{action.label}</h4>
                 <p className="font-label text-xs tracking-widest text-outline uppercase">{action.value}</p>
@@ -72,7 +72,7 @@ const DashboardHome = () => {
           <div className="flex justify-between items-end pb-4 border-b border-outline-variant/20">
             <div>
               <div className="flex items-center gap-3 mb-2">
-                <span className="material-symbols-outlined text-secondary text-base">auto_awesome</span>
+                <span className="material-symbols-outlined notranslate text-secondary text-base" translate="no">auto_awesome</span>
                 <p className="font-label text-[10px] tracking-[0.2em] uppercase text-outline">Intelligence Matching</p>
               </div>
               <h2 className="font-headline text-3xl text-primary">Tailored for You</h2>

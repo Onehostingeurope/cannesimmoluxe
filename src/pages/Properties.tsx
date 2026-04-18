@@ -49,7 +49,7 @@ const PropertiesPage = ({ mode }: PropertiesPageProps) => {
         <div className="max-w-7xl mx-auto space-y-10 animate-luxury-fade text-center md:text-left">
           <div className="flex flex-col md:flex-row items-center gap-4 mb-4">
              <div className="flex items-center gap-3">
-               <span className="material-symbols-outlined text-secondary text-base">architecture</span>
+               <span className="material-symbols-outlined notranslate text-secondary text-base" translate="no">architecture</span>
                <p className="font-label text-[10px] tracking-[0.4em] uppercase text-outline">{mode === 'sale' ? 'Portfolio Acquisition' : 'Seasonal Curations'}</p>
              </div>
              <div className="hidden md:block h-px w-24 bg-outline-variant/30"></div>
@@ -85,11 +85,11 @@ const PropertiesPage = ({ mode }: PropertiesPageProps) => {
           
           <div className="flex items-center gap-10 w-full md:w-auto justify-between md:justify-end">
              <div className="flex items-center gap-3 text-outline hover:text-primary cursor-pointer transition-colors group">
-                <span className="material-symbols-outlined text-lg group-hover:scale-110 transition-transform">search</span>
+                <span className="material-symbols-outlined notranslate text-lg group-hover:scale-110 transition-transform" translate="no">search</span>
                 <span className="font-label text-[10px] tracking-widest uppercase">Search Repository</span>
              </div>
              <div className="flex items-center gap-3 text-outline hover:text-primary cursor-pointer transition-colors group">
-                <span className="material-symbols-outlined text-lg group-hover:scale-110 transition-transform">tune</span>
+                <span className="material-symbols-outlined notranslate text-lg group-hover:scale-110 transition-transform" translate="no">tune</span>
                 <span className="font-label text-[10px] tracking-widest uppercase">Ledger Filters</span>
              </div>
           </div>
@@ -108,7 +108,7 @@ const PropertiesPage = ({ mode }: PropertiesPageProps) => {
           <div className="mt-40 text-center space-y-8">
              <div className="flex items-center justify-center gap-4">
                 <div className="h-px w-12 bg-outline-variant/20"></div>
-                <span className="material-symbols-outlined text-secondary opacity-40">stat_1</span>
+                <span className="material-symbols-outlined notranslate text-secondary opacity-40" translate="no">stat_1</span>
                 <div className="h-px w-12 bg-outline-variant/20"></div>
              </div>
              <p className="font-headline italic text-on-surface-variant opacity-40 text-sm">
