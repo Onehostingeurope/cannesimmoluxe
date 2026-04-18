@@ -13,6 +13,7 @@ const Contact = () => {
     firstName: '',
     lastName: '',
     email: '',
+    phone: '',
     message: '',
     category: location.state?.category || 'Real Estate'
   });
@@ -31,6 +32,7 @@ const Contact = () => {
           tracking_data: {
             first_name: form.firstName,
             last_name: form.lastName,
+            phone: form.phone,
             category: form.category
           }
         }
@@ -40,7 +42,7 @@ const Contact = () => {
       alert('Error sending enquiry: ' + error.message);
     } else {
       alert('Your enquiry has been securely transmitted to our concierge.');
-      setForm({ firstName: '', lastName: '', email: '', message: '', category: 'Real Estate' });
+      setForm({ firstName: '', lastName: '', email: '', phone: '', message: '', category: 'Real Estate' });
     }
     setLoading(false);
   };
@@ -106,9 +108,10 @@ const Contact = () => {
                  required
                />
             </div>
-            <div className="md:col-span-2 border-b border-primary/20 pb-2">
+            <div className="md:col-span-2 border-b border-primary/20 pb-2 relative mt-4">
+               <label className="text-[9px] text-primary/60 tracking-widest uppercase absolute -top-5 left-0">Select Nature of Inquiry</label>
                <select 
-                 className="bg-transparent w-full text-[10px] tracking-widest uppercase outline-none text-primary/80 appearance-none cursor-pointer" 
+                 className="bg-transparent w-full text-[10px] tracking-widest uppercase outline-none text-primary cursor-pointer font-bold" 
                  value={form.category}
                  onChange={(e) => setForm({ ...form, category: e.target.value })}
                  required
@@ -117,13 +120,23 @@ const Contact = () => {
                  <option value="Management">Property Management & Concierge</option>
                </select>
             </div>
-            <div className="md:col-span-2 border-b border-primary/20 pb-2">
+            <div className="border-b border-primary/20 pb-2">
                <input 
                  type="email" 
                  placeholder="EMAIL ADDRESS" 
                  className="bg-transparent w-full text-[10px] tracking-widest outline-none placeholder:text-outline/50" 
                  value={form.email}
                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                 required
+               />
+            </div>
+            <div className="border-b border-primary/20 pb-2">
+               <input 
+                 type="tel" 
+                 placeholder="TELEPHONE" 
+                 className="bg-transparent w-full text-[10px] tracking-widest outline-none placeholder:text-outline/50" 
+                 value={form.phone}
+                 onChange={(e) => setForm({ ...form, phone: e.target.value })}
                  required
                />
             </div>
