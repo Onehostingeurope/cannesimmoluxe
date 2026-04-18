@@ -10,7 +10,7 @@ const Team = () => {
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
   const [creating, setCreating] = useState(false);
-  const [newOperative, setNewOperative] = useState({ email: '', password: '', first_name: '', last_name: '', role: 'user' });
+  const [newOperative, setNewOperative] = useState({ email: '', password: '', first_name: '', last_name: '', role: 'user', avatar_url: '' });
   
   const currentUser = useAuthStore(state => state.user);
 
@@ -76,12 +76,13 @@ const Team = () => {
         await supabase.from('profiles').update({
           first_name: newOperative.first_name,
           last_name: newOperative.last_name,
-          role: newOperative.role
+          role: newOperative.role,
+          avatar_url: newOperative.avatar_url
         }).eq('id', data.user.id);
       }
 
       setShowCreate(false);
-      setNewOperative({ email: '', password: '', first_name: '', last_name: '', role: 'user' });
+      setNewOperative({ email: '', password: '', first_name: '', last_name: '', role: 'user', avatar_url: '' });
       fetchProfiles();
     } catch (err: any) {
       alert('Creation Error: ' + err.message);
@@ -102,6 +103,40 @@ const Team = () => {
     } else {
       fetchProfiles();
     }
+  };
+
+  const handleNewAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX_DIM = 250;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height && width > MAX_DIM) {
+          height *= MAX_DIM / width;
+          width = MAX_DIM;
+        } else if (height > MAX_DIM) {
+          width *= MAX_DIM / height;
+          height = MAX_DIM;
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx?.drawImage(img, 0, 0, width, height);
+        
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+        setNewOperative(prev => ({ ...prev, avatar_url: dataUrl }));
+      };
+      img.src = event.target?.result as string;
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, profileId: string) => {
@@ -184,6 +219,27 @@ const Team = () => {
         {showCreate && (
           <form onSubmit={handleCreate} className="bg-white dark:bg-[#0a0a0a] border border-outline-variant/10 p-8 space-y-6">
              <h3 className="font-headline text-xl text-primary border-b border-outline-variant/10 pb-4">New Operative Credentials</h3>
+             
+             {/* Dynamic Avatar UI Dropzone */}
+             <div className="flex justify-center mb-8 pt-4">
+                <div className="relative w-24 h-24 group/newavatar cursor-pointer shrink-0 rounded-full border border-outline-variant/20 overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300">
+                   {newOperative.avatar_url ? (
+                      <img src={newOperative.avatar_url} alt="Profile Template" className="w-full h-full object-cover group-hover/newavatar:opacity-50 transition-opacity" />
+                   ) : (
+                      <div className="w-full h-full bg-[#f6f3ee] dark:bg-[#1c1b1b] flex flex-col items-center justify-center text-outline group-hover/newavatar:scale-110 transition-transform">
+                        <span className="material-symbols-outlined text-3xl mb-1 opacity-70">add_photo_alternate</span>
+                        <span className="text-[7px] font-label uppercase tracking-widest opacity-50">Upload</span>
+                      </div>
+                   )}
+                   <input 
+                      type="file" 
+                      accept="image/*" 
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" 
+                      onChange={handleNewAvatarUpload}
+                   />
+                </div>
+             </div>
+
              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                    <label className="font-label text-[9px] tracking-widest uppercase text-outline opacity-50">First Name</label>
