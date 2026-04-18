@@ -28,9 +28,17 @@ const Settings = () => {
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [backups, setBackups] = useState<any[]>([]);
+  const [showRestoreModal, setShowRestoreModal] = useState(false);
+  const [restoreTarget, setRestoreTarget] = useState<any>(null);
+  const [validationText, setValidationText] = useState('');
+  const [adminPassword, setAdminPassword] = useState('');
+  const [restoring, setRestoring] = useState(false);
+  const [restoreError, setRestoreError] = useState('');
 
   useEffect(() => {
     fetchSettings();
+    fetchBackups();
   }, []);
 
   const fetchSettings = async () => {
@@ -47,6 +55,62 @@ const Settings = () => {
       setSettings(data.modules[0]);
     }
     setLoading(false);
+  };
+
+  const fetchBackups = async () => {
+    const { data } = await supabase
+      .from('cms_content')
+      .select('id, page_name, updated_at, modules')
+      .like('page_name', 'Backup-%')
+      .order('updated_at', { ascending: false });
+    if (data) setBackups(data);
+  };
+
+  const handleRestore = async () => {
+    setRestoreError('');
+    if (validationText !== 'RESTORE') {
+      setRestoreError('Validation mismatch: You must type RESTORE');
+      return;
+    }
+    setRestoring(true);
+    
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const userEmail = sessionData.session?.user?.email;
+
+      if (!userEmail) throw new Error('No active session identified.');
+
+      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+        email: userEmail,
+        password: adminPassword,
+      });
+
+      if (authError || !authData.user) {
+        throw new Error('Authentication Rejected: Invalid Administrator Password.');
+      }
+
+      const archive = restoreTarget.modules[0];
+      if (!archive || !archive.properties) throw new Error('Corrupt Archive: Payload missing.');
+
+      await supabase.from('inquiries').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+      await supabase.from('properties').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+
+      if (archive.properties.length > 0) {
+        await supabase.from('properties').insert(archive.properties);
+      }
+      if (archive.inquiries.length > 0) {
+        await supabase.from('inquiries').insert(archive.inquiries);
+      }
+
+      alert('Disaster Recovery Complete! Local matrix restored from archive: ' + restoreTarget.page_name);
+      setShowRestoreModal(false);
+      setRestoreTarget(null);
+      setValidationText('');
+      setAdminPassword('');
+    } catch (e: any) {
+      setRestoreError(e.message);
+    }
+    setRestoring(false);
   };
 
   const handleSave = async () => {
@@ -173,6 +237,36 @@ const Settings = () => {
                   </div>
                </div>
             </section>
+            
+             <section className="space-y-8 mt-12 bg-red-950/5 p-8 border border-red-500/20">
+               <div className="flex items-center gap-3 border-b border-red-500/20 pb-4">
+                 <span className="material-symbols-outlined text-red-500 notranslate" translate="no">emergency</span>
+                 <h3 className="font-headline text-2xl text-red-500">Disaster Recovery (30-Day Automated Engine)</h3>
+               </div>
+               
+               <div className="space-y-4">
+                 {backups.length === 0 ? (
+                   <p className="text-on-surface-variant text-sm opacity-50">No automated archives have been recorded yet. The engine runs daily at 00:00.</p>
+                 ) : backups.map((bkp) => (
+                   <div key={bkp.id} className="flex items-center justify-between bg-surface p-4 border border-outline-variant/10">
+                      <div>
+                        <p className="font-headline text-lg text-primary">{bkp.page_name}</p>
+                        <p className="text-xs text-outline font-label uppercase tracking-widest">{new Date(bkp.updated_at).toLocaleString()}</p>
+                      </div>
+                      <Button 
+                        variant="outline" 
+                        className="border-red-500/30 text-red-500 hover:bg-red-500 hover:text-white"
+                        onClick={() => {
+                          setRestoreTarget(bkp);
+                          setShowRestoreModal(true);
+                        }}
+                      >
+                        Initiate Restore
+                      </Button>
+                   </div>
+                 ))}
+               </div>
+             </section>
           </div>
 
           {/* Secondary Column */}
@@ -210,6 +304,50 @@ const Settings = () => {
           </div>
         </div>
       </div>
+
+      {showRestoreModal && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-surface p-8 max-w-lg w-full border border-red-500/30 space-y-6">
+            <h3 className="font-headline text-2xl text-red-500 border-b border-red-500/20 pb-4">Critical Action: Database Overwrite</h3>
+            <p className="text-sm text-on-surface leading-relaxed">
+              You are about to irreversibly OVERWRITE the live properties and CRM configuration with archive: <strong>{restoreTarget?.page_name}</strong>.
+            </p>
+            
+            {restoreError && <div className="text-red-500 text-xs bg-red-500/10 p-3">{restoreError}</div>}
+
+            <div className="space-y-4 pt-4">
+               <div>
+                  <label className="font-label text-[9px] tracking-widest uppercase text-outline">Intent Verification (Type RESTORE)</label>
+                  <input 
+                     type="text"
+                     placeholder="Type RESTORE here"
+                     className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/20 p-4 font-body text-sm text-primary mt-2"
+                     value={validationText}
+                     onChange={e => setValidationText(e.target.value)}
+                  />
+               </div>
+               <div>
+                  <label className="font-label text-[9px] tracking-widest uppercase text-outline">Executive Password</label>
+                  <input 
+                     type="password"
+                     placeholder="Enter your administrative password"
+                     className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/20 p-4 font-body text-sm text-primary mt-2"
+                     value={adminPassword}
+                     onChange={e => setAdminPassword(e.target.value)}
+                  />
+               </div>
+            </div>
+
+            <div className="flex gap-4 pt-4 border-t border-outline-variant/20">
+               <Button variant="outline" className="flex-1" onClick={() => setShowRestoreModal(false)} disabled={restoring}>Abort</Button>
+               <Button variant="primary" className="flex-1 bg-red-600 hover:bg-red-700 text-white border-none" onClick={handleRestore} disabled={restoring}>
+                 {restoring ? 'Overwriting...' : 'Execute Recovery'}
+               </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </AdminLayout>
   );
 };
