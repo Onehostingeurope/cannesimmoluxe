@@ -75,33 +75,26 @@ export const Navbar = () => {
 
         {/* Mobile Menu Toggle */}
         <button 
-          className={clsx("lg:hidden p-2 transition-colors duration-500", showContrast ? "text-luxury-charcoal" : "text-white")}
+          className={clsx("lg:hidden p-2 transition-colors duration-500 relative z-[60]", isMobileMenuOpen || !showContrast ? "text-white drop-shadow-lg" : "text-luxury-charcoal")}
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
         >
-          {isMobileMenuOpen ? <X /> : <Menu />}
+          {isMobileMenuOpen ? <X size={32} strokeWidth={1.5} /> : <Menu size={32} strokeWidth={1.5} />}
         </button>
       </div>
 
       {/* Mobile Menu */}
       <div 
         className={clsx(
-          "fixed inset-0 bg-surface z-40 lg:hidden transition-transform duration-500 ease-in-out p-12 flex flex-col items-center justify-center space-y-8",
-          isMobileMenuOpen ? "translate-x-0" : "translate-x-full"
+          "fixed inset-0 bg-black/95 backdrop-blur-2xl z-[55] lg:hidden transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] flex flex-col items-center justify-center space-y-10",
+          isMobileMenuOpen ? "opacity-100 pointer-events-auto translate-y-0" : "opacity-0 pointer-events-none -translate-y-8"
         )}
       >
-        <button 
-          className="absolute top-8 right-8 text-luxury-charcoal"
-          onClick={() => setIsMobileMenuOpen(false)}
-        >
-          <X size={32} />
-        </button>
-
         {navLinks.map((link) => (
           <Link 
             key={link.label} 
             to={link.href}
             onClick={() => setIsMobileMenuOpen(false)}
-            className="font-serif text-3xl text-luxury-charcoal hover:text-luxury-gold transition-colors"
+            className="font-headline text-4xl text-white hover:text-secondary hover:italic transition-all duration-300 transform hover:scale-110"
           >
             {link.label}
           </Link>
@@ -109,7 +102,7 @@ export const Navbar = () => {
         
         <div className="pt-12">
           <Link to="/login" onClick={() => setIsMobileMenuOpen(false)}>
-            <Button variant="primary" className="flex items-center gap-3">
+            <Button variant="secondary" className="flex items-center gap-3 px-8 h-12 bg-white text-black hover:bg-secondary hover:text-white rounded-none">
               <Lock className="w-4 h-4" />
               Private Access
             </Button>
