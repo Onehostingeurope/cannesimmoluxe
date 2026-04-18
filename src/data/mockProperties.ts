@@ -14,6 +14,7 @@ export const MOCK_PROPERTIES = [
     images: ['https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=1200'],
     featured: true,
     mode: 'sale' as const,
+    status: 'available',
     slug: 'villa-etoile',
     ref_id: 'REF-8841'
   },
@@ -32,6 +33,7 @@ export const MOCK_PROPERTIES = [
     images: ['https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&q=80&w=1200'],
     featured: true,
     mode: 'sale' as const,
+    status: 'available',
     slug: 'penthouse-croisette',
     ref_id: 'REF-9210'
   },
@@ -50,6 +52,7 @@ export const MOCK_PROPERTIES = [
     images: ['https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&q=80&w=1200'],
     featured: false,
     mode: 'sale' as const,
+    status: 'available',
     slug: 'domaine-de-la-mer',
     ref_id: 'REF-7742'
   },
@@ -68,6 +71,7 @@ export const MOCK_PROPERTIES = [
     images: ['https://images.unsplash.com/photo-1577495508048-b635879837f1?auto=format&fit=crop&q=80&w=1200'],
     featured: false,
     mode: 'rent' as const,
+    status: 'available',
     slug: 'le-palais-moderne',
     ref_id: 'REF-8801'
   }
