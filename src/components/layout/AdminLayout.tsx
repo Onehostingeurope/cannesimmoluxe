@@ -17,6 +17,7 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
     { label: 'Portfolio', icon: 'domain', path: '/admin/properties' },
     { label: 'Analytics', icon: 'insights', path: '/admin' },
     { label: 'CRM', icon: 'hub', path: '/admin/crm' },
+    { label: 'Editorial CMS', icon: 'auto_stories', path: '/admin/cms' },
     { label: 'Marketing', icon: 'campaign', path: '/admin/marketing' },
     { label: 'Team', icon: 'groups', path: '/admin/team' },
     { label: 'Settings', icon: 'settings', path: '/admin/settings' },
