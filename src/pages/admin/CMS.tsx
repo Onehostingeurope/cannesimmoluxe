@@ -112,25 +112,47 @@ const CMS = () => {
   const handleFileUpload = async (moduleId: string, file: File) => {
     try {
       setUploading(moduleId);
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${Math.random()}.${fileExt}`;
-      const filePath = `cms/${fileName}`;
+      const isVideo = file.type.startsWith('video/');
+      
+      if (isVideo) {
+        alert("Native video file upload exceeds DB limits. Please use YouTube IDs instead.");
+        setUploading(null);
+        return;
+      }
 
-      const { error: uploadError } = await supabase.storage
-        .from('assets')
-        .upload(filePath, file);
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const MAX_DIM = 1200;
+          let width = img.width;
+          let height = img.height;
 
-      if (uploadError) throw uploadError;
+          if (width > height && width > MAX_DIM) {
+            height *= MAX_DIM / width;
+            width = MAX_DIM;
+          } else if (height > MAX_DIM) {
+            width *= MAX_DIM / height;
+            height = MAX_DIM;
+          }
 
-      const { data: { publicUrl } } = supabase.storage
-        .from('assets')
-        .getPublicUrl(filePath);
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx?.drawImage(img, 0, 0, width, height);
+          
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+          updateModuleContent(moduleId, 'media_url', dataUrl);
+          updateModuleContent(moduleId, 'media_type', 'image');
+          setUploading(null);
+        };
+        img.src = event.target?.result as string;
+      };
+      reader.readAsDataURL(file);
 
-      updateModuleContent(moduleId, 'media_url', publicUrl);
-      updateModuleContent(moduleId, 'media_type', file.type.startsWith('video/') ? 'video' : 'image');
     } catch (error: any) {
-      alert('Error uploading file: ' + error.message);
-    } finally {
+      alert('Error processing file: ' + error.message);
       setUploading(null);
     }
   };
@@ -138,29 +160,45 @@ const CMS = () => {
   const handleGridFileUpload = async (moduleId: string, itemIdx: number, file: File) => {
     try {
       setUploading(`${moduleId}-${itemIdx}`);
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${Math.random()}.${fileExt}`;
-      const filePath = `cms/${fileName}`;
 
-      const { error: uploadError } = await supabase.storage
-        .from('assets')
-        .upload(filePath, file);
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const MAX_DIM = 800;
+          let width = img.width;
+          let height = img.height;
 
-      if (uploadError) throw uploadError;
+          if (width > height && width > MAX_DIM) {
+            height *= MAX_DIM / width;
+            width = MAX_DIM;
+          } else if (height > MAX_DIM) {
+            width *= MAX_DIM / height;
+            height = MAX_DIM;
+          }
 
-      const { data: { publicUrl } } = supabase.storage
-        .from('assets')
-        .getPublicUrl(filePath);
-
-      const newModules = [...modules];
-      const mIdx = newModules.findIndex(m => m.id === moduleId);
-      if (newModules[mIdx].grid_items) {
-        newModules[mIdx].grid_items[itemIdx].img = publicUrl;
-        setModules(newModules);
-      }
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx?.drawImage(img, 0, 0, width, height);
+          
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+          
+          const newModules = [...modules];
+          const mIdx = newModules.findIndex(m => m.id === moduleId);
+          if (newModules[mIdx].grid_items) {
+            newModules[mIdx].grid_items[itemIdx].img = dataUrl;
+            setModules(newModules);
+          }
+          setUploading(null);
+        };
+        img.src = event.target?.result as string;
+      };
+      reader.readAsDataURL(file);
+      
     } catch (error: any) {
-      alert('Error uploading file: ' + error.message);
-    } finally {
+      alert('Error processing file: ' + error.message);
       setUploading(null);
     }
   };
