@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Layout } from '../components/layout/Layout';
 import { PropertyCard } from '../components/property/PropertyCard';
-import { MOCK_PROPERTIES } from '../data/mockProperties';
+import { supabase } from '../lib/supabase';
 import { clsx } from 'clsx';
 
 interface PropertiesPageProps {
@@ -10,8 +10,33 @@ interface PropertiesPageProps {
 
 const PropertiesPage = ({ mode }: PropertiesPageProps) => {
   const [filterType, setFilterType] = useState('All');
-  
-  const properties = MOCK_PROPERTIES.filter(p => p.mode === mode);
+  const [properties, setProperties] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchProperties();
+  }, [mode, filterType]);
+
+  const fetchProperties = async () => {
+    setLoading(true);
+    let query = supabase
+      .from('properties')
+      .select('*')
+      .eq('mode', mode);
+    
+    if (filterType !== 'All') {
+      query = query.ilike('type', `%${filterType}%`);
+    }
+
+    const { data, error } = await query.order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching properties:', error);
+    } else {
+      setProperties(data || []);
+    }
+    setLoading(false);
+  };
   const title = mode === 'sale' ? 'Exquisite Sales' : 'Seasonal Rentals';
   const subtitle = mode === 'sale' 
     ? 'A curated selection of the most prestigious residences on the Côte d’Azur.' 
