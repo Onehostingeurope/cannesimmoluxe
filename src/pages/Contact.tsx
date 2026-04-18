@@ -14,9 +14,21 @@ const Contact = () => {
     phone: '',
     message: ''
   });
+  const [errors, setErrors] = useState<{ email?: string, phone?: string }>({});
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    const newErrors: { email?: string, phone?: string } = {};
+    if (!form.email || form.email.trim() === '') newErrors.email = "* Email strictly required";
+    if (!form.phone || form.phone.trim() === '') newErrors.phone = "* Phone number strictly required";
+    
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+    
+    setErrors({});
     setLoading(true);
 
     const { error } = await supabase
@@ -105,7 +117,7 @@ const Contact = () => {
                  required
                />
             </div>
-            <div className="border-b border-primary/20 pb-2">
+            <div className="relative border-b border-primary/20 pb-2">
                <input 
                  type="email" 
                  placeholder="EMAIL ADDRESS" 
@@ -114,8 +126,9 @@ const Contact = () => {
                  onChange={(e) => setForm({ ...form, email: e.target.value })}
                  required
                />
+               {errors.email && <span className="absolute -bottom-5 left-0 text-red-600 font-label text-[9px] uppercase tracking-widest">{errors.email}</span>}
             </div>
-            <div className="border-b border-primary/20 pb-2">
+            <div className="relative border-b border-primary/20 pb-2">
                <input 
                  type="tel" 
                  placeholder="TELEPHONE" 
@@ -124,6 +137,7 @@ const Contact = () => {
                  onChange={(e) => setForm({ ...form, phone: e.target.value })}
                  required
                />
+               {errors.phone && <span className="absolute -bottom-5 left-0 text-red-600 font-label text-[9px] uppercase tracking-widest">{errors.phone}</span>}
             </div>
             <div className="md:col-span-2 border-b border-primary/20 pb-2 h-32">
                <textarea 

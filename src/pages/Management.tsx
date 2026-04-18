@@ -26,6 +26,7 @@ const Management = () => {
     address: '',
     details: ''
   });
+  const [errors, setErrors] = useState<{ email?: string, phone?: string }>({});
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -61,6 +62,20 @@ const Management = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Strict Input Validation
+    const newErrors: { email?: string, phone?: string } = {};
+    if (!form.email || form.email.trim() === '') newErrors.email = "* SECURE EMAIL STRICTLY REQUIRED";
+    if (!form.phone || form.phone.trim() === '') newErrors.phone = "* TELEPHONE STRICTLY REQUIRED";
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      // Ensure the browser scrolls instantly to the errors so the user physically sees what blocked the submission
+      setTimeout(() => document.getElementById('management-portal')?.scrollIntoView({ behavior: 'smooth' }), 50);
+      return;
+    }
+
+    setErrors({});
     setLoading(true);
 
     const { error } = await supabase
@@ -226,11 +241,13 @@ const Management = () => {
                   <div className="border-b border-white/20 pb-2">
                      <input type="text" placeholder="LAST NAME" className="bg-transparent w-full text-[10px] tracking-widest outline-none placeholder:text-white/30 text-white" value={form.lastName} onChange={e => setForm({...form, lastName: e.target.value})} required />
                   </div>
-                  <div className="border-b border-white/20 pb-2">
+                  <div className="relative border-b border-white/20 pb-2">
                      <input type="email" placeholder="SECURE EMAIL" className="bg-transparent w-full text-[10px] tracking-widest outline-none placeholder:text-white/30 text-white" value={form.email} onChange={e => setForm({...form, email: e.target.value})} required />
+                     {errors.email && <span className="absolute -bottom-5 left-0 text-red-600 font-label text-[9px] uppercase tracking-widest animate-pulse">{errors.email}</span>}
                   </div>
-                  <div className="border-b border-white/20 pb-2">
+                  <div className="relative border-b border-white/20 pb-2">
                      <input type="tel" placeholder="TELEPHONE" className="bg-transparent w-full text-[10px] tracking-widest outline-none placeholder:text-white/30 text-white" value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} required />
+                     {errors.phone && <span className="absolute -bottom-5 left-0 text-red-600 font-label text-[9px] uppercase tracking-widest animate-pulse">{errors.phone}</span>}
                   </div>
 
                   {/* Property Details */}
