@@ -87,6 +87,7 @@ const Team = () => {
     }
   };
 
+
   const deleteProfile = async (id: string) => {
     if (!window.confirm('Are you sure you want to revoke this operative? This will permanently delete their directory profile and revoke all administrative access.')) return;
     
@@ -96,6 +97,56 @@ const Team = () => {
     } else {
       fetchProfiles();
     }
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, profileId: string) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Client-side visual compression matrix
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = async () => {
+        const canvas = document.createElement('canvas');
+        const MAX_DIM = 250;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height && width > MAX_DIM) {
+          height *= MAX_DIM / width;
+          width = MAX_DIM;
+        } else if (height > MAX_DIM) {
+          width *= MAX_DIM / height;
+          height = MAX_DIM;
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx?.drawImage(img, 0, 0, width, height);
+        
+        // Output as highly optimized jpeg base64
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+        
+        try {
+           const { error } = await supabase.from('profiles').update({ avatar_url: dataUrl }).eq('id', profileId);
+           if (error) {
+             if (error.message.includes('avatar_url')) {
+                alert('CRITICAL: You must execute the SQL Database modification first to enable the avatar_url column.');
+             } else {
+                throw error;
+             }
+           } else {
+             fetchProfiles();
+           }
+        } catch(err: any) {
+           alert('Transmission Error: ' + err.message);
+        }
+      };
+      img.src = event.target?.result as string;
+    };
+    reader.readAsDataURL(file);
   };
 
   return (
@@ -170,11 +221,28 @@ const Team = () => {
              </div>
           ) : (
             profiles.map((profile) => (
-              <div key={profile.id} className="bg-white dark:bg-[#0a0a0a] border border-outline-variant/10 p-8 flex flex-col lg:flex-row justify-between items-center gap-8 hover:shadow-xl transition-all duration-500 group">
-                {/* Visual Bio */}
+              <div key={profile.id} className="bg-white dark:bg-[#0a0a0a] border border-outline-variant/10 p-8 flex flex-col lg:flex-row justify-between items-center gap-8 hover:shadow-xl transition-all duration-500 group relative">
+                {/* Visual Bio with Hidden File Uploader */}
                 <div className="flex items-center gap-8 w-full lg:w-1/3">
-                   <div className="w-14 h-14 bg-[#f6f3ee] dark:bg-[#1c1b1b] border border-outline-variant/20 flex items-center justify-center font-headline text-2xl text-primary group-hover:scale-110 transition-transform">
-                     {profile.first_name ? profile.first_name[0] : 'U'}
+                   <div className="relative w-14 h-14 group/avatar cursor-pointer shrink-0">
+                      {profile.avatar_url ? (
+                         <img src={profile.avatar_url} alt={profile.first_name} className="w-full h-full object-cover shadow-md group-hover/avatar:opacity-50 transition-opacity" />
+                      ) : (
+                         <div className="w-full h-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border border-outline-variant/20 flex items-center justify-center font-headline text-2xl text-primary group-hover/avatar:scale-110 transition-transform">
+                           {profile.first_name ? profile.first_name[0] : 'U'}
+                         </div>
+                      )}
+                      
+                      {/* Upload Overlay */}
+                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/avatar:opacity-100 transition-opacity bg-black/50 overflow-hidden">
+                          <span className="material-symbols-outlined text-white text-sm">photo_camera</span>
+                      </div>
+                      <input 
+                         type="file" 
+                         accept="image/*" 
+                         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" 
+                         onChange={(e) => handleFileUpload(e, profile.id)}
+                      />
                    </div>
                    <div className="space-y-1">
                       <div className="text-lg font-bold text-primary">
