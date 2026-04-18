@@ -239,6 +239,7 @@ const PropertyEditor = () => {
                        <select {...register('status')} className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/20 p-4 font-label text-[10px] tracking-widest uppercase">
                           <option value="available">Available</option>
                           <option value="highlight">Exclusive Highlight</option>
+                          <option value="off-market">Off-Market (Confidential)</option>
                           <option value="reserved">Reserved</option>
                           <option value="sold">Decommissioned (Sold)</option>
                        </select>
