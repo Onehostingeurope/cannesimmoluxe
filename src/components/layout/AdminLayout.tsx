@@ -4,6 +4,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../../store/useAuthStore';
 import { Button } from '../ui/Button';
 import { supabase } from '../../lib/supabase';
+import { LanguageSwitcher } from './LanguageSwitcher';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -90,9 +91,12 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
         </nav>
 
         <div className="mt-auto pt-6 space-y-4">
+          <div className="px-4 pb-2 border-b border-outline-variant/10 flex justify-center">
+            <LanguageSwitcher />
+          </div>
           <Button 
             variant="primary" 
-            className="w-full py-3 font-semibold text-xs tracking-widest"
+            className="w-full py-3 font-semibold text-xs tracking-widest mt-2"
             onClick={() => navigate('/admin/properties/new')}
           >
             New Listing
