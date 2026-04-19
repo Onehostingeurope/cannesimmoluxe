@@ -2,10 +2,16 @@ import { useState, useEffect } from 'react';
 import { Layout } from '../components/layout/Layout';
 import { Button } from '../components/ui/Button';
 import { useNavigate } from 'react-router-dom';
+
 import { supabase } from '../lib/supabase';
 
 const Home = () => {
   const navigate = useNavigate();
+  const [currentLang, setCurrentLang] = useState('en');
+  useEffect(() => {
+    const match = document.cookie.match(/googtrans=\/[a-zA-Z]{2}\/([a-zA-Z]{2})/);
+    if (match && match[1]) setCurrentLang(match[1]);
+  }, []);
   const [heroData, setHeroData] = useState<any>(null);
   const [gridData, setGridData] = useState<any>(null);
   const [textData, setTextData] = useState<any>(null);
@@ -165,11 +171,26 @@ const Home = () => {
       <section className="bg-white dark:bg-[#0a0a0a] py-32 px-6 md:px-12 lg:px-24">
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-20 items-center">
           <div className="lg:col-span-5 relative order-2 lg:order-1">
-             <div className="aspect-[3/4] overflow-hidden bg-black border-[20px] border-[#f6f3ee] dark:border-[#1c1b1b] shadow-2xl">
+             <div 
+               className="aspect-[3/4] overflow-hidden bg-black border-[20px] border-[#f6f3ee] dark:border-[#1c1b1b] shadow-2xl relative group cursor-pointer"
+               onMouseEnter={(e) => { const v = e.currentTarget.querySelector('video'); if (v) v.play(); }}
+               onMouseLeave={(e) => { const v = e.currentTarget.querySelector('video'); if (v) v.pause(); }}
+             >
                 <img 
                   src={textData?.media_url || "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=1000"} 
-                  className="w-full h-full object-cover grayscale transition-all duration-[5s] hover:grayscale-0"
+                  className="absolute inset-0 w-full h-full object-cover grayscale transition-all duration-700 group-hover:opacity-0 group-hover:scale-105 z-10"
                 />
+                
+                {(textData?.en_video_url || textData?.fr_video_url) && (
+                   <video 
+                     src={currentLang === 'fr' ? (textData?.fr_video_url || textData?.en_video_url) : (textData?.en_video_url || textData?.fr_video_url)} 
+                     className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-700 z-0" 
+                     preload="auto" 
+                     muted 
+                     loop 
+                     playsInline 
+                   />
+                )}
              </div>
              <div className="absolute -bottom-10 -right-10 w-48 h-48 bg-secondary flex flex-col items-center justify-center text-white p-8 text-center space-y-2 shadow-2xl">
                 <span className="font-headline text-4xl">25</span>

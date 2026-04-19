@@ -121,81 +121,50 @@ const CMS = () => {
     setModules(prev => prev.map(m => m.id === id ? { ...m, [field]: value } : m));
   };
 
-  const handleFileUpload = async (moduleId: string, file: File) => {
+  const handleFileUpload = async (moduleId: string, file: File, targetField: string = 'media_url') => {
+    if (!file) return;
     try {
-      setUploading(moduleId);
+      setUploading(`${moduleId}-${targetField}`);
       const isVideo = file.type.startsWith('video/');
+      const folder = isVideo ? 'videos' : 'images';
       
-      if (isVideo) {
-        if (file.size > 50 * 1024 * 1024) {
-           alert("Video exceeds 50MB limit. Please compress your asset.");
-           setUploading(null);
-           return;
-        }
-
-        const fileExt = file.name.split('.').pop();
-        const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
-        const filePath = `videos/${fileName}`;
-
-        const { error: uploadError } = await supabase.storage
-          .from('media')
-          .upload(filePath, file, { cacheControl: '3600', upsert: false });
-
-        if (uploadError) {
-           if (uploadError.message.includes('Bucket not found') || uploadError.message.includes('row-level security') || uploadError.message.includes('Violates')) {
-              alert("System Requirement: To upload native videos, please log into your Supabase Dashboard, create a new Storage Bucket named 'media', and set it to 'Public'.");
-           } else {
-              alert(`Storage Error: ${uploadError.message}`);
-           }
-           setUploading(null);
-           return;
-        }
-
-        const { data: publicUrlData } = supabase.storage
-          .from('media')
-          .getPublicUrl(filePath);
-
-        updateModuleContent(moduleId, 'media_url', publicUrlData.publicUrl);
-        updateModuleContent(moduleId, 'media_type', 'video');
-        setUploading(null);
-        return;
+      if (isVideo && file.size > 50 * 1024 * 1024) {
+         alert("Video exceeds 50MB limit. Please compress your asset.");
+         setUploading(null);
+         return;
       }
 
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const img = new Image();
-        img.onload = () => {
-          const canvas = document.createElement('canvas');
-          const MAX_DIM = 1200;
-          let width = img.width;
-          let height = img.height;
+      if (!isVideo && file.size > 20 * 1024 * 1024) {
+         alert("Image exceeds 20MB High-Definition limit. Please compress out of bounds vectors.");
+         setUploading(null);
+         return;
+      }
 
-          if (width > height && width > MAX_DIM) {
-            height *= MAX_DIM / width;
-            width = MAX_DIM;
-          } else if (height > MAX_DIM) {
-            width *= MAX_DIM / height;
-            height = MAX_DIM;
-          }
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
+      const filePath = `${folder}/${fileName}`;
 
-          canvas.width = width;
-          canvas.height = height;
-          const ctx = canvas.getContext('2d');
-          ctx?.drawImage(img, 0, 0, width, height);
-          
-          const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
-          updateModuleContent(moduleId, 'media_url', dataUrl);
-          updateModuleContent(moduleId, 'media_type', 'image');
-          setUploading(null);
-        };
-        img.onerror = () => {
-          alert("Operating System Error: This image matrix is corrupt or an unsupported iPhone HDR (HEIC) file format. Please upload a standard JPEG or PNG.");
-          setUploading(null);
-        };
-        img.src = event.target?.result as string;
-      };
-      reader.readAsDataURL(file);
+      const { error: uploadError } = await supabase.storage
+        .from('media')
+        .upload(filePath, file, { cacheControl: '3600', upsert: false });
 
+      if (uploadError) {
+         if (uploadError.message.includes('Bucket not found') || uploadError.message.includes('row-level security') || uploadError.message.includes('Violates')) {
+            alert("System Requirement: Please log into your Supabase Dashboard, create a new Storage Bucket named 'media', and set it to 'Public'.");
+         } else {
+            alert(`Storage Error: ${uploadError.message}`);
+         }
+         setUploading(null);
+         return;
+      }
+
+      const { data: publicUrlData } = supabase.storage
+        .from('media')
+        .getPublicUrl(filePath);
+
+      updateModuleContent(moduleId, targetField, publicUrlData.publicUrl);
+      if (targetField === 'media_url') updateModuleContent(moduleId, 'media_type', isVideo ? 'video' : 'image');
+      setUploading(null);
     } catch (error: any) {
       alert('Error processing file: ' + error.message);
       setUploading(null);
@@ -203,51 +172,43 @@ const CMS = () => {
   };
 
   const handleGridFileUpload = async (moduleId: string, itemIdx: number, file: File) => {
+    if (!file) return;
     try {
       setUploading(`${moduleId}-${itemIdx}`);
 
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const img = new Image();
-        img.onload = () => {
-          const canvas = document.createElement('canvas');
-          const MAX_DIM = 800;
-          let width = img.width;
-          let height = img.height;
+      if (file.size > 15 * 1024 * 1024) {
+         alert("Image exceeds 15MB limit. Please compress out of bounds files.");
+         setUploading(null);
+         return;
+      }
 
-          if (width > height && width > MAX_DIM) {
-            height *= MAX_DIM / width;
-            width = MAX_DIM;
-          } else if (height > MAX_DIM) {
-            width *= MAX_DIM / height;
-            height = MAX_DIM;
-          }
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
+      const filePath = `images/grids/${fileName}`;
 
-          canvas.width = width;
-          canvas.height = height;
-          const ctx = canvas.getContext('2d');
-          ctx?.drawImage(img, 0, 0, width, height);
-          
-          const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
-          
-          setModules(prev => {
-            const newModules = [...prev];
-            const mIdx = newModules.findIndex(m => m.id === moduleId);
-            if (mIdx !== -1 && newModules[mIdx].grid_items) {
-              newModules[mIdx].grid_items[itemIdx].img = dataUrl;
-            }
-            return newModules;
-          });
-          setUploading(null);
-        };
-        img.onerror = () => {
-          alert("Operating System Error: This image matrix is corrupt or an unsupported iPhone HDR (HEIC) file format. Please upload a standard JPEG or PNG.");
-          setUploading(null);
-        };
-        img.src = event.target?.result as string;
-      };
-      reader.readAsDataURL(file);
+      const { error: uploadError } = await supabase.storage
+        .from('media')
+        .upload(filePath, file, { cacheControl: '3600', upsert: false });
+
+      if (uploadError) {
+         alert(`Storage Error: ${uploadError.message}`);
+         setUploading(null);
+         return;
+      }
+
+      const { data: publicUrlData } = supabase.storage
+        .from('media')
+        .getPublicUrl(filePath);
       
+      setModules(prev => prev.map(m => {
+        if (m.id === moduleId && m.grid_items) {
+           const newItems = [...m.grid_items];
+           newItems[itemIdx] = { ...newItems[itemIdx], img: publicUrlData.publicUrl };
+           return { ...m, grid_items: newItems };
+        }
+        return m;
+      }));
+      setUploading(null);
     } catch (error: any) {
       alert('Error processing file: ' + error.message);
       setUploading(null);
