@@ -16,7 +16,7 @@ const Home = () => {
   const [gridData, setGridData] = useState<any>(null);
   const [textData, setTextData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [isMuted, setIsMuted] = useState(true);
+  const [isMuted, setIsMuted] = useState(false);
   const [isPlaybackActive, setIsPlaybackActive] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -171,20 +171,26 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Concierge Engagement Segment - 9:16 Vertical Hybrid Layout */}
+      {/* Concierge Engagement Segment - 9:16 Vertical Hybrid Layout with Direct Audio */}
       <section className="bg-white dark:bg-[#0a0a0a] py-32 px-6 md:px-12 lg:px-24">
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
           <div className="lg:col-span-4 relative order-2 lg:order-1">
              <div 
-               className="aspect-[9/16] overflow-hidden bg-black shadow-2xl relative cursor-pointer"
+               className="aspect-[9/16] overflow-hidden bg-black shadow-2xl relative cursor-pointer group"
                onMouseEnter={() => setIsPlaybackActive(true)}
              >
+                {/* Instructional Instruction Layer */}
+                <div className={`absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/40 transition-opacity duration-700 pointer-events-none ${isPlaybackActive ? 'opacity-0' : 'opacity-100'}`}>
+                   <span className="material-symbols-outlined notranslate text-white text-4xl animate-pulse mb-4" translate="no">visibility</span>
+                   <p className="font-label text-[10px] tracking-[0.4em] uppercase text-white/80">Hover to listen</p>
+                </div>
+
                 <img 
                   src={textData?.media_url || "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=1000"} 
                   className={`absolute inset-0 w-full h-full object-cover grayscale transition-all duration-700 ${isPlaybackActive ? 'opacity-0 scale-110' : 'opacity-100 scale-100'} z-10`}
                 />
                 
-                {/* High-Fidelity Video Layer (Persistent playback until end) */}
+                {/* High-Fidelity Video Layer (Direct Audio Attempt) */}
                 { (textData?.en_video_url || textData?.fr_video_url) ? (
                     <video 
                       ref={videoRef}
@@ -207,7 +213,7 @@ const Home = () => {
                     </div>
                 )}
 
-                {/* Premium Audio Controls */}
+                {/* Backup Audio Controls (Appears if auto-muted or manually toggled) */}
                 <div className={`absolute bottom-6 right-6 z-30 transition-opacity ${isPlaybackActive ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
                     <button 
                       onClick={(e) => { e.stopPropagation(); setIsMuted(!isMuted); }}
