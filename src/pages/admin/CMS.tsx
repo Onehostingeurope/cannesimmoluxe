@@ -90,13 +90,20 @@ const CMS = () => {
   const handleDeploy = async () => {
     setSaving(true);
     try {
-      const { error } = await supabase
-        .from('cms_content')
-        .upsert({ 
-          page_name: activePage, 
-          modules: modules,
-          updated_at: new Date().toISOString()
-        }, { onConflict: 'page_name' });
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Network Timeout: The data matrix is too heavy to stream (Likely massive Base64 images). Please use the new Storage Pipeline instead.')), 15000)
+      );
+
+      const { error } = await Promise.race([
+        supabase
+          .from('cms_content')
+          .upsert({ 
+            page_name: activePage, 
+            modules: modules,
+            updated_at: new Date().toISOString()
+          }, { onConflict: 'page_name' }),
+        timeoutPromise
+      ]) as any;
 
       if (error) {
         throw error;
