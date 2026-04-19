@@ -35,6 +35,20 @@ const Settings = () => {
   const [adminPassword, setAdminPassword] = useState('');
   const [restoring, setRestoring] = useState(false);
   const [restoreError, setRestoreError] = useState('');
+  
+  // Anti-Brute Force Local Matrix
+  const [failedAttempts, setFailedAttempts] = useState(0);
+  const [lockoutTimer, setLockoutTimer] = useState(0);
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (lockoutTimer > 0) {
+      interval = setInterval(() => {
+        setLockoutTimer((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [lockoutTimer]);
 
   useEffect(() => {
     fetchSettings();
@@ -67,6 +81,7 @@ const Settings = () => {
   };
 
   const handleRestore = async () => {
+    if (lockoutTimer > 0) return;
     setRestoreError('');
     if (validationText !== 'RESTORE') {
       setRestoreError('Validation mismatch: You must type RESTORE');
@@ -108,6 +123,16 @@ const Settings = () => {
       setValidationText('');
       setAdminPassword('');
     } catch (e: any) {
+      setFailedAttempts((prev) => {
+        const newAttempts = prev + 1;
+        let delay = 0;
+        if (newAttempts === 2) delay = 3;
+        else if (newAttempts === 3) delay = 10;
+        else if (newAttempts >= 4) delay = 30;
+        
+        if (delay > 0) setLockoutTimer(delay);
+        return newAttempts;
+      });
       setRestoreError(e.message);
     }
     setRestoring(false);
@@ -321,9 +346,10 @@ const Settings = () => {
                   <input 
                      type="text"
                      placeholder="Type RESTORE here"
-                     className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/20 p-4 font-body text-sm text-primary mt-2"
+                     className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/20 p-4 font-body text-sm text-primary mt-2 flex disabled:opacity-50"
                      value={validationText}
                      onChange={e => setValidationText(e.target.value)}
+                     disabled={lockoutTimer > 0}
                   />
                </div>
                <div>
@@ -331,17 +357,25 @@ const Settings = () => {
                   <input 
                      type="password"
                      placeholder="Enter your administrative password"
-                     className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/20 p-4 font-body text-sm text-primary mt-2"
+                     className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/20 p-4 font-body text-sm text-primary mt-2 disabled:opacity-50"
                      value={adminPassword}
                      onChange={e => setAdminPassword(e.target.value)}
+                     disabled={lockoutTimer > 0}
                   />
                </div>
             </div>
 
+            {lockoutTimer > 0 && (
+              <div className="bg-red-500/10 border border-red-500/30 text-red-500 text-xs p-3 flex items-center justify-between">
+                <span>Security Shield Active.</span>
+                <span className="font-bold tracking-widest">{lockoutTimer}s Lockout</span>
+              </div>
+            )}
+
             <div className="flex gap-4 pt-4 border-t border-outline-variant/20">
                <Button variant="outline" className="flex-1" onClick={() => setShowRestoreModal(false)} disabled={restoring}>Abort</Button>
-               <Button variant="primary" className="flex-1 bg-red-600 hover:bg-red-700 text-white border-none" onClick={handleRestore} disabled={restoring}>
-                 {restoring ? 'Overwriting...' : 'Execute Recovery'}
+               <Button variant="primary" className="flex-1 bg-red-600 hover:bg-red-700 text-white border-none disabled:opacity-50" onClick={handleRestore} disabled={restoring || lockoutTimer > 0}>
+                 {restoring ? 'Overwriting...' : (lockoutTimer > 0 ? 'Restricted' : 'Execute Recovery')}
                </Button>
             </div>
           </div>

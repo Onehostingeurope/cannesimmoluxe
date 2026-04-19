@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -20,7 +21,22 @@ const Login = () => {
     resolver: zodResolver(schema),
   });
 
+  const [failedAttempts, setFailedAttempts] = useState(0);
+  const [lockoutTimer, setLockoutTimer] = useState(0);
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (lockoutTimer > 0) {
+      interval = setInterval(() => {
+        setLockoutTimer((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [lockoutTimer]);
+
   const onSubmit = async (data: FormData) => {
+    if (lockoutTimer > 0) return;
+
     try {
       const { data: authData, error } = await supabase.auth.signInWithPassword({
         email: data.email,
@@ -38,10 +54,26 @@ const Login = () => {
           
         useAuthStore.getState().setUser(authData.user);
         useAuthStore.getState().setProfile(profile);
+        setFailedAttempts(0); // Reset on clean login
       }
 
       navigate('/dashboard');
     } catch (error: any) {
+      setFailedAttempts((prev) => {
+        const newAttempts = prev + 1;
+        // Mathematical Logic:
+        // Fail 1: 0s delay
+        // Fail 2: 3s delay
+        // Fail 3: 10s delay
+        // Fail 4+: 30s delay limit
+        let delay = 0;
+        if (newAttempts === 2) delay = 3;
+        else if (newAttempts === 3) delay = 10;
+        else if (newAttempts >= 4) delay = 30;
+        
+        if (delay > 0) setLockoutTimer(delay);
+        return newAttempts;
+      });
       alert(error.message);
     }
   };
@@ -114,12 +146,18 @@ const Login = () => {
               </div>
 
               <div className="space-y-6 pt-4">
+                {lockoutTimer > 0 && (
+                   <div className="bg-red-500/10 border border-red-500/30 text-red-500 text-xs p-3 flex items-center justify-between">
+                     <span>Security Protocol Intitiated.</span>
+                     <span className="font-bold tracking-widest">{lockoutTimer}s Lockout</span>
+                   </div>
+                )}
                 <Button 
                   type="submit" 
-                  disabled={isSubmitting} 
-                  className="w-full h-14 bg-black dark:bg-white text-white dark:text-black hover:bg-secondary hover:text-white transition-all duration-300 shadow-xl"
+                  disabled={isSubmitting || lockoutTimer > 0} 
+                  className="w-full h-14 bg-black dark:bg-white text-white dark:text-black hover:bg-secondary hover:text-white transition-all duration-300 shadow-xl disabled:opacity-50"
                 >
-                  {isSubmitting ? 'Validating Connection...' : 'Verify Identity'}
+                  {isSubmitting ? 'Validating Connection...' : (lockoutTimer > 0 ? 'Connection Restricted' : 'Verify Identity')}
                 </Button>
                 
                 <div className="text-center">
