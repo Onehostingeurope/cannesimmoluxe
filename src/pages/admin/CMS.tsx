@@ -146,13 +146,27 @@ const CMS = () => {
       const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
       const filePath = `${folder}/${fileName}`;
 
-      const { error: uploadError } = await supabase.storage
-        .from('Media')
-        .upload(filePath, file, { cacheControl: '3600', upsert: false });
+      const bucketNames = ['Media', 'media'];
+      let uploadError = null;
+      let usedBucket = 'Media';
+
+      for (const bucket of bucketNames) {
+        const { error } = await supabase.storage
+          .from(bucket)
+          .upload(filePath, file, { cacheControl: '3600', upsert: false });
+        
+        if (!error) {
+          uploadError = null;
+          usedBucket = bucket;
+          break;
+        }
+        uploadError = error;
+      }
 
       if (uploadError) {
-         if (uploadError.message.includes('Bucket not found') || uploadError.message.includes('row-level security') || uploadError.message.includes('Violates')) {
-            alert("System Requirement: Please log into your Supabase Dashboard, create a new Storage Bucket named 'media', and set it to 'Public'.");
+         const msg = uploadError.message.toLowerCase();
+         if (msg.includes('bucket not found') || msg.includes('row-level security') || msg.includes('violates') || msg.includes('policy')) {
+            alert("UPLOAD FAILURE: Your bucket exists but its SECURITIES (Policies) are missing.\n\nREQUIRED FIX:\n1. Log into Supabase Dashboard.\n2. Go to Storage -> Policies.\n3. Click 'New Policy' for the 'Media' bucket.\n4. Choose 'Full access to all users' (or Enable Insert/Select for all).\n5. Click Review -> Save.");
          } else {
             alert(`Storage Error: ${uploadError.message}`);
          }
@@ -161,7 +175,7 @@ const CMS = () => {
       }
 
       const { data: publicUrlData } = supabase.storage
-        .from('Media')
+        .from(usedBucket)
         .getPublicUrl(filePath);
 
       updateModuleContent(moduleId, targetField, publicUrlData.publicUrl);
@@ -188,18 +202,31 @@ const CMS = () => {
       const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
       const filePath = `images/grids/${fileName}`;
 
-      const { error: uploadError } = await supabase.storage
-        .from('Media')
-        .upload(filePath, file, { cacheControl: '3600', upsert: false });
+      const bucketNames = ['Media', 'media'];
+      let uploadError = null;
+      let usedBucket = 'Media';
+
+      for (const bucket of bucketNames) {
+        const { error } = await supabase.storage
+          .from(bucket)
+          .upload(filePath, file, { cacheControl: '3600', upsert: false });
+        
+        if (!error) {
+          uploadError = null;
+          usedBucket = bucket;
+          break;
+        }
+        uploadError = error;
+      }
 
       if (uploadError) {
-         alert(`Storage Error: ${uploadError.message}`);
+         alert(`UPLOAD FAILURE: Your bucket exists but its SECURITIES (Policies) are missing.\n\nREQUIRED FIX:\n1. Log into Supabase Dashboard.\n2. Go to Storage -> Policies.\n3. Click 'New Policy' for the 'Media' bucket.\n4. Choose 'Full access to all users'.\n5. Save.`);
          setUploading(null);
          return;
       }
 
       const { data: publicUrlData } = supabase.storage
-        .from('Media')
+        .from(usedBucket)
         .getPublicUrl(filePath);
       
       setModules(prev => prev.map(m => {
