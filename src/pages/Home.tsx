@@ -56,6 +56,7 @@ const Home = () => {
         const text = data.modules.find((m: any) => m.type === 'text');
         if (text) setTextData(text);
       }
+      setLoading(false);
     };
     fetchHero();
   }, []);
@@ -116,7 +117,7 @@ const Home = () => {
             <img 
               src={heroData?.media_url || "https://images.unsplash.com/photo-1512918728675-ed5a9ecdebfd?auto=format&fit=crop&q=80&w=2000"} 
               alt="Riviera Horizon" 
-              className="w-full h-full object-cover scale-105 animate-[ken-burns_20s_ease-in-out_infinite_alternate] opacity-60"
+              className={`w-full h-full object-cover scale-105 animate-[ken-burns_20s_ease-in-out_infinite_alternate] transition-opacity duration-1000 ${loading ? 'opacity-0' : 'opacity-60'}`}
             />
           ) : heroData.media_type === 'video' ? (
             <video 
@@ -254,8 +255,8 @@ const Home = () => {
                 </div>
 
                 <img 
-                  src={textData?.media_url || "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=1000"} 
-                  className={`absolute inset-0 w-full h-full object-cover grayscale transition-all duration-700 ${isPlaybackActive ? 'opacity-0 scale-110' : 'opacity-100 scale-100'} z-10`}
+                  src={textData?.media_url || ""} 
+                  className={`absolute inset-0 w-full h-full object-cover grayscale transition-all duration-1000 ${isPlaybackActive ? 'opacity-0 scale-110' : 'opacity-100 scale-100'} z-10`}
                 />
                 
                 {/* High-Fidelity Video Layer (Persistent Logic) */}
