@@ -26,9 +26,11 @@ const Home = () => {
   const [loading, setLoading] = useState(true);
   const [isMuted, setIsMuted] = useState(false);
   const [isPlaybackActive, setIsPlaybackActive] = useState(false);
+  const [isDestinationsVisible, setIsDestinationsVisible] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const ytPlayerRef = useRef<any>(null);
   const ytContainerId = "yt-player-curator";
+  const destinationsRef = useRef<HTMLElement>(null);
 
   // Load YouTube IFrame API
   useEffect(() => {
@@ -59,6 +61,26 @@ const Home = () => {
       setLoading(false);
     };
     fetchHero();
+  }, []);
+
+  // Intersection Observer for Destinations
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsDestinationsVisible(true);
+          // We don't unobserve yet because we might want different mobile/desktop triggers 
+          // (actually user said "on scroll" for mobile and "automatic" for desktop which both work here)
+        }
+      },
+      { threshold: 0.15 } // Trigger when 15% is visible
+    );
+
+    if (destinationsRef.current) {
+      observer.observe(destinationsRef.current);
+    }
+
+    return () => observer.disconnect();
   }, []);
 
   // Initialize YouTube Player when needed
@@ -319,8 +341,8 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Riviera Destinations Segment */}
-      <section className="bg-[#f6f3ee] dark:bg-[#0a0a0a] py-32">
+      {/* Riviera Destinations Segment - With Scroll-to-Color Reveal */}
+      <section ref={destinationsRef} className="bg-[#f6f3ee] dark:bg-[#0a0a0a] py-32">
         <div className="px-6 md:px-12 lg:px-24 mb-20 text-center space-y-4">
            <p className="font-label text-[10px] tracking-[0.4em] uppercase text-secondary">Our Influence</p>
            <h2 className="font-headline text-5xl md:text-6xl text-primary tracking-tight">{gridData?.title || 'The Enclaves'}</h2>
@@ -335,9 +357,12 @@ const Home = () => {
             <div key={idx} className="group relative aspect-[3/5] overflow-hidden cursor-pointer" onClick={() => navigate('/properties')}>
               <img 
                 src={city.img} 
-                className="w-full h-full object-cover grayscale brightness-[0.7] group-hover:scale-110 group-hover:grayscale-0 group-hover:brightness-100 transition-all duration-[2s]" 
+                className={`w-full h-full object-cover transition-all duration-[2s] ${isDestinationsVisible ? 'grayscale-0 brightness-100 delay-[500ms]' : 'grayscale brightness-[0.7]'}`} 
+                style={{ 
+                  transitionDelay: isDestinationsVisible ? `${idx * 400}ms` : '0ms' 
+                }}
               />
-              <div className="absolute inset-0 bg-black/40 group-hover:bg-transparent transition-all duration-700" />
+              <div className={`absolute inset-0 bg-black/40 transition-all duration-700 ${isDestinationsVisible ? 'opacity-0' : 'opacity-100'} group-hover:opacity-0`} />
               <div className="absolute bottom-12 left-12">
                  <h3 className="font-headline text-4xl text-white tracking-widest uppercase italic">{city.name}</h3>
                  <p className="font-label text-[9px] tracking-[0.3em] uppercase text-white/60 mt-2">Discover the Territory</p>
