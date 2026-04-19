@@ -89,20 +89,25 @@ const CMS = () => {
 
   const handleDeploy = async () => {
     setSaving(true);
-    const { error } = await supabase
-      .from('cms_content')
-      .upsert({ 
-        page_name: activePage, 
-        modules: modules,
-        updated_at: new Date().toISOString()
-      }, { onConflict: 'page_name' });
+    try {
+      const { error } = await supabase
+        .from('cms_content')
+        .upsert({ 
+          page_name: activePage, 
+          modules: modules,
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'page_name' });
 
-    if (error) {
-      alert('Error deploying changes: ' + error.message);
-    } else {
+      if (error) {
+        throw error;
+      }
       alert('Content successfully deployed to global cluster.');
+    } catch (e: any) {
+      alert('Error deploying changes: ' + (e.message || 'Payload too large or network timeout.'));
+      console.error(e);
+    } finally {
+      setSaving(false);
     }
-    setSaving(false);
   };
 
   const updateModuleContent = (id: string, field: string, value: any) => {
