@@ -481,22 +481,37 @@ const CMS = () => {
                                  <div className="space-y-4 pt-8 border-t border-outline-variant/10">
                                     <label className="font-label text-[9px] tracking-widest uppercase text-outline opacity-50 block">Interactive Hover Videos (Multi-lingual Backgrounds)</label>
                                     <div className="grid grid-cols-2 gap-4">
-                                      <div className="border border-dashed border-outline-variant/30 py-6 text-center relative group bg-[#f6f3ee] dark:bg-[#1c1b1b] hover:border-primary transition-colors">
-                                         <span className="material-symbols-outlined notranslate text-outline mb-2 block" translate="no">{module.en_video_url ? 'check_circle' : 'videocam'}</span>
-                                         <p className="font-label text-[8px] uppercase text-outline">{module.en_video_url ? 'EN Bound' : 'Upload EN MP4'}</p>
-                                         <input type="file" accept="video/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => e.target.files && handleFileUpload(module.id, e.target.files[0], 'en_video_url')} />
-                                         {uploading === `${module.id}-en_video_url` && <div className="absolute inset-0 bg-black/50 flex items-center justify-center"><div className="animate-spin w-4 h-4 border-t-2 border-primary rounded-full"></div></div>}
-                                      </div>
-                                      <div className="border border-dashed border-outline-variant/30 py-6 text-center relative group bg-[#f6f3ee] dark:bg-[#1c1b1b] hover:border-primary transition-colors">
-                                         <span className="material-symbols-outlined notranslate text-outline mb-2 block" translate="no">{module.fr_video_url ? 'check_circle' : 'videocam'}</span>
-                                         <p className="font-label text-[8px] uppercase text-outline">{module.fr_video_url ? 'FR Bound' : 'Upload FR MP4'}</p>
-                                         <input type="file" accept="video/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => e.target.files && handleFileUpload(module.id, e.target.files[0], 'fr_video_url')} />
-                                         {uploading === `${module.id}-fr_video_url` && <div className="absolute inset-0 bg-black/50 flex items-center justify-center"><div className="animate-spin w-4 h-4 border-t-2 border-primary rounded-full"></div></div>}
-                                      </div>
+                                       <div className="border border-dashed border-outline-variant/30 py-6 text-center relative group bg-[#f6f3ee] dark:bg-[#1c1b1b] hover:border-primary transition-colors">
+                                          {module.en_video_url && (
+                                             <button 
+                                                onClick={() => updateModuleContent(module.id, 'en_video_url', null)}
+                                                className="absolute top-1 right-1 z-20 material-symbols-outlined notranslate text-[12px] text-outline hover:text-red-500 bg-white/50 rounded-full p-0.5"
+                                             >close</button>
+                                          )}
+                                          <span className="material-symbols-outlined notranslate text-outline mb-2 block" translate="no">{module.en_video_url ? 'check_circle' : 'videocam'}</span>
+                                          <p className="font-label text-[8px] uppercase text-outline">{module.en_video_url ? 'EN Bound' : 'Upload EN MP4'}</p>
+                                          <input type="file" accept="video/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => e.target.files && handleFileUpload(module.id, e.target.files[0], 'en_video_url')} />
+                                          {uploading === `${module.id}-en_video_url` && <div className="absolute inset-0 bg-black/50 flex items-center justify-center"><div className="animate-spin w-4 h-4 border-t-2 border-primary rounded-full"></div></div>}
+                                       </div>
+                                       <div className="border border-dashed border-outline-variant/30 py-6 text-center relative group bg-[#f6f3ee] dark:bg-[#1c1b1b] hover:border-primary transition-colors">
+                                          {module.fr_video_url && (
+                                             <button 
+                                                onClick={() => updateModuleContent(module.id, 'fr_video_url', null)}
+                                                className="absolute top-1 right-1 z-20 material-symbols-outlined notranslate text-[12px] text-outline hover:text-red-500 bg-white/50 rounded-full p-0.5"
+                                             >close</button>
+                                          )}
+                                          <span className="material-symbols-outlined notranslate text-outline mb-2 block" translate="no">{module.fr_video_url ? 'check_circle' : 'videocam'}</span>
+                                          <p className="font-label text-[8px] uppercase text-outline">{module.fr_video_url ? 'FR Bound' : 'Upload FR MP4'}</p>
+                                          <input type="file" accept="video/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => e.target.files && handleFileUpload(module.id, e.target.files[0], 'fr_video_url')} />
+                                          {uploading === `${module.id}-fr_video_url` && <div className="absolute inset-0 bg-black/50 flex items-center justify-center"><div className="animate-spin w-4 h-4 border-t-2 border-primary rounded-full"></div></div>}
+                                       </div>
                                     </div>
                                     <div className="grid grid-cols-2 gap-4 mt-4">
                                        <div className="space-y-1">
-                                          <label className="font-label text-[7px] tracking-widest uppercase text-outline opacity-70">EN YouTube ID (Fallback)</label>
+                                          <div className="flex justify-between items-center">
+                                             <label className="font-label text-[7px] tracking-widest uppercase text-outline opacity-70">EN YouTube ID (Fallback)</label>
+                                             {module.en_youtube_id && <button onClick={() => updateModuleContent(module.id, 'en_youtube_id', '')} className="font-label text-[7px] text-red-500 uppercase">Clear</button>}
+                                          </div>
                                           <input 
                                             type="text" 
                                             placeholder="e.g. dQw4w9WgXcQ"
@@ -506,7 +521,10 @@ const CMS = () => {
                                           />
                                        </div>
                                        <div className="space-y-1">
-                                          <label className="font-label text-[7px] tracking-widest uppercase text-outline opacity-70">FR YouTube ID (Fallback)</label>
+                                          <div className="flex justify-between items-center">
+                                             <label className="font-label text-[7px] tracking-widest uppercase text-outline opacity-70">FR YouTube ID (Fallback)</label>
+                                             {module.fr_youtube_id && <button onClick={() => updateModuleContent(module.id, 'fr_youtube_id', '')} className="font-label text-[7px] text-red-500 uppercase">Clear</button>}
+                                          </div>
                                           <input 
                                             type="text" 
                                             placeholder="e.g. dQw4w9WgXcQ"
