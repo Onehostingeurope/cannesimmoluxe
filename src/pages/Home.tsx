@@ -5,6 +5,14 @@ import { useNavigate } from 'react-router-dom';
 
 import { supabase } from '../lib/supabase';
 
+// Declarations for YouTube IFrame API
+declare global {
+  interface Window {
+    onYouTubeIframeAPIReady: () => void;
+    YT: any;
+  }
+}
+
 const Home = () => {
   const navigate = useNavigate();
   const [currentLang, setCurrentLang] = useState('en');
@@ -19,6 +27,18 @@ const Home = () => {
   const [isMuted, setIsMuted] = useState(false);
   const [isPlaybackActive, setIsPlaybackActive] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const ytPlayerRef = useRef<any>(null);
+  const ytContainerId = "yt-player-curator";
+
+  // Load YouTube IFrame API
+  useEffect(() => {
+    if (!window.YT) {
+      const tag = document.createElement('script');
+      tag.src = "https://www.youtube.com/iframe_api";
+      const firstScriptTag = document.getElementsByTagName('script')[0];
+      firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
+    }
+  }, []);
 
   useEffect(() => {
     const fetchHero = async () => {
@@ -39,6 +59,52 @@ const Home = () => {
     };
     fetchHero();
   }, []);
+
+  // Initialize YouTube Player when needed
+  useEffect(() => {
+    if (isPlaybackActive && !textData?.en_video_url && !textData?.fr_video_url) {
+      const ytId = currentLang === 'fr' 
+        ? (textData?.fr_youtube_id || textData?.en_youtube_id) 
+        : (textData?.en_youtube_id || textData?.fr_youtube_id);
+
+      if (ytId && window.YT && window.YT.Player) {
+        if (ytPlayerRef.current) {
+          ytPlayerRef.current.loadVideoById(ytId);
+          ytPlayerRef.current.playVideo();
+          if (isMuted) ytPlayerRef.current.mute(); else ytPlayerRef.current.unMute();
+        } else {
+          ytPlayerRef.current = new window.YT.Player(ytContainerId, {
+            videoId: ytId,
+            playerVars: {
+              autoplay: 1,
+              mute: isMuted ? 1 : 0,
+              controls: 0,
+              rel: 0,
+              showinfo: 0,
+              modestbranding: 1,
+              iv_load_policy: 3,
+              playsinline: 1
+            },
+            events: {
+              onStateChange: (event: any) => {
+                if (event.data === 0) { // YT.PlayerState.ENDED
+                  setIsPlaybackActive(false);
+                }
+              }
+            }
+          });
+        }
+      }
+    }
+  }, [isPlaybackActive, textData, currentLang]);
+
+  // Sync mute state to YouTube Player
+  useEffect(() => {
+    if (ytPlayerRef.current && ytPlayerRef.current.mute) {
+      if (isMuted) ytPlayerRef.current.mute();
+      else ytPlayerRef.current.unMute();
+    }
+  }, [isMuted]);
 
   return (
     <Layout>
@@ -171,7 +237,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Concierge Engagement Segment - 9:16 Vertical Hybrid Layout with Direct Audio */}
+      {/* Concierge Engagement Segment - 9:16 Vertical Hybrid Layout with Direct Audio & Smart Reversion */}
       <section className="bg-white dark:bg-[#0a0a0a] py-32 px-6 md:px-12 lg:px-24">
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
           <div className="lg:col-span-4 relative order-2 lg:order-1">
@@ -179,10 +245,12 @@ const Home = () => {
                className="aspect-[9/16] overflow-hidden bg-black shadow-2xl relative cursor-pointer group"
                onMouseEnter={() => setIsPlaybackActive(true)}
              >
-                {/* Instructional Instruction Layer */}
-                <div className={`absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/40 transition-opacity duration-700 pointer-events-none ${isPlaybackActive ? 'opacity-0' : 'opacity-100'}`}>
-                   <span className="material-symbols-outlined notranslate text-white text-4xl animate-pulse mb-4" translate="no">visibility</span>
-                   <p className="font-label text-[10px] tracking-[0.4em] uppercase text-white/80">Hover to listen</p>
+                {/* Instructional Instruction Layer - Fixed Centering */}
+                <div className={`absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/40 transition-opacity duration-700 pointer-events-none px-8 ${isPlaybackActive ? 'opacity-0' : 'opacity-100'}`}>
+                   <span className="material-symbols-outlined notranslate text-white text-4xl animate-pulse mb-6" translate="no">visibility</span>
+                   <p className="font-label text-[10px] tracking-[0.4em] uppercase text-white/80 text-center leading-relaxed max-w-[200px]">
+                      {currentLang === 'fr' ? 'Passez votre souris dessus pour écouter' : 'Hover for Audio Experience'}
+                   </p>
                 </div>
 
                 <img 
@@ -190,7 +258,7 @@ const Home = () => {
                   className={`absolute inset-0 w-full h-full object-cover grayscale transition-all duration-700 ${isPlaybackActive ? 'opacity-0 scale-110' : 'opacity-100 scale-100'} z-10`}
                 />
                 
-                {/* High-Fidelity Video Layer (Direct Audio Attempt) */}
+                {/* High-Fidelity Video Layer (Persistent Logic) */}
                 { (textData?.en_video_url || textData?.fr_video_url) ? (
                     <video 
                       ref={videoRef}
@@ -204,16 +272,11 @@ const Home = () => {
                     />
                 ) : (textData?.en_youtube_id || textData?.fr_youtube_id) && (
                     <div className={`absolute inset-0 transition-opacity duration-1000 ${isPlaybackActive ? 'opacity-100 z-0' : 'opacity-0 z-[-1]'} pointer-events-none`}>
-                       <iframe 
-                         src={`https://www.youtube.com/embed/${currentLang === 'fr' ? (textData?.fr_youtube_id || textData?.en_youtube_id) : (textData?.en_youtube_id || textData?.fr_youtube_id)}?autoplay=${isPlaybackActive ? 1 : 0}&mute=${isMuted ? 1 : 0}&controls=0&loop=0&playlist=${currentLang === 'fr' ? (textData?.fr_youtube_id || textData?.en_youtube_id) : (textData?.en_youtube_id || textData?.fr_youtube_id)}&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1`}
-                         className="w-full h-full absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 object-cover"
-                         allow="autoplay; encrypted-media"
-                         frameBorder="0"
-                       />
+                       <div id={ytContainerId} className="w-full h-full absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 object-cover"></div>
                     </div>
                 )}
 
-                {/* Backup Audio Controls (Appears if auto-muted or manually toggled) */}
+                {/* Backup Audio Controls */}
                 <div className={`absolute bottom-6 right-6 z-30 transition-opacity ${isPlaybackActive ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
                     <button 
                       onClick={(e) => { e.stopPropagation(); setIsMuted(!isMuted); }}
