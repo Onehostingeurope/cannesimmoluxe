@@ -17,6 +17,7 @@ const Home = () => {
   const [textData, setTextData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [isMuted, setIsMuted] = useState(true);
+  const [isPlaybackActive, setIsPlaybackActive] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
@@ -170,35 +171,36 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Concierge Engagement Segment - Expanded Hybrid Layout */}
+      {/* Concierge Engagement Segment - 9:16 Vertical Hybrid Layout */}
       <section className="bg-white dark:bg-[#0a0a0a] py-32 px-6 md:px-12 lg:px-24">
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
-          <div className="lg:col-span-6 relative order-2 lg:order-1">
+          <div className="lg:col-span-4 relative order-2 lg:order-1">
              <div 
-               className="aspect-video overflow-hidden bg-black shadow-2xl relative group cursor-pointer"
+               className="aspect-[9/16] overflow-hidden bg-black shadow-2xl relative cursor-pointer"
+               onMouseEnter={() => setIsPlaybackActive(true)}
              >
                 <img 
                   src={textData?.media_url || "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=1000"} 
-                  className="absolute inset-0 w-full h-full object-cover grayscale transition-all duration-700 group-hover:opacity-0 group-hover:scale-110 z-10"
+                  className={`absolute inset-0 w-full h-full object-cover grayscale transition-all duration-700 ${isPlaybackActive ? 'opacity-0 scale-110' : 'opacity-100 scale-100'} z-10`}
                 />
                 
-                {/* High-Fidelity Video Layer (Priority 1: Native MP4, Priority 2: YouTube) */}
+                {/* High-Fidelity Video Layer (Persistent playback until end) */}
                 { (textData?.en_video_url || textData?.fr_video_url) ? (
                     <video 
                       ref={videoRef}
                       src={currentLang === 'fr' ? (textData?.fr_video_url || textData?.en_video_url) : (textData?.en_video_url || textData?.fr_video_url)} 
-                      className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-1000 z-0" 
-                      autoPlay
+                      className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${isPlaybackActive ? 'opacity-100 z-0' : 'opacity-0 z-[-1]'}`} 
+                      autoPlay={isPlaybackActive}
                       muted={isMuted}
-                      loop 
                       playsInline 
                       preload="auto"
+                      onEnded={() => setIsPlaybackActive(false)}
                     />
                 ) : (textData?.en_youtube_id || textData?.fr_youtube_id) && (
-                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-1000 z-0 pointer-events-none">
+                    <div className={`absolute inset-0 transition-opacity duration-1000 ${isPlaybackActive ? 'opacity-100 z-0' : 'opacity-0 z-[-1]'} pointer-events-none`}>
                        <iframe 
-                         src={`https://www.youtube.com/embed/${currentLang === 'fr' ? (textData?.fr_youtube_id || textData?.en_youtube_id) : (textData?.en_youtube_id || textData?.fr_youtube_id)}?autoplay=1&mute=${isMuted ? 1 : 0}&controls=0&loop=1&playlist=${currentLang === 'fr' ? (textData?.fr_youtube_id || textData?.en_youtube_id) : (textData?.en_youtube_id || textData?.fr_youtube_id)}&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1`}
-                         className="w-full h-[150%] absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 object-cover aspect-video"
+                         src={`https://www.youtube.com/embed/${currentLang === 'fr' ? (textData?.fr_youtube_id || textData?.en_youtube_id) : (textData?.en_youtube_id || textData?.fr_youtube_id)}?autoplay=${isPlaybackActive ? 1 : 0}&mute=${isMuted ? 1 : 0}&controls=0&loop=0&playlist=${currentLang === 'fr' ? (textData?.fr_youtube_id || textData?.en_youtube_id) : (textData?.en_youtube_id || textData?.fr_youtube_id)}&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1`}
+                         className="w-full h-full absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 object-cover"
                          allow="autoplay; encrypted-media"
                          frameBorder="0"
                        />
@@ -206,7 +208,7 @@ const Home = () => {
                 )}
 
                 {/* Premium Audio Controls */}
-                <div className="absolute bottom-6 right-6 z-30 opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className={`absolute bottom-6 right-6 z-30 transition-opacity ${isPlaybackActive ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
                     <button 
                       onClick={(e) => { e.stopPropagation(); setIsMuted(!isMuted); }}
                       className="bg-white/10 backdrop-blur-md border border-white/20 p-3 rounded-full hover:bg-white/20 transition-all flex items-center justify-center"
@@ -223,12 +225,12 @@ const Home = () => {
              </div>
           </div>
 
-          <div className="lg:col-span-6 space-y-12 order-1 lg:order-2">
+          <div className="lg:col-span-8 space-y-12 order-1 lg:order-2 px-6">
             <div className="space-y-6">
               <p className="font-label text-[10px] tracking-[0.4em] uppercase text-secondary">The Riviera Office</p>
               <h2 className="font-headline text-5xl md:text-6xl text-primary leading-[1.1]">{textData?.title || 'The Curator\'s Perspective'}</h2>
             </div>
-            <p className="text-lg text-on-surface-variant max-w-xl opacity-80 leading-relaxed font-body">
+            <p className="text-lg text-on-surface-variant max-w-2xl opacity-80 leading-relaxed font-body">
               {textData?.content || "For over two decades, we have provided unparalleled representation for the Riviera's most elite property owners. Every transaction is handled with absolute discretion and technical precision."}
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-12 pt-4">
