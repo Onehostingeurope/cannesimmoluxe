@@ -147,7 +147,7 @@ const CMS = () => {
       const filePath = `${folder}/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
-        .from('media')
+        .from('Media')
         .upload(filePath, file, { cacheControl: '3600', upsert: false });
 
       if (uploadError) {
@@ -161,7 +161,7 @@ const CMS = () => {
       }
 
       const { data: publicUrlData } = supabase.storage
-        .from('media')
+        .from('Media')
         .getPublicUrl(filePath);
 
       updateModuleContent(moduleId, targetField, publicUrlData.publicUrl);
@@ -189,7 +189,7 @@ const CMS = () => {
       const filePath = `images/grids/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
-        .from('media')
+        .from('Media')
         .upload(filePath, file, { cacheControl: '3600', upsert: false });
 
       if (uploadError) {
@@ -199,7 +199,7 @@ const CMS = () => {
       }
 
       const { data: publicUrlData } = supabase.storage
-        .from('media')
+        .from('Media')
         .getPublicUrl(filePath);
       
       setModules(prev => prev.map(m => {
