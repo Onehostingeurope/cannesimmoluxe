@@ -130,8 +130,8 @@ const CMS = () => {
       const isVideo = file.type.startsWith('video/');
       const folder = isVideo ? 'videos' : 'images';
       
-      if (isVideo && file.size > 50 * 1024 * 1024) {
-         alert("Video exceeds 50MB limit. Please compress your asset.");
+      if (isVideo && file.size > 200 * 1024 * 1024) {
+         alert("Video exceeds 200MB limit. Please compress your asset for better web performance.");
          setUploading(null);
          return;
       }
