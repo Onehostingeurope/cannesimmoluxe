@@ -17,7 +17,8 @@ envFile.split('\n').forEach(line => {
 const supabase = createClient(url, anon);
 
 async function check() {
-    const { data } = await supabase.from('properties').select('*').limit(1);
-    console.log(data);
+    const { data: buckets, error } = await supabase.storage.listBuckets();
+    if(error) console.error(error);
+    else console.log(buckets.map(b => b.name));
 }
 check();

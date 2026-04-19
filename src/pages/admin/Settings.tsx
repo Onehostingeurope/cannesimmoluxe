@@ -41,7 +41,7 @@ const Settings = () => {
   const [lockoutTimer, setLockoutTimer] = useState(0);
 
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    let interval: ReturnType<typeof setInterval>;
     if (lockoutTimer > 0) {
       interval = setInterval(() => {
         setLockoutTimer((prev) => prev - 1);

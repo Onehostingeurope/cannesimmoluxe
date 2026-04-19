@@ -43,7 +43,7 @@ export const Footer = () => {
             <li><a href="/buy" className="hover:text-luxury-gold">Properties for Sale</a></li>
             <li><a href="/rent" className="hover:text-luxury-gold">Seasonal Rentals</a></li>
             <li><a href="/management" className="hover:text-luxury-gold">Property Management</a></li>
-            <li><a href="/off-market" className="hover:text-luxury-gold">Off-Market</a></li>
+            <li><a href="/register" className="hover:text-luxury-gold">Off-Market</a></li>
           </ul>
         </div>
 

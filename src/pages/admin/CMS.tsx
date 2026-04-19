@@ -115,7 +115,36 @@ const CMS = () => {
       const isVideo = file.type.startsWith('video/');
       
       if (isVideo) {
-        alert("Native video file upload exceeds DB limits. Please use YouTube IDs instead.");
+        if (file.size > 50 * 1024 * 1024) {
+           alert("Video exceeds 50MB limit. Please compress your asset.");
+           setUploading(null);
+           return;
+        }
+
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
+        const filePath = `videos/${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('media')
+          .upload(filePath, file, { cacheControl: '3600', upsert: false });
+
+        if (uploadError) {
+           if (uploadError.message.includes('Bucket not found') || uploadError.message.includes('row-level security') || uploadError.message.includes('Violates')) {
+              alert("System Requirement: To upload native videos, please log into your Supabase Dashboard, create a new Storage Bucket named 'media', and set it to 'Public'.");
+           } else {
+              alert(`Storage Error: ${uploadError.message}`);
+           }
+           setUploading(null);
+           return;
+        }
+
+        const { data: publicUrlData } = supabase.storage
+          .from('media')
+          .getPublicUrl(filePath);
+
+        updateModuleContent(moduleId, 'media_url', publicUrlData.publicUrl);
+        updateModuleContent(moduleId, 'media_type', 'video');
         setUploading(null);
         return;
       }
