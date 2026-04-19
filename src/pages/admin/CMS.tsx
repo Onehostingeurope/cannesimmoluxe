@@ -13,6 +13,8 @@ interface CMSModule {
   media_url?: string;
   en_video_url?: string;
   fr_video_url?: string;
+  en_youtube_id?: string;
+  fr_youtube_id?: string;
   youtube_id?: string;
   youtube_id_mobile?: string;
   grid_items?: { name: string, img: string }[];
@@ -491,6 +493,28 @@ const CMS = () => {
                                          <input type="file" accept="video/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => e.target.files && handleFileUpload(module.id, e.target.files[0], 'fr_video_url')} />
                                          {uploading === `${module.id}-fr_video_url` && <div className="absolute inset-0 bg-black/50 flex items-center justify-center"><div className="animate-spin w-4 h-4 border-t-2 border-primary rounded-full"></div></div>}
                                       </div>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-4 mt-4">
+                                       <div className="space-y-1">
+                                          <label className="font-label text-[7px] tracking-widest uppercase text-outline opacity-70">EN YouTube ID (Fallback)</label>
+                                          <input 
+                                            type="text" 
+                                            placeholder="e.g. dQw4w9WgXcQ"
+                                            className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/20 p-2 font-label text-[8px]" 
+                                            value={module.en_youtube_id || ''}
+                                            onChange={(e) => updateModuleContent(module.id, 'en_youtube_id', e.target.value)}
+                                          />
+                                       </div>
+                                       <div className="space-y-1">
+                                          <label className="font-label text-[7px] tracking-widest uppercase text-outline opacity-70">FR YouTube ID (Fallback)</label>
+                                          <input 
+                                            type="text" 
+                                            placeholder="e.g. dQw4w9WgXcQ"
+                                            className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/20 p-2 font-label text-[8px]" 
+                                            value={module.fr_youtube_id || ''}
+                                            onChange={(e) => updateModuleContent(module.id, 'fr_youtube_id', e.target.value)}
+                                          />
+                                       </div>
                                     </div>
                                  </div>
 

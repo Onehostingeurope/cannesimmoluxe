@@ -179,7 +179,8 @@ const Home = () => {
                   className="absolute inset-0 w-full h-full object-cover grayscale transition-all duration-700 group-hover:opacity-0 group-hover:scale-110 z-10"
                 />
                 
-                {(textData?.en_video_url || textData?.fr_video_url) && (
+                {/* High-Fidelity Video Layer (Priority 1: Native MP4, Priority 2: YouTube) */}
+                { (textData?.en_video_url || textData?.fr_video_url) ? (
                    <video 
                      src={currentLang === 'fr' ? (textData?.fr_video_url || textData?.en_video_url) : (textData?.en_video_url || textData?.fr_video_url)} 
                      className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-1000 z-0" 
@@ -189,6 +190,15 @@ const Home = () => {
                      playsInline 
                      preload="auto"
                    />
+                ) : (textData?.en_youtube_id || textData?.fr_youtube_id) && (
+                   <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-1000 z-0 pointer-events-none">
+                      <iframe 
+                        src={`https://www.youtube.com/embed/${currentLang === 'fr' ? (textData?.fr_youtube_id || textData?.en_youtube_id) : (textData?.en_youtube_id || textData?.fr_youtube_id)}?autoplay=1&mute=1&controls=0&loop=1&playlist=${currentLang === 'fr' ? (textData?.fr_youtube_id || textData?.en_youtube_id) : (textData?.en_youtube_id || textData?.fr_youtube_id)}&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1`}
+                        className="w-full h-[150%] absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 object-cover aspect-video"
+                        allow="autoplay; encrypted-media"
+                        frameBorder="0"
+                      />
+                   </div>
                 )}
              </div>
              <div className="absolute -bottom-10 -right-10 w-48 h-48 bg-secondary flex flex-col items-center justify-center text-white p-8 text-center space-y-2 shadow-2xl">
