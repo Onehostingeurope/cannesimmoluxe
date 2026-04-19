@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Layout } from '../components/layout/Layout';
 import { Button } from '../components/ui/Button';
 import { useNavigate } from 'react-router-dom';
@@ -15,6 +15,9 @@ const Home = () => {
   const [heroData, setHeroData] = useState<any>(null);
   const [gridData, setGridData] = useState<any>(null);
   const [textData, setTextData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [isMuted, setIsMuted] = useState(true);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     const fetchHero = async () => {
@@ -167,12 +170,12 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Concierge Engagement Segment */}
+      {/* Concierge Engagement Segment - Expanded Hybrid Layout */}
       <section className="bg-white dark:bg-[#0a0a0a] py-32 px-6 md:px-12 lg:px-24">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-20 items-center">
-          <div className="lg:col-span-5 relative order-2 lg:order-1">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
+          <div className="lg:col-span-6 relative order-2 lg:order-1">
              <div 
-               className="aspect-[3/4] overflow-hidden bg-black border-[20px] border-[#f6f3ee] dark:border-[#1c1b1b] shadow-2xl relative group cursor-pointer"
+               className="aspect-video overflow-hidden bg-black shadow-2xl relative group cursor-pointer"
              >
                 <img 
                   src={textData?.media_url || "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=1000"} 
@@ -181,33 +184,46 @@ const Home = () => {
                 
                 {/* High-Fidelity Video Layer (Priority 1: Native MP4, Priority 2: YouTube) */}
                 { (textData?.en_video_url || textData?.fr_video_url) ? (
-                   <video 
-                     src={currentLang === 'fr' ? (textData?.fr_video_url || textData?.en_video_url) : (textData?.en_video_url || textData?.fr_video_url)} 
-                     className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-1000 z-0" 
-                     autoPlay
-                     muted 
-                     loop 
-                     playsInline 
-                     preload="auto"
-                   />
+                    <video 
+                      ref={videoRef}
+                      src={currentLang === 'fr' ? (textData?.fr_video_url || textData?.en_video_url) : (textData?.en_video_url || textData?.fr_video_url)} 
+                      className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-1000 z-0" 
+                      autoPlay
+                      muted={isMuted}
+                      loop 
+                      playsInline 
+                      preload="auto"
+                    />
                 ) : (textData?.en_youtube_id || textData?.fr_youtube_id) && (
-                   <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-1000 z-0 pointer-events-none">
-                      <iframe 
-                        src={`https://www.youtube.com/embed/${currentLang === 'fr' ? (textData?.fr_youtube_id || textData?.en_youtube_id) : (textData?.en_youtube_id || textData?.fr_youtube_id)}?autoplay=1&mute=1&controls=0&loop=1&playlist=${currentLang === 'fr' ? (textData?.fr_youtube_id || textData?.en_youtube_id) : (textData?.en_youtube_id || textData?.fr_youtube_id)}&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1`}
-                        className="w-full h-[150%] absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 object-cover aspect-video"
-                        allow="autoplay; encrypted-media"
-                        frameBorder="0"
-                      />
-                   </div>
+                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-1000 z-0 pointer-events-none">
+                       <iframe 
+                         src={`https://www.youtube.com/embed/${currentLang === 'fr' ? (textData?.fr_youtube_id || textData?.en_youtube_id) : (textData?.en_youtube_id || textData?.fr_youtube_id)}?autoplay=1&mute=${isMuted ? 1 : 0}&controls=0&loop=1&playlist=${currentLang === 'fr' ? (textData?.fr_youtube_id || textData?.en_youtube_id) : (textData?.en_youtube_id || textData?.fr_youtube_id)}&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1`}
+                         className="w-full h-[150%] absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 object-cover aspect-video"
+                         allow="autoplay; encrypted-media"
+                         frameBorder="0"
+                       />
+                    </div>
                 )}
+
+                {/* Premium Audio Controls */}
+                <div className="absolute bottom-6 right-6 z-30 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); setIsMuted(!isMuted); }}
+                      className="bg-white/10 backdrop-blur-md border border-white/20 p-3 rounded-full hover:bg-white/20 transition-all flex items-center justify-center"
+                    >
+                       <span className="material-symbols-outlined notranslate text-white text-base" translate="no">
+                          {isMuted ? 'volume_off' : 'volume_up'}
+                       </span>
+                    </button>
+                </div>
              </div>
-             <div className="absolute -bottom-10 -right-10 w-48 h-48 bg-secondary flex flex-col items-center justify-center text-white p-8 text-center space-y-2 shadow-2xl">
+             <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-secondary flex flex-col items-center justify-center text-white p-6 text-center shadow-2xl z-20">
                 <span className="font-headline text-4xl">25</span>
-                <p className="font-label text-[9px] tracking-widest uppercase opacity-80">Years of Discretion</p>
+                <p className="font-label text-[8px] tracking-widest uppercase opacity-80 leading-tight">Years of Discretion</p>
              </div>
           </div>
 
-          <div className="lg:col-span-7 space-y-12 order-1 lg:order-2">
+          <div className="lg:col-span-6 space-y-12 order-1 lg:order-2">
             <div className="space-y-6">
               <p className="font-label text-[10px] tracking-[0.4em] uppercase text-secondary">The Riviera Office</p>
               <h2 className="font-headline text-5xl md:text-6xl text-primary leading-[1.1]">{textData?.title || 'The Curator\'s Perspective'}</h2>
@@ -249,50 +265,34 @@ const Home = () => {
                 src={city.img} 
                 className="w-full h-full object-cover grayscale brightness-[0.7] group-hover:scale-110 group-hover:grayscale-0 group-hover:brightness-100 transition-all duration-[2s]" 
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
-              <div className="absolute inset-0 flex flex-col items-center justify-end p-16 pb-24 text-center space-y-4">
-                <h3 className="font-headline text-5xl text-white italic transform translate-y-8 group-hover:translate-y-0 transition-transform duration-700">{city.name}</h3>
-                <div className="w-0 h-px bg-secondary group-hover:w-24 transition-all duration-700"></div>
-                <p className="font-label text-[9px] tracking-[0.3em] uppercase text-white/40 opacity-0 group-hover:opacity-100 transition-opacity duration-700">View Collection</p>
+              <div className="absolute inset-0 bg-black/40 group-hover:bg-transparent transition-all duration-700" />
+              <div className="absolute bottom-12 left-12">
+                 <h3 className="font-headline text-4xl text-white tracking-widest uppercase italic">{city.name}</h3>
+                 <p className="font-label text-[9px] tracking-[0.3em] uppercase text-white/60 mt-2">Discover the Territory</p>
               </div>
             </div>
           ))}
         </div>
       </section>
 
-      {/* CTA Segment */}
-      <section className="relative h-[80vh] flex items-center justify-center bg-black overflow-hidden">
-        <div className="absolute inset-0 opacity-40">
-           <img 
-             src="https://images.unsplash.com/photo-1540518614846-7eded433c457?auto=format&fit=crop&q=80&w=2000" 
-             className="w-full h-full object-cover grayscale"
-           />
-           <div className="absolute inset-0 bg-gradient-to-b from-black via-transparent to-black" />
-        </div>
-        
-        <div className="relative z-10 text-center max-w-4xl px-8 space-y-12 animate-luxury-fade">
-           <div className="space-y-6">
-              <span className="material-symbols-outlined notranslate text-secondary text-5xl" translate="no">key</span>
-              <h2 className="font-headline text-5xl md:text-7xl text-white">Enter the <br /> <span className="italic">Private Circle.</span></h2>
-              <p className="text-white/40 text-lg font-body max-w-2xl mx-auto leading-relaxed">
-                Verification unlocks access to our classified portfolio and direct consultation lines with our senior partners.
-              </p>
+      {/* Concierge Segment */}
+      <section className="bg-white dark:bg-black py-32">
+        <div className="max-w-4xl mx-auto px-6 text-center space-y-12">
+           <div className="space-y-4">
+              <p className="font-label text-[10px] tracking-[0.4em] uppercase text-secondary">Global Reach</p>
+              <h2 className="font-headline text-6xl text-primary leading-tight lowercase">Representing excellence.</h2>
            </div>
-           
-           <div className="pt-8 flex flex-col md:flex-row items-center justify-center gap-6">
+           <p className="text-xl text-on-surface-variant opacity-70 font-body leading-relaxed max-w-2xl mx-auto">
+             Whether acquiring a historic villa in Cap d'Antibes or listing a contemporary masterpiece in Cannes, our concierge team provides the technical precision and network access required for success.
+           </p>
+           <div className="pt-8">
               <Button 
-                variant="primary" 
-                className="h-16 px-16 text-[10px] tracking-[0.4em] uppercase bg-secondary text-white border-secondary hover:bg-white hover:text-black"
-                onClick={() => navigate('/register')}
+                variant="outline" 
+                className="h-16 px-16 text-[10px] tracking-[0.4em] uppercase border-primary text-primary hover:bg-black hover:text-white"
+                onClick={() => navigate('/contact')}
               >
-                Request Access
+                Request Representation
               </Button>
-              <button 
-                className="font-label text-[10px] tracking-[0.2em] uppercase text-white hover:text-secondary border-b border-transparent hover:border-secondary pb-1 transition-all"
-                onClick={() => navigate('/login')}
-              >
-                Verified Login
-              </button>
            </div>
         </div>
       </section>
