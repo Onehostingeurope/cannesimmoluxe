@@ -11,6 +11,8 @@ interface CMSModule {
   content?: string;
   media_type?: 'image' | 'video' | 'youtube';
   media_url?: string;
+  en_video_url?: string;
+  fr_video_url?: string;
   youtube_id?: string;
   youtube_id_mobile?: string;
   grid_items?: { name: string, img: string }[];
