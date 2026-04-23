@@ -23,24 +23,24 @@ const propertySchema = z.object({
   mode: z.enum(['sale', 'rent']),
   type: z.string().min(2, 'Property type is required'),
   status: z.string(),
-  featured: z.boolean().default(false),
+  featured: z.boolean(),
   description_short: z.string().min(10, 'Short summary should be descriptive'),
   description_long: z.string().min(20, 'Detailed description is required'),
   
   // Location
-  country: z.string().default('France'),
+  country: z.string(),
   city: z.string().min(2, 'City is required'),
   district: z.string().optional(),
   address: z.string().optional(),
   postal_code: z.string().optional(),
   latitude: z.number().nullable().optional(),
   longitude: z.number().nullable().optional(),
-  hide_map: z.boolean().default(false),
+  hide_map: z.boolean(),
   
   // Pricing
   price: z.number().nullable().optional(),
-  price_on_request: z.boolean().default(false),
-  currency: z.string().default('EUR'),
+  price_on_request: z.boolean(),
+  currency: z.string(),
   property_tax: z.number().nullable().optional(),
   charges: z.number().nullable().optional(),
   availability_date: z.string().optional(),
@@ -56,8 +56,8 @@ const propertySchema = z.object({
   terrace_surface: z.number().nullable().optional(),
   balcony_surface: z.number().nullable().optional(),
   garage: z.number().nullable().optional(),
-  piscine: z.boolean().default(false),
-  air_conditioning: z.boolean().default(false),
+  piscine: z.boolean(),
+  air_conditioning: z.boolean(),
   exposition: z.string().optional(),
   vue: z.string().optional(),
   condition: z.string().optional(),
@@ -76,7 +76,7 @@ const propertySchema = z.object({
   annual_energy_max: z.number().nullable().optional(),
   
   // Amenities
-  amenities: z.array(z.string()).default([]),
+  amenities: z.array(z.string()),
   
   // SEO
   seo_title: z.string().optional(),
@@ -86,9 +86,9 @@ const propertySchema = z.object({
   og_description: z.string().optional(),
   
   // Gated
-  gated_brochure: z.boolean().default(false),
-  gated_dossier: z.boolean().default(false),
-  gated_save: z.boolean().default(false),
+  gated_brochure: z.boolean(),
+  gated_dossier: z.boolean(),
+  gated_save: z.boolean(),
   agent_notes: z.string().optional(),
   
   // Media
@@ -113,7 +113,7 @@ const PropertyEditor = () => {
   const [completionScore, setCompletionScore] = useState(0);
 
   const { register, handleSubmit, watch, setValue, reset, formState: { errors, isValid, isSubmitting } } = useForm<PropertyFormData>({
-    resolver: zodResolver(propertySchema),
+    resolver: zodResolver(propertySchema) as any,
     defaultValues: {
       status: 'available',
       mode: 'sale',
@@ -209,7 +209,7 @@ const PropertyEditor = () => {
            <div className="flex gap-4 w-full md:w-auto">
               <Button variant="outline" onClick={() => navigate('/admin/properties')}>Discard</Button>
               <Button variant="outline" onClick={() => {}}>Preview</Button>
-              <Button variant="primary" onClick={handleSubmit((d: PropertyFormData) => onSubmit(d, 'publish'))}>Publish Asset</Button>
+              <Button variant="primary" onClick={handleSubmit((d) => onSubmit(d as any, 'publish'))}>Publish Asset</Button>
            </div>
         </div>
 
@@ -556,7 +556,7 @@ const PropertyEditor = () => {
                  score={completionScore}
                  status={watchedFields.status || 'available'}
                  onStatusChange={(s) => setValue('status', s)}
-                 onSave={(mode) => handleSubmit((d: PropertyFormData) => onSubmit(d, mode))()}
+                 onSave={(mode) => handleSubmit((d) => onSubmit(d as any, mode))()}
                  onPreview={() => {}}
                  isValid={isValid}
                  errors={errors}
