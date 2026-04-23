@@ -75,14 +75,14 @@ const CRM = () => {
 
   const handleCreatePrompt = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newLead.email || !newLead.property_id) {
-       alert("Email and Property Association are strictly required payload attributes.");
+    if (!newLead.email) {
+       alert("Email is a strictly required payload attribute.");
        return;
     }
     
     setCreating(true);
     const { error } = await supabase.from('inquiries').insert([{
-      property_id: newLead.property_id,
+      property_id: newLead.property_id || null,
       message: newLead.message,
       lead_status: 'new',
       tracking_data: {
@@ -214,9 +214,9 @@ const CRM = () => {
                    <input type="tel" className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/20 p-3 font-body text-sm" value={newLead.phone} onChange={e => setNewLead({...newLead, phone: e.target.value})} />
                 </div>
                 <div className="space-y-2">
-                   <label className="font-label text-[9px] tracking-widest uppercase text-outline opacity-50">Target Property Association *</label>
-                   <select required className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/20 p-3 font-body text-sm" value={newLead.property_id} onChange={e => setNewLead({...newLead, property_id: e.target.value})}>
-                      <option value="" disabled>Select Target Asset</option>
+                   <label className="font-label text-[9px] tracking-widest uppercase text-outline opacity-50">Target Property Association (Optional)</label>
+                   <select className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/20 p-3 font-body text-sm" value={newLead.property_id} onChange={e => setNewLead({...newLead, property_id: e.target.value})}>
+                      <option value="">No Association / General Portfolio</option>
                       {availableProperties
                          .filter(p => pipelineCategory === 'Management' ? p.mode === 'management' : p.mode !== 'management')
                          .map(p => (

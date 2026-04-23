@@ -113,6 +113,11 @@ interface PropertyPDFProps {
     surface?: number | null;
     ref_id?: string;
     images: string[];
+    garage?: number | null;
+    piscine?: boolean;
+    air_conditioning?: boolean;
+    exposition?: string | null;
+    vue?: string | null;
   };
 }
 
@@ -154,11 +159,31 @@ export const PropertyPDF = ({ property }: PropertyPDFProps) => {
                  <Text style={styles.statLabel}>Surface</Text>
                  <Text style={styles.statValue}>{property.surface ? `${property.surface} m²` : '—'}</Text>
                </View>
-               <View style={styles.statItem}>
-                 <Text style={styles.statLabel}>Price</Text>
-                 <Text style={styles.statValue}>{formattedPrice}</Text>
-               </View>
-            </View>
+                <View style={styles.statItem}>
+                  <Text style={styles.statLabel}>Price</Text>
+                  <Text style={styles.statValue}>{formattedPrice}</Text>
+                </View>
+                <View style={styles.statItem}>
+                  <Text style={styles.statLabel}>Garage</Text>
+                  <Text style={styles.statValue}>{property.garage ? `${property.garage} spaces` : 'None'}</Text>
+                </View>
+                <View style={styles.statItem}>
+                  <Text style={styles.statLabel}>Swimming Pool</Text>
+                  <Text style={styles.statValue}>{property.piscine ? 'Yes' : 'No'}</Text>
+                </View>
+                <View style={styles.statItem}>
+                  <Text style={styles.statLabel}>Air Conditioning</Text>
+                  <Text style={styles.statValue}>{property.air_conditioning ? 'Yes' : 'No'}</Text>
+                </View>
+                <View style={styles.statItem}>
+                  <Text style={styles.statLabel}>Exposure</Text>
+                  <Text style={styles.statValue}>{property.exposition || '—'}</Text>
+                </View>
+                <View style={styles.statItem}>
+                  <Text style={styles.statLabel}>View</Text>
+                  <Text style={styles.statValue}>{property.vue || '—'}</Text>
+                </View>
+             </View>
           </View>
 
           <View style={styles.sideCol}>

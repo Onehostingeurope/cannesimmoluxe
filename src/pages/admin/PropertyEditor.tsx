@@ -5,443 +5,577 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { AdminLayout } from '../../components/layout/AdminLayout';
 import { Button } from '../../components/ui/Button';
+import { Headline, Label } from '../../components/ui/Typography';
 import { supabase } from '../../lib/supabase';
 import { clsx } from 'clsx';
 
+// Modular Components
+import { FormSection } from '../../components/admin/property/FormSection';
+import { AmenityPicker } from '../../components/admin/property/AmenityPicker';
+import { MediaUploader } from '../../components/admin/property/MediaUploader';
+import { PublishSidebar } from '../../components/admin/property/PublishSidebar';
+
+// Schema Definition
 const propertySchema = z.object({
-  title: z.string().min(3, 'Title is required'),
+  // Basic
+  title: z.string().min(3, 'Title must be at least 3 characters'),
   ref_id: z.string().min(2, 'Reference ID is required'),
-  type: z.string().min(2, 'Asset type is required'),
   mode: z.enum(['sale', 'rent']),
-  status: z.enum(['available', 'reserved', 'sold', 'highlight', 'off-market']),
+  type: z.string().min(2, 'Property type is required'),
+  status: z.string(),
+  featured: z.boolean().default(false),
+  description_short: z.string().min(10, 'Short summary should be descriptive'),
+  description_long: z.string().min(20, 'Detailed description is required'),
+  
+  // Location
+  country: z.string().default('France'),
   city: z.string().min(2, 'City is required'),
   district: z.string().optional(),
+  address: z.string().optional(),
+  postal_code: z.string().optional(),
+  latitude: z.number().nullable().optional(),
+  longitude: z.number().nullable().optional(),
+  hide_map: z.boolean().default(false),
+  
+  // Pricing
   price: z.number().nullable().optional(),
-  price_on_request: z.boolean(),
-  surface: z.number().nullable().optional(),
-  land_surface: z.number().nullable().optional(),
+  price_on_request: z.boolean().default(false),
+  currency: z.string().default('EUR'),
+  property_tax: z.number().nullable().optional(),
+  charges: z.number().nullable().optional(),
+  availability_date: z.string().optional(),
+  
+  // Details
   rooms: z.number().nullable().optional(),
   bedrooms: z.number().nullable().optional(),
   bathrooms: z.number().nullable().optional(),
-  description_short: z.string().nullable().optional(),
-  description_long: z.string().nullable().optional(),
-  dpe: z.string().nullable().optional(),
-  youtube_id: z.string().nullable().optional(),
+  levels: z.number().nullable().optional(),
+  interior_area: z.number().nullable().optional(),
+  surface: z.number().nullable().optional(), // total surface
+  land_surface: z.number().nullable().optional(),
+  terrace_surface: z.number().nullable().optional(),
+  balcony_surface: z.number().nullable().optional(),
+  garage: z.number().nullable().optional(),
+  piscine: z.boolean().default(false),
+  air_conditioning: z.boolean().default(false),
+  exposition: z.string().optional(),
+  vue: z.string().optional(),
+  condition: z.string().optional(),
+  style: z.string().optional(),
+  
+  // Technical
+  heating_energy: z.string().optional(),
+  heating_type: z.string().optional(),
+  hot_water: z.string().optional(),
+  waste_water: z.string().optional(),
+  energy_class: z.string().optional(),
+  energy_value: z.number().nullable().optional(),
+  climate_class: z.string().optional(),
+  climate_value: z.number().nullable().optional(),
+  annual_energy_min: z.number().nullable().optional(),
+  annual_energy_max: z.number().nullable().optional(),
+  
+  // Amenities
+  amenities: z.array(z.string()).default([]),
+  
+  // SEO
+  seo_title: z.string().optional(),
+  seo_description: z.string().optional(),
+  slug: z.string().optional(),
+  og_title: z.string().optional(),
+  og_description: z.string().optional(),
+  
+  // Gated
+  gated_brochure: z.boolean().default(false),
+  gated_dossier: z.boolean().default(false),
+  gated_save: z.boolean().default(false),
+  agent_notes: z.string().optional(),
+  
+  // Media
+  youtube_id: z.string().optional(),
 });
 
 type PropertyFormData = z.infer<typeof propertySchema>;
+
+const LUXURY_AMENITIES = [
+  'Air conditioning', 'Double glazing', 'Sliding windows', 'Internet', 'Jacuzzi', 
+  'Electric shutters', 'Irrigation', 'Barbecue', 'Outdoor lighting', 'Optical fiber', 
+  'Alarm', 'Safe', 'Electric gate', 'Video surveillance', 'Videophone', 
+  'Swimming pool', 'Fireplace', 'Gym', 'Wine Cellar', 'Elevator', 'Home Automation'
+];
 
 const PropertyEditor = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const isEdit = !!id;
-  const [loading, setLoading] = useState(isEdit ? true : false);
-  const [imageUrls, setImageUrls] = useState<string[]>([]);
-  const [newImageUrl, setNewImageUrl] = useState('');
-  const [crmLeads, setCrmLeads] = useState<any[]>([]);
-  const [assignedLeadId, setAssignedLeadId] = useState<string>('');
+  const [loading, setLoading] = useState(isEdit);
+  const [mediaFiles, setMediaFiles] = useState<any[]>([]);
+  const [completionScore, setCompletionScore] = useState(0);
 
-  const { register, handleSubmit, reset, watch, setValue, formState: { errors, isSubmitting } } = useForm<PropertyFormData>({
+  const { register, handleSubmit, watch, setValue, reset, formState: { errors, isValid, isSubmitting } } = useForm<PropertyFormData>({
     resolver: zodResolver(propertySchema),
     defaultValues: {
-      mode: 'sale',
       status: 'available',
+      mode: 'sale',
+      country: 'France',
+      currency: 'EUR',
+      featured: false,
+      hide_map: false,
       price_on_request: false,
+      amenities: [],
+      piscine: false,
+      air_conditioning: false,
     }
   });
 
-  const priceOnRequest = watch('price_on_request');
+  const watchedFields = watch();
+
+  // Calculate Completion Score
+  useEffect(() => {
+    let score = 0;
+    if (watchedFields.title && watchedFields.ref_id) score += 20;
+    if (mediaFiles.length > 0) score += 20;
+    if (watchedFields.energy_class || watchedFields.interior_area) score += 20;
+    if (watchedFields.seo_title) score += 20;
+    if (watchedFields.gated_brochure) score += 20;
+    setCompletionScore(score);
+  }, [watchedFields, mediaFiles]);
 
   useEffect(() => {
-    const orchestrateLeads = async () => {
-      const { data } = await supabase.from('inquiries').select('id, tracking_data, created_at').order('created_at', { ascending: false });
-      if (data) {
-        const mgmtLeads = data.filter(lead => 
-          lead.tracking_data?.category === 'Management' || 
-          lead.tracking_data?.category === 'Real Estate'
-        );
-        setCrmLeads(mgmtLeads);
-      }
-    };
-    orchestrateLeads();
-
-    if (isEdit) {
-      fetchProperty();
-    }
+    if (isEdit) fetchProperty();
   }, [id]);
 
   const fetchProperty = async () => {
-    const { data, error } = await supabase
-      .from('properties')
-      .select('*')
-      .eq('id', id)
-      .single();
-
-    if (error) {
-      console.error('Error fetching property:', error);
-      navigate('/admin/properties');
-    } else {
-      reset({
-        title: data.title,
-        ref_id: data.ref_id,
-        type: data.type,
-        mode: data.mode,
-        status: data.status,
-        city: data.city,
-        district: data.district || '',
-        price: data.price,
-        price_on_request: data.price_on_request,
-        surface: data.surface,
-        land_surface: data.land_surface,
-        rooms: data.rooms,
-        bedrooms: data.bedrooms,
-        bathrooms: data.bathrooms,
-        description_short: data.description_short,
-        description_long: data.description_long,
-        dpe: data.dpe,
-        youtube_id: data.youtube_id,
-      });
-      setImageUrls(data.images || []);
-      
-      const { data: leadReq } = await supabase.from('inquiries').select('id').eq('property_id', id).maybeSingle();
-      if (leadReq && leadReq.id) {
-         setAssignedLeadId(leadReq.id);
-      }
-      
+    const { data, error } = await supabase.from('properties').select('*').eq('id', id).single();
+    if (data) {
+      reset(data);
+      // Fetch media too if implemented...
       setLoading(false);
     }
   };
 
-  const onSubmit = async (values: PropertyFormData) => {
-    const slug = values.title.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
-    const propertyData = {
-      ...values,
-      slug,
-      images: imageUrls,
-      updated_at: new Date().toISOString(),
-    };
-
-    let targetPropertyId = id;
-    let error;
-    if (isEdit) {
-      const { error: updateError } = await supabase
-        .from('properties')
-        .update(propertyData)
-        .eq('id', id);
-      error = updateError;
-    } else {
-      const { error: insertError, data: insertData } = await supabase
-        .from('properties')
-        .insert([propertyData])
-        .select()
-        .single();
-      error = insertError;
-      if (insertData) targetPropertyId = insertData.id;
-    }
+  const onSubmit = async (values: PropertyFormData, mode: 'draft' | 'publish') => {
+    const slug = values.slug || values.title.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
+    const propertyData = { ...values, slug, updated_at: new Date().toISOString() };
+    
+    // In actual implementation, we would also handle mediaFiles table updates here
+    
+    const { error } = isEdit 
+      ? await supabase.from('properties').update(propertyData).eq('id', id)
+      : await supabase.from('properties').insert([propertyData]);
 
     if (error) {
-      alert('Error saving property: ' + error.message);
+      alert('Error saving: ' + error.message);
     } else {
-      if (assignedLeadId && targetPropertyId) {
-         await supabase.from('inquiries').update({ property_id: targetPropertyId }).eq('id', assignedLeadId);
-      }
       navigate('/admin/properties');
     }
   };
 
-  const addImage = () => {
-    if (newImageUrl && !imageUrls.includes(newImageUrl)) {
-      setImageUrls([...imageUrls, newImageUrl]);
-      setNewImageUrl('');
-    }
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+    
+    // Simple local preview for demo
+    const newFiles = Array.from(files).map(file => ({
+      id: Math.random().toString(36).substr(2, 9),
+      url: URL.createObjectURL(file),
+      alt: '',
+      isCover: false,
+      type: 'image'
+    }));
+    setMediaFiles(prev => [...prev, ...newFiles]);
   };
 
-  const removeImage = (url: string) => {
-    setImageUrls(imageUrls.filter(u => u !== url));
-  };
-
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        const MAX_DIM = 1200;
-        let width = img.width;
-        let height = img.height;
-
-        if (width > height && width > MAX_DIM) {
-          height *= MAX_DIM / width;
-          width = MAX_DIM;
-        } else if (height > MAX_DIM) {
-          width *= MAX_DIM / height;
-          height = MAX_DIM;
-        }
-
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        ctx?.drawImage(img, 0, 0, width, height);
-        
-        const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
-        setImageUrls(prev => [...prev, dataUrl]);
-      };
-      img.src = event.target?.result as string;
-    };
-    reader.readAsDataURL(file);
-  };
-
-  if (loading) {
-    return (
-      <AdminLayout>
-         <div className="min-h-[400px] flex items-center justify-center">
-            <div className="w-12 h-12 border-t-2 border-secondary animate-spin rounded-full"></div>
-         </div>
-      </AdminLayout>
-    );
-  }
+  if (loading) return <div className="p-20 text-center">Loading Asset Dossier...</div>;
 
   return (
     <AdminLayout>
-      <div className="max-w-5xl mx-auto space-y-12 animate-luxury-fade font-body pb-24">
-        <div className="flex justify-between items-end border-b border-outline-variant/20 pb-8">
-           <div className="space-y-4">
+      <div className="max-w-7xl mx-auto space-y-12 pb-24">
+        {/* Header */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 border-b border-outline-variant/20 pb-8">
+           <div className="space-y-3">
               <div className="flex items-center gap-3">
-                 <span className="material-symbols-outlined notranslate text-secondary text-base" translate="no">edit_square</span>
-                 <p className="font-label text-[10px] tracking-[0.2em] uppercase text-outline">Technical Dossier Editor</p>
+                 <span className="material-symbols-outlined notranslate text-secondary text-base" translate="no">add_circle</span>
+                 <p className="font-label text-[10px] tracking-[0.2em] uppercase text-outline">Inventory Management</p>
               </div>
-              <h2 className="font-headline text-4xl text-primary">{isEdit ? 'Refine Asset' : 'Deploy New Estate'}</h2>
+              <h1 className="font-serif text-4xl text-primary">{isEdit ? 'Refine Asset' : 'Add New Property'}</h1>
+              <p className="text-sm text-outline opacity-70 italic font-serif max-w-xl">
+                 Create a luxury listing with media, pricing, details, SEO, and brochure access.
+              </p>
            </div>
-           <div className="flex gap-4">
-              <Button variant="ghost" onClick={() => navigate('/admin/properties')}>Cancel</Button>
-              <Button 
-                variant="primary" 
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleSubmit(onSubmit as any)();
-                }}
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? 'Processing...' : isEdit ? 'Update Entry' : 'Publish Asset'}
-              </Button>
+           <div className="flex gap-4 w-full md:w-auto">
+              <Button variant="outline" onClick={() => navigate('/admin/properties')}>Discard</Button>
+              <Button variant="outline" onClick={() => {}}>Preview</Button>
+              <Button variant="primary" onClick={handleSubmit((d) => onSubmit(d, 'publish'))}>Publish Asset</Button>
            </div>
         </div>
 
-        <form className="grid grid-cols-1 md:grid-cols-2 gap-12">
-           {/* Section 1: Identification */}
-           <div className="space-y-8">
-              <h3 className="font-label text-[10px] tracking-[0.3em] uppercase text-secondary font-bold border-l-2 border-secondary pl-4">Identification Matrix</h3>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+           {/* Main Content */}
+           <div className="lg:col-span-8 space-y-12">
               
-              <div className="space-y-6">
-                 <div className="space-y-2">
-                    <label className="font-label text-[9px] tracking-widest uppercase text-outline opacity-60">Property Title</label>
-                    <input {...register('title')} className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/20 focus:border-secondary focus:ring-0 p-4 font-headline text-xl text-primary" />
-                    {errors.title && <p className="text-red-500 text-[9px] uppercase tracking-widest">{(errors.title as any).message}</p>}
-                 </div>
-
-                 <div className="grid grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                       <label className="font-label text-[9px] tracking-widest uppercase text-outline opacity-60">Reference ID</label>
-                       <input {...register('ref_id')} placeholder="REF-XXXX" className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/20 p-4 font-label text-[10px] tracking-widest uppercase" />
+              {/* A. Basic Information */}
+              <FormSection title="Basic Information" subtitle="Primary identity and editorial narrative" icon="info">
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="space-y-2 md:col-span-2">
+                       <label className="text-[10px] uppercase tracking-widest text-outline">Property Title</label>
+                       <input {...register('title')} className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/10 p-4 font-serif text-2xl focus:ring-0 focus:border-secondary transition-all" placeholder="e.g. Villa Émeraude" />
+                       {errors.title && <p className="text-red-500 text-[9px] uppercase tracking-widest">{errors.title.message}</p>}
                     </div>
                     <div className="space-y-2">
-                       <label className="font-label text-[9px] tracking-widest uppercase text-outline opacity-60">Asset Type</label>
-                       <input {...register('type')} placeholder="Villa, Penthouse, etc." className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/20 p-4 font-label text-[10px] tracking-widest uppercase" />
+                       <label className="text-[10px] uppercase tracking-widest text-outline">Reference ID</label>
+                       <input {...register('ref_id')} className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/10 p-4 text-sm focus:ring-0 focus:border-secondary transition-all uppercase tracking-widest" placeholder="REF-8841" />
                     </div>
-                 </div>
-
-                 <div className="grid grid-cols-2 gap-6">
                     <div className="space-y-2">
-                       <label className="font-label text-[9px] tracking-widest uppercase text-outline opacity-60">Listing Mode</label>
-                       <select {...register('mode')} className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/20 p-4 font-label text-[10px] tracking-widest uppercase">
-                          <option value="sale">For Sale</option>
-                          <option value="rent">Seasonal Rental</option>
+                       <label className="text-[10px] uppercase tracking-widest text-outline">Acquisition Mode</label>
+                       <div className="flex gap-2">
+                          {['sale', 'rent'].map(m => (
+                             <button
+                                key={m}
+                                type="button"
+                                onClick={() => setValue('mode', m as any)}
+                                className={clsx(
+                                   "flex-1 py-3 px-4 border text-[10px] uppercase tracking-widest transition-all",
+                                   watchedFields.mode === m ? "bg-secondary text-white border-secondary" : "border-outline-variant/20 text-outline hover:border-primary"
+                                )}
+                             >
+                                {m === 'sale' ? 'For Sale' : 'Seasonal Rental'}
+                             </button>
+                          ))}
+                       </div>
+                    </div>
+                    <div className="space-y-2">
+                       <label className="text-[10px] uppercase tracking-widest text-outline">Property Category</label>
+                       <select {...register('type')} className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/10 p-4 text-xs uppercase tracking-widest focus:ring-0 focus:border-secondary transition-all">
+                          <option value="Villa">Villa</option>
+                          <option value="Penthouse">Penthouse</option>
+                          <option value="Apartment">Apartment</option>
+                          <option value="Estate">Historical Estate</option>
                        </select>
                     </div>
-                    <div className="space-y-2">
-                       <label className="font-label text-[9px] tracking-widest uppercase text-outline opacity-60">Market Status</label>
-                       <select {...register('status')} className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/20 p-4 font-label text-[10px] tracking-widest uppercase">
-                          <option value="available">Available</option>
-                          <option value="highlight">Exclusive Highlight</option>
-                          <option value="off-market">Off-Market (Confidential)</option>
-                          <option value="reserved">Reserved</option>
-                          <option value="sold">Decommissioned (Sold)</option>
-                       </select>
+                    <div className="space-y-2 md:col-span-2 pt-4 border-t border-outline-variant/10 flex items-center gap-6">
+                       <div className="flex items-center gap-3">
+                          <input type="checkbox" {...register('featured')} className="w-5 h-5 text-secondary focus:ring-0 rounded-none bg-transparent border-outline-variant/30" />
+                          <label className="text-[10px] uppercase tracking-widest text-primary font-bold">Featured Selection</label>
+                       </div>
+                       <p className="text-[9px] text-outline italic uppercase tracking-widest opacity-60">Highlight this asset on the primary landing page.</p>
+                    </div>
+                    <div className="space-y-2 md:col-span-2">
+                       <label className="text-[10px] uppercase tracking-widest text-outline">Short Summary</label>
+                       <textarea {...register('description_short')} rows={3} className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/10 p-4 text-sm leading-relaxed focus:ring-0 focus:border-secondary transition-all resize-none" placeholder="A brief teaser for the property lists..." />
+                    </div>
+                    <div className="space-y-2 md:col-span-2">
+                       <label className="text-[10px] uppercase tracking-widest text-outline">Full Narrative</label>
+                       <textarea {...register('description_long')} rows={8} className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/10 p-4 text-sm leading-relaxed focus:ring-0 focus:border-secondary transition-all resize-none font-serif" placeholder="Tell the story of this exceptional residence..." />
                     </div>
                  </div>
+              </FormSection>
 
-                 <div className="space-y-2 pt-4 border-t border-outline-variant/10">
-                     <label className="font-label text-[9px] tracking-widest uppercase text-outline opacity-60 flex items-center gap-2">
-                       <span className="material-symbols-outlined notranslate text-xs text-secondary" translate="no">diversity_3</span>
-                       CRM Owner / Lead Association
-                     </label>
-                     <select 
-                        value={assignedLeadId}
-                        onChange={(e) => setAssignedLeadId(e.target.value)}
-                        className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/20 p-4 font-label text-[10px] tracking-widest uppercase cursor-pointer text-primary"
-                     >
-                        <option value="">-- NO OWNER ASSOCIATED --</option>
-                        {crmLeads.map(lead => (
-                           <option key={lead.id} value={lead.id}>
-                              {lead.tracking_data?.first_name || lead.tracking_data?.firstName} {lead.tracking_data?.last_name || lead.tracking_data?.lastName} — [{lead.tracking_data?.category || 'Legacy'}]
-                           </option>
-                        ))}
-                     </select>
-                  </div>
-              </div>
-           </div>
-
-           {/* Section 2: Financials & Location */}
-           <div className="space-y-8">
-              <h3 className="font-label text-[10px] tracking-[0.3em] uppercase text-secondary font-bold border-l-2 border-secondary pl-4">Financials & Geometry</h3>
-              
-              <div className="space-y-6">
-                 <div className="flex items-center gap-4 py-2 border-b border-outline-variant/10">
-                    <input type="checkbox" {...register('price_on_request')} className="w-4 h-4 text-secondary focus:ring-0" />
-                    <label className="font-label text-[10px] tracking-widest uppercase text-primary">Conceal Price (On Request)</label>
-                 </div>
-
-                 {!priceOnRequest && (
+              {/* B. Location */}
+              <FormSection title="Location" subtitle="Geographic positioning and map privacy" icon="location_on">
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div className="space-y-2">
-                       <label className="font-label text-[9px] tracking-widest uppercase text-outline opacity-60">Valuation (€)</label>
-                       <input 
-                         type="number" 
-                         {...register('price', { valueAsNumber: true })} 
-                         className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/20 p-4 font-headline text-2xl text-primary" 
-                       />
-                    </div>
-                 )}
-
-                 <div className="grid grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                       <label className="font-label text-[9px] tracking-widest uppercase text-outline opacity-60">City / Commune</label>
-                       <input {...register('city')} className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/20 p-4 font-label text-[10px] tracking-widest uppercase" />
+                       <label className="text-[10px] uppercase tracking-widest text-outline">Country</label>
+                       <input {...register('country')} className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/10 p-4 text-sm" />
                     </div>
                     <div className="space-y-2">
-                       <label className="font-label text-[9px] tracking-widest uppercase text-outline opacity-60">District / Quarter</label>
-                       <input {...register('district')} className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/20 p-4 font-label text-[10px] tracking-widest uppercase" />
+                       <label className="text-[10px] uppercase tracking-widest text-outline">City / Commune</label>
+                       <input {...register('city')} className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/10 p-4 text-sm" />
+                    </div>
+                    <div className="space-y-2">
+                       <label className="text-[10px] uppercase tracking-widest text-outline">District / Neighborhood</label>
+                       <input {...register('district')} className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/10 p-4 text-sm" />
+                    </div>
+                    <div className="space-y-2">
+                       <label className="text-[10px] uppercase tracking-widest text-outline">Postal Code</label>
+                       <input {...register('postal_code')} className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/10 p-4 text-sm" />
+                    </div>
+                    <div className="space-y-2 md:col-span-2">
+                       <label className="text-[10px] uppercase tracking-widest text-outline">Full Address</label>
+                       <input {...register('address')} className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/10 p-4 text-sm" />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4 md:col-span-2">
+                       <div className="space-y-2">
+                          <label className="text-[10px] uppercase tracking-widest text-outline">Latitude</label>
+                          <input type="number" step="any" {...register('latitude', { valueAsNumber: true })} className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/10 p-4 text-sm" />
+                       </div>
+                       <div className="space-y-2">
+                          <label className="text-[10px] uppercase tracking-widest text-outline">Longitude</label>
+                          <input type="number" step="any" {...register('longitude', { valueAsNumber: true })} className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/10 p-4 text-sm" />
+                       </div>
+                    </div>
+                    <div className="space-y-2 md:col-span-2 pt-4 border-t border-outline-variant/10">
+                       <div className="flex items-center gap-3">
+                          <input type="checkbox" {...register('hide_map')} className="w-5 h-5 text-secondary focus:ring-0 rounded-none bg-transparent border-outline-variant/30" />
+                          <label className="text-[10px] uppercase tracking-widest text-primary font-bold">Hide Exact Location from Public</label>
+                       </div>
                     </div>
                  </div>
-              </div>
-           </div>
+              </FormSection>
 
-           {/* Section 3: Technical Specifications */}
-           <div className="space-y-8">
-              <h3 className="font-label text-[10px] tracking-[0.3em] uppercase text-secondary font-bold border-l-2 border-secondary pl-4">Technical Specifications</h3>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
-                 {[
-                   { id: 'surface', label: 'Living Space (m²)', icon: 'straighten' },
-                   { id: 'land_surface', label: 'Plot Size (m²)', icon: 'landscape' },
-                   { id: 'rooms', label: 'Total Rooms', icon: 'apps' },
-                   { id: 'bedrooms', label: 'Bedrooms', icon: 'bed' },
-                   { id: 'bathrooms', label: 'Bathrooms', icon: 'bathtub' },
-                 ].map((spec) => (
-                   <div key={spec.id} className="space-y-2">
-                      <label className="font-label text-[9px] tracking-widest uppercase text-outline opacity-60 flex items-center gap-2">
-                         <span className="material-symbols-outlined notranslate text-xs" translate="no">{spec.icon}</span>
-                         {spec.label}
-                      </label>
-                      <input 
-                        type="number" 
-                        {...register(spec.id as any, { valueAsNumber: true })} 
-                        className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/20 p-4 font-label text-[11px]" 
-                      />
-                   </div>
-                 ))}
-                 <div className="space-y-2">
-                    <label className="font-label text-[9px] tracking-widest uppercase text-outline opacity-60 flex items-center gap-2">
-                       <span className="material-symbols-outlined notranslate text-xs" translate="no">energy_savings_leaf</span>
-                       DPE Rating
-                    </label>
-                    <select {...register('dpe')} className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/20 p-4 font-label text-[11px]">
-                       <option value="">Undefined</option>
-                       <option value="A">A - Exceptional</option>
-                       <option value="B">B - Excellent</option>
-                       <option value="C">C - Good</option>
-                       <option value="D">D - Average</option>
-                       <option value="E">E - Poor</option>
-                       <option value="F">F - Very Poor</option>
-                       <option value="G">G - Extremely Poor</option>
-                    </select>
-                 </div>
-              </div>
-           </div>
-
-           {/* Section 4: Media Orchestration */}
-           <div className="space-y-8">
-              <h3 className="font-label text-[10px] tracking-[0.3em] uppercase text-secondary font-bold border-l-2 border-secondary pl-4">Media Orchestration</h3>
-              <div className="space-y-4">
-                 <div className="space-y-2">
-                    <label className="font-label text-[9px] tracking-widest uppercase text-outline opacity-60">YouTube Cinematic Video ID (Optional)</label>
-                    <input {...register('youtube_id')} placeholder="e.g. dQw4w9WgXcQ" className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/20 p-4 font-label text-[10px]" />
-                    <p className="text-[10px] text-outline opacity-50">Upload your massive hero videos exclusively to YouTube and paste the ID here.</p>
-                 </div>
-              </div>
-
-              <div className="space-y-4 pt-4 border-t border-outline-variant/10">
-                 <label className="font-label text-[9px] tracking-widest uppercase text-outline opacity-60">Architectural Photography Library (Base64 Injection)</label>
-                 <div className="flex gap-4 items-center">
-                    <div className="relative overflow-hidden inline-block group">
-                       <Button variant="secondary" type="button" className="px-8 whitespace-nowrap group-hover:bg-secondary/90">
-                          <span className="material-symbols-outlined notranslate text-sm mr-2 align-middle" translate="no">cloud_upload</span> Upload Local Image
-                       </Button>
-                       <input 
-                         type="file" 
-                         accept="image/*" 
-                         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" 
-                         onChange={handleFileUpload}
-                       />
+              {/* C. Pricing */}
+              <FormSection title="Pricing & Financials" subtitle="Valuation and recurring fiscal obligations" icon="payments">
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="space-y-2 pt-4 md:col-span-2 border-b border-outline-variant/10 pb-6">
+                       <div className="flex items-center gap-3">
+                          <input type="checkbox" {...register('price_on_request')} className="w-5 h-5 text-secondary focus:ring-0 rounded-none bg-transparent border-outline-variant/30" />
+                          <label className="text-[10px] uppercase tracking-widest text-primary font-bold">Price on Request (Confidential Valuation)</label>
+                       </div>
                     </div>
-                    <p className="text-[10px] uppercase tracking-widest text-outline">OR</p>
-                    <input 
-                      value={newImageUrl}
-                      onChange={(e) => setNewImageUrl(e.target.value)}
-                      placeholder="ENTER ASSET URL..." 
-                      className="flex-grow bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/20 p-4 font-label text-[9px] tracking-widest uppercase" 
-                    />
-                    <Button variant="secondary" onClick={addImage} type="button">Add</Button>
+                    {!watchedFields.price_on_request && (
+                       <>
+                          <div className="space-y-2">
+                             <label className="text-[10px] uppercase tracking-widest text-outline">Valuation Amount</label>
+                             <div className="relative">
+                                <input type="number" {...register('price', { valueAsNumber: true })} className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/10 p-4 text-xl font-bold pl-12" />
+                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-outline font-bold">€</span>
+                             </div>
+                          </div>
+                          <div className="space-y-2">
+                             <label className="text-[10px] uppercase tracking-widest text-outline">Currency</label>
+                             <input {...register('currency')} className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/10 p-4 text-sm uppercase tracking-widest" />
+                          </div>
+                       </>
+                    )}
+                    <div className="space-y-2">
+                       <label className="text-[10px] uppercase tracking-widest text-outline">Property Tax (Annual)</label>
+                       <input type="number" {...register('property_tax', { valueAsNumber: true })} className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/10 p-4 text-sm" />
+                    </div>
+                    <div className="space-y-2">
+                       <label className="text-[10px] uppercase tracking-widest text-outline">Charges / HOA Fees</label>
+                       <input type="number" {...register('charges', { valueAsNumber: true })} className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/10 p-4 text-sm" />
+                    </div>
+                    <div className="space-y-2">
+                       <label className="text-[10px] uppercase tracking-widest text-outline">Availability Date</label>
+                       <input type="date" {...register('availability_date')} className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/10 p-4 text-sm" />
+                    </div>
                  </div>
-                 <div className="grid grid-cols-4 gap-4 max-h-40 overflow-y-auto pr-2 custom-scrollbar">
-                    {imageUrls.map((url, index) => (
-                       <div key={index} className="relative group aspect-square border border-outline-variant/20">
-                          <img src={url} className="w-full h-full object-cover" alt="Property asset" />
-                          <button 
-                            type="button"
-                            onClick={() => removeImage(url)}
-                            className="absolute inset-0 bg-red-500/80 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                          >
-                             <span className="material-symbols-outlined notranslate text-sm" translate="no">delete</span>
-                          </button>
+              </FormSection>
+
+              {/* D. Property Details */}
+              <FormSection title="Property Details" subtitle="Technical metrics and architectural style" icon="architecture">
+                 <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                    {[
+                       { name: 'rooms', label: 'Rooms', icon: 'grid_view' },
+                       { name: 'bedrooms', label: 'Bedrooms', icon: 'bed' },
+                       { name: 'bathrooms', label: 'Bathrooms', icon: 'bathtub' },
+                       { name: 'levels', label: 'Levels', icon: 'layers' },
+                    ].map(field => (
+                       <div key={field.name} className="space-y-2">
+                          <label className="text-[9px] uppercase tracking-widest text-outline flex items-center gap-2">
+                             <span className="material-symbols-outlined notranslate text-xs" translate="no">{field.icon}</span>
+                             {field.label}
+                          </label>
+                          <input type="number" {...register(field.name as any, { valueAsNumber: true })} className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/10 p-3 text-sm" />
                        </div>
                     ))}
                  </div>
-              </div>
+                 <div className="grid grid-cols-2 md:grid-cols-3 gap-6 pt-8 border-t border-outline-variant/10">
+                    {[
+                       { name: 'interior_area', label: 'Interior Area (m²)', icon: 'square_foot' },
+                       { name: 'surface', label: 'Total Surface (m²)', icon: 'zoom_out_map' },
+                       { name: 'land_surface', label: 'Land Size (m²)', icon: 'landscape' },
+                       { name: 'terrace_surface', label: 'Terrace (m²)', icon: 'deck' },
+                       { name: 'balcony_surface', label: 'Balcony (m²)', icon: 'balcony' },
+                       { name: 'garage', label: 'Garage / Parking', icon: 'directions_car' },
+                    ].map(field => (
+                       <div key={field.name} className="space-y-2">
+                          <label className="text-[9px] uppercase tracking-widest text-outline flex items-center gap-2">
+                             <span className="material-symbols-outlined notranslate text-xs" translate="no">{field.icon}</span>
+                             {field.label}
+                          </label>
+                          <input type="number" {...register(field.name as any, { valueAsNumber: true })} className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/10 p-3 text-sm" />
+                       </div>
+                    ))}
+                 </div>
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-8 border-t border-outline-variant/10">
+                    <div className="space-y-2">
+                       <label className="text-[10px] uppercase tracking-widest text-outline">Exposure (Orientation)</label>
+                       <input {...register('exposition')} className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/10 p-4 text-sm" placeholder="e.g. South-West" />
+                    </div>
+                    <div className="space-y-2">
+                       <label className="text-[10px] uppercase tracking-widest text-outline">View Description</label>
+                       <input {...register('vue')} className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/10 p-4 text-sm" placeholder="e.g. Panoramic Sea View" />
+                    </div>
+                    <div className="space-y-2">
+                       <label className="text-[10px] uppercase tracking-widest text-outline">Condition</label>
+                       <input {...register('condition')} className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/10 p-4 text-sm" placeholder="e.g. Brand New" />
+                    </div>
+                    <div className="space-y-2">
+                       <label className="text-[10px] uppercase tracking-widest text-outline">Architectural Style</label>
+                       <input {...register('style')} className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/10 p-4 text-sm" placeholder="e.g. Contemporary" />
+                    </div>
+                 </div>
+              </FormSection>
+
+              {/* E. Technical / Energy */}
+              <FormSection title="Technical & Energy" subtitle="Utility systems and environmental performance" icon="bolt">
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="space-y-2">
+                       <label className="text-[10px] uppercase tracking-widest text-outline">Heating Energy</label>
+                       <input {...register('heating_energy')} className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/10 p-4 text-sm" placeholder="e.g. Electricity" />
+                    </div>
+                    <div className="space-y-2">
+                       <label className="text-[10px] uppercase tracking-widest text-outline">Heating Type</label>
+                       <input {...register('heating_type')} className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/10 p-4 text-sm" placeholder="e.g. Air-conditioning" />
+                    </div>
+                    <div className="grid grid-cols-2 gap-6 md:col-span-2 border-y border-outline-variant/10 py-8">
+                       <div className="space-y-4">
+                          <label className="text-[10px] uppercase tracking-widest text-primary font-bold">Energy Performance (DPE)</label>
+                          <div className="grid grid-cols-2 gap-4">
+                             <div className="space-y-1">
+                                <label className="text-[8px] uppercase tracking-widest text-outline">Class</label>
+                                <select {...register('energy_class')} className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/10 p-3 text-sm">
+                                   <option value="">--</option>
+                                   {['A', 'B', 'C', 'D', 'E', 'F', 'G'].map(c => <option key={c} value={c}>{c}</option>)}
+                                </select>
+                             </div>
+                             <div className="space-y-1">
+                                <label className="text-[8px] uppercase tracking-widest text-outline">Value (kWh/m²/y)</label>
+                                <input type="number" {...register('energy_value', { valueAsNumber: true })} className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/10 p-3 text-sm" />
+                             </div>
+                          </div>
+                       </div>
+                       <div className="space-y-4 border-l border-outline-variant/10 pl-6">
+                          <label className="text-[10px] uppercase tracking-widest text-primary font-bold">Climate Emission (GES)</label>
+                          <div className="grid grid-cols-2 gap-4">
+                             <div className="space-y-1">
+                                <label className="text-[8px] uppercase tracking-widest text-outline">Class</label>
+                                <select {...register('climate_class')} className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/10 p-3 text-sm">
+                                   <option value="">--</option>
+                                   {['A', 'B', 'C', 'D', 'E', 'F', 'G'].map(c => <option key={c} value={c}>{c}</option>)}
+                                </select>
+                             </div>
+                             <div className="space-y-1">
+                                <label className="text-[8px] uppercase tracking-widest text-outline">Value (kgCO²/m²/y)</label>
+                                <input type="number" {...register('climate_value', { valueAsNumber: true })} className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/10 p-3 text-sm" />
+                             </div>
+                          </div>
+                       </div>
+                    </div>
+                    <div className="space-y-2 md:col-span-2">
+                       <label className="text-[10px] uppercase tracking-widest text-outline">Estimated Annual Energy Cost</label>
+                       <div className="grid grid-cols-2 gap-4">
+                          <input type="number" {...register('annual_energy_min', { valueAsNumber: true })} placeholder="Min €" className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/10 p-4 text-sm" />
+                          <input type="number" {...register('annual_energy_max', { valueAsNumber: true })} placeholder="Max €" className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/10 p-4 text-sm" />
+                       </div>
+                    </div>
+                 </div>
+              </FormSection>
+
+              {/* F. Amenities */}
+              <FormSection title="Amenities & Comfort" subtitle="Exclusive features and lifestyle amenities" icon="pool">
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8 pb-8 border-b border-outline-variant/10">
+                    <div className="flex items-center justify-between p-4 bg-[#f6f3ee] dark:bg-[#1c1b1b] border border-outline-variant/10">
+                       <div className="flex items-center gap-4">
+                          <span className="material-symbols-outlined notranslate text-secondary" translate="no">pool</span>
+                          <label className="text-[10px] uppercase tracking-widest text-primary font-bold">Swimming Pool</label>
+                       </div>
+                       <input type="checkbox" {...register('piscine')} className="w-5 h-5 text-secondary focus:ring-0 rounded-none bg-transparent border-outline-variant/30" />
+                    </div>
+                    <div className="flex items-center justify-between p-4 bg-[#f6f3ee] dark:bg-[#1c1b1b] border border-outline-variant/10">
+                       <div className="flex items-center gap-4">
+                          <span className="material-symbols-outlined notranslate text-secondary" translate="no">ac_unit</span>
+                          <label className="text-[10px] uppercase tracking-widest text-primary font-bold">Air Conditioning</label>
+                       </div>
+                       <input type="checkbox" {...register('air_conditioning')} className="w-5 h-5 text-secondary focus:ring-0 rounded-none bg-transparent border-outline-variant/30" />
+                    </div>
+                 </div>
+                 <AmenityPicker 
+                    suggestions={LUXURY_AMENITIES} 
+                    value={watchedFields.amenities || []}
+                    onChange={(val) => setValue('amenities', val, { shouldValidate: true, shouldDirty: true })}
+                 />
+              </FormSection>
+
+              {/* G. Media Upload */}
+              <FormSection title="Media Orchestration" subtitle="Architectural photography and cinematic assets" icon="movie">
+                 <MediaUploader 
+                    files={mediaFiles} 
+                    onChange={setMediaFiles}
+                    onUpload={handleFileUpload}
+                 />
+                 <div className="pt-8 space-y-4">
+                    <label className="text-[10px] uppercase tracking-widest text-outline">YouTube Cinematic Video ID</label>
+                    <input {...register('youtube_id')} className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/10 p-4 text-sm" placeholder="e.g. dQw4w9WgXcQ" />
+                 </div>
+              </FormSection>
+
+              {/* H. Lead Access / Gated Content */}
+              <FormSection title="Gated Intelligence" subtitle="Privacy controls and internal briefings" icon="lock">
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="space-y-4">
+                       {[
+                          { name: 'gated_brochure', label: 'Gated Digital Brochure' },
+                          { name: 'gated_dossier', label: 'Gated Technical Dossier' },
+                          { name: 'gated_save', label: 'Require Registry to Save' },
+                       ].map(gate => (
+                          <div key={gate.name} className="flex items-center gap-4 py-3 border-b border-outline-variant/10">
+                             <input type="checkbox" {...register(gate.name as any)} className="w-5 h-5 text-secondary focus:ring-0 rounded-none bg-transparent border-outline-variant/30" />
+                             <label className="text-[10px] uppercase tracking-widest text-primary font-bold">{gate.label}</label>
+                          </div>
+                       ))}
+                    </div>
+                    <div className="space-y-2">
+                       <label className="text-[10px] uppercase tracking-widest text-outline">Internal Agent Notes</label>
+                       <textarea {...register('agent_notes')} rows={6} className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/10 p-4 text-sm italic opacity-80" placeholder="Confidential briefing for the operative team..." />
+                    </div>
+                 </div>
+              </FormSection>
+
+              {/* I. SEO */}
+              <FormSection title="Global Reach (SEO)" subtitle="Search engine optimization and social metadata" icon="language">
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="space-y-2 md:col-span-2">
+                       <label className="text-[10px] uppercase tracking-widest text-outline">Custom Slug (URI)</label>
+                       <input {...register('slug')} className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/10 p-4 text-sm" placeholder="villa-emeraude-cannes" />
+                    </div>
+                    <div className="space-y-2">
+                       <label className="text-[10px] uppercase tracking-widest text-outline">SEO Meta Title</label>
+                       <input {...register('seo_title')} className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/10 p-4 text-sm" />
+                    </div>
+                    <div className="space-y-2">
+                       <label className="text-[10px] uppercase tracking-widest text-outline">Open Graph Title</label>
+                       <input {...register('og_title')} className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/10 p-4 text-sm" />
+                    </div>
+                    <div className="space-y-2 md:col-span-2">
+                       <label className="text-[10px] uppercase tracking-widest text-outline">SEO Meta Description</label>
+                       <textarea {...register('seo_description')} rows={3} className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/10 p-4 text-sm" />
+                    </div>
+                 </div>
+              </FormSection>
+
            </div>
 
-           {/* Section 5: Editorial Content */}
-           <div className="md:col-span-2 space-y-8">
-              <h3 className="font-label text-[10px] tracking-[0.3em] uppercase text-secondary font-bold border-l-2 border-secondary pl-4">Editorial Narrative</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                 <div className="space-y-4">
-                    <label className="font-label text-[9px] tracking-widest uppercase text-outline opacity-60">Short Abstract (Curated Teaser)</label>
-                    <textarea 
-                      {...register('description_short')}
-                      className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/20 p-6 font-body text-sm leading-relaxed resize-none h-32" 
-                    />
-                 </div>
-                 <div className="space-y-4">
-                    <label className="font-label text-[9px] tracking-widest uppercase text-outline opacity-60">The Full Narrative (Detailed Dossier)</label>
-                    <textarea 
-                      {...register('description_long')}
-                      className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/20 p-6 font-body text-sm leading-relaxed resize-none h-32" 
-                    />
-                 </div>
+           {/* Sticky Sidebar */}
+           <div className="lg:col-span-4">
+              <PublishSidebar 
+                 score={completionScore}
+                 status={watchedFields.status || 'available'}
+                 onStatusChange={(s) => setValue('status', s)}
+                 onSave={(mode) => handleSubmit((d) => onSubmit(d, mode))()}
+                 onPreview={() => {}}
+                 isValid={isValid}
+                 errors={errors}
+              />
+              
+              {/* Secondary Context Actions */}
+              <div className="mt-8 space-y-4 opacity-60 hover:opacity-100 transition-opacity">
+                 <button className="w-full flex items-center justify-between p-4 bg-white dark:bg-[#121212] border border-outline-variant/10 text-[9px] uppercase tracking-[0.2em] hover:bg-[#f6f3ee] transition-colors">
+                    <span>Duplicate Dossier</span>
+                    <span className="material-symbols-outlined notranslate text-xs" translate="no">content_copy</span>
+                 </button>
+                 <button className="w-full flex items-center justify-between p-4 bg-white dark:bg-[#121212] border border-outline-variant/10 text-[9px] uppercase tracking-[0.2em] hover:bg-[#f6f3ee] transition-colors">
+                    <span>AI-Assisted Narrative</span>
+                    <span className="material-symbols-outlined notranslate text-xs" translate="no">psychology</span>
+                 </button>
+                 <button className="w-full flex items-center justify-between p-4 bg-white dark:bg-[#121212] border border-outline-variant/10 text-[9px] uppercase tracking-[0.2em] hover:bg-[#f6f3ee] transition-colors">
+                    <span>Import from PDF/Brochure</span>
+                    <span className="material-symbols-outlined notranslate text-xs" translate="no">upload_file</span>
+                 </button>
               </div>
            </div>
-        </form>
+        </div>
       </div>
     </AdminLayout>
   );

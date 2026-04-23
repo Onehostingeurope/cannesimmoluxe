@@ -129,12 +129,13 @@ const PropertyDetail = () => {
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-4">
                   {[
-                    { label: "Construction", value: "2015" },
-                    { label: "Exposure", value: "South-West" },
-                    { label: "Heating", value: "Reversible A/C" },
-                    { label: "Hot Water", value: "Individual Electric" },
-                    { label: "Energy Rating", value: "DPE: A (45) / GES: A (5)" },
-                    { label: "Land Tax", value: "€8,450 / Year" },
+                    { label: "Ref ID", value: property.ref_id },
+                    { label: "Exposure", value: property.exposition || "N/A" },
+                    { label: "View", value: property.vue || "N/A" },
+                    { label: "Garage", value: property.garage ? `${property.garage} spaces` : "None" },
+                    { label: "Swimming Pool", value: property.piscine ? "Yes" : "No" },
+                    { label: "Air Conditioning", value: property.air_conditioning ? "Yes" : "No" },
+                    { label: "Energy Rating", value: property.dpe ? `Class ${property.dpe}` : "N/A" },
                   ].map((field, idx) => (
                     <div key={idx} className="flex items-center justify-between py-4 border-b border-outline-variant/20">
                       <span className="font-label text-[10px] tracking-widest uppercase text-outline">{field.label}</span>
