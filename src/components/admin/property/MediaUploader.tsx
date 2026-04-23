@@ -7,6 +7,7 @@ interface MediaFile {
   url: string;
   alt: string;
   isCover: boolean;
+  published: boolean;
   type: 'image' | 'video' | 'brochure' | 'dpe';
 }
 
@@ -27,8 +28,13 @@ export const MediaUploader = ({ files, onChange, onUpload }: MediaUploaderProps)
   const setCover = (id: string) => {
     onChange(files.map(f => ({
       ...f,
-      isCover: f.id === id && f.type === 'image'
+      isCover: f.id === id && f.type === 'image',
+      published: f.id === id ? true : f.published // Principal asset must be published
     })));
+  };
+
+  const togglePublished = (id: string) => {
+    onChange(files.map(f => f.id === id ? { ...f, published: !f.published } : f));
   };
 
   const updateAlt = (id: string, alt: string) => {
@@ -68,7 +74,10 @@ export const MediaUploader = ({ files, onChange, onUpload }: MediaUploaderProps)
       {images.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {images.map((file, idx) => (
-            <div key={file.id} className="group relative bg-white dark:bg-[#1c1b1b] border border-outline-variant/10 overflow-hidden animate-luxury-fade">
+            <div key={file.id} className={clsx(
+              "group relative bg-white dark:bg-[#1c1b1b] border border-outline-variant/10 overflow-hidden animate-luxury-fade",
+              !file.published && "grayscale opacity-50"
+            )}>
                <div className="aspect-[4/3] relative overflow-hidden">
                   <img src={file.url} alt={file.alt} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
@@ -82,6 +91,17 @@ export const MediaUploader = ({ files, onChange, onUpload }: MediaUploaderProps)
                         title="Set as Cover"
                      >
                         <span className="material-symbols-outlined notranslate text-sm" translate="no">grade</span>
+                     </button>
+                     <button 
+                        type="button"
+                        onClick={() => togglePublished(file.id)}
+                        className={clsx(
+                          "w-10 h-10 flex items-center justify-center transition-colors border",
+                          file.published ? "bg-black/80 border-white/40 text-white" : "bg-white text-black border-white"
+                        )}
+                        title={file.published ? "Unpublish" : "Publish"}
+                     >
+                        <span className="material-symbols-outlined notranslate text-sm" translate="no">{file.published ? 'visibility' : 'visibility_off'}</span>
                      </button>
                      <button 
                         type="button"

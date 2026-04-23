@@ -184,6 +184,7 @@ const PropertyEditor = () => {
       url: URL.createObjectURL(file),
       alt: '',
       isCover: false,
+      published: true,
       type: 'image'
     }));
     setMediaFiles(prev => [...prev, ...newFiles]);
