@@ -125,6 +125,9 @@ const PropertyEditor = () => {
       amenities: [],
       piscine: false,
       air_conditioning: false,
+      gated_brochure: false,
+      gated_dossier: false,
+      gated_save: false,
     }
   });
 
@@ -206,7 +209,7 @@ const PropertyEditor = () => {
            <div className="flex gap-4 w-full md:w-auto">
               <Button variant="outline" onClick={() => navigate('/admin/properties')}>Discard</Button>
               <Button variant="outline" onClick={() => {}}>Preview</Button>
-              <Button variant="primary" onClick={handleSubmit((d) => onSubmit(d, 'publish'))}>Publish Asset</Button>
+              <Button variant="primary" onClick={handleSubmit((d: PropertyFormData) => onSubmit(d, 'publish'))}>Publish Asset</Button>
            </div>
         </div>
 
@@ -553,7 +556,7 @@ const PropertyEditor = () => {
                  score={completionScore}
                  status={watchedFields.status || 'available'}
                  onStatusChange={(s) => setValue('status', s)}
-                 onSave={(mode) => handleSubmit((d) => onSubmit(d, mode))()}
+                 onSave={(mode) => handleSubmit((d: PropertyFormData) => onSubmit(d, mode))()}
                  onPreview={() => {}}
                  isValid={isValid}
                  errors={errors}
