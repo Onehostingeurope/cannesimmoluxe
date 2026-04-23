@@ -15,6 +15,7 @@ const CRM = () => {
   const [logType, setLogType] = useState('Call');
   const [logNote, setLogNote] = useState('');
   const [logging, setLogging] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<{ type: 'success' | 'error', message: string } | null>(null);
 
   const [availableProperties, setAvailableProperties] = useState<any[]>([]);
   const [newLead, setNewLead] = useState({ 
@@ -96,10 +97,14 @@ const CRM = () => {
     }]);
 
     if (error) {
-      alert('Error creating lead: ' + error.message);
+      setSaveStatus({ type: 'error', message: 'Sync Failure: ' + error.message });
     } else {
+      setSaveStatus({ type: 'success', message: 'Lead successfully committed to the registry.' });
       setNewLead({ email: '', first_name: '', last_name: '', phone: '', message: '', intensity: 'Low', property_id: '' });
-      setShowCreate(false);
+      setTimeout(() => {
+        setShowCreate(false);
+        setSaveStatus(null);
+      }, 2000);
       fetchLeads();
     }
     setCreating(false);
@@ -194,8 +199,30 @@ const CRM = () => {
 
         {/* Lead Insertion Panel */}
         {showCreate && (
-          <form onSubmit={handleCreatePrompt} className="bg-white dark:bg-[#0a0a0a] border border-outline-variant/10 p-8 space-y-6">
-             <h3 className="font-headline text-xl text-primary border-b border-outline-variant/10 pb-4">Manual Lead Injection</h3>
+          <form onSubmit={handleCreatePrompt} className="bg-white dark:bg-[#0a0a0a] border border-secondary/20 shadow-2xl animate-luxury-fade p-8 space-y-8 relative overflow-hidden">
+             <div className="absolute top-0 left-0 w-1 h-full bg-secondary"></div>
+             
+             <div className="flex justify-between items-center border-b border-outline-variant/10 pb-6">
+                <div className="space-y-1">
+                   <h3 className="font-headline text-2xl text-primary">Manual Lead Injection</h3>
+                   <p className="text-[10px] text-outline uppercase tracking-widest opacity-60">Initialize HNW Prospect Dossier</p>
+                </div>
+                <div className="flex gap-3">
+                   <Button variant="outline" type="button" onClick={() => setShowCreate(false)}>Cancel</Button>
+                   <Button variant="primary" type="submit" disabled={creating}>
+                      {creating ? 'Injecting...' : 'Deploy to Registry'}
+                   </Button>
+                </div>
+             </div>
+
+             {saveStatus && (
+                <div className={clsx(
+                   "p-4 text-[10px] uppercase tracking-[0.2em] font-bold text-center border animate-luxury-fade",
+                   saveStatus.type === 'success' ? "bg-green-500/10 border-green-500/50 text-green-600" : "bg-red-500/10 border-red-500/50 text-red-600"
+                )}>
+                   {saveStatus.message}
+                </div>
+             )}
              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                    <label className="font-label text-[9px] tracking-widest uppercase text-outline opacity-50">First Name</label>
@@ -237,9 +264,10 @@ const CRM = () => {
                    <textarea rows={3} className="w-full bg-[#f6f3ee] dark:bg-[#1c1b1b] border-outline-variant/20 p-3 font-body text-sm" value={newLead.message} onChange={e => setNewLead({...newLead, message: e.target.value})} />
                 </div>
              </div>
-             <div className="flex justify-end pt-4">
-               <button type="submit" disabled={creating} className="px-8 py-3 bg-secondary text-white font-label text-[10px] tracking-widest uppercase hover:bg-secondary/90 transition-colors disabled:opacity-50">
-                 {creating ? 'Injecting...' : 'Deploy To Registry'}
+             <div className="flex justify-end items-center gap-6 pt-6 border-t border-outline-variant/10">
+               <p className="text-[9px] text-outline opacity-40 uppercase tracking-widest italic">Ensure all critical fields are validated before ledger entry.</p>
+               <button type="submit" disabled={creating} className="px-12 py-4 bg-secondary text-white font-label text-[10px] tracking-[0.2em] uppercase hover:bg-secondary/90 transition-all hover:scale-105 shadow-lg disabled:opacity-50">
+                 {creating ? 'Injecting Dossier...' : 'Confirm Lead Deployment'}
                </button>
              </div>
           </form>
